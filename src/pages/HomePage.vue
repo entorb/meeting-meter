@@ -5,220 +5,198 @@
       <v-toolbar-title class="text-h5 font-weight-medium flex-grow-1">
         Meeting Meter
       </v-toolbar-title>
-      <v-btn
-        to="/config"
-        icon
-        variant="text"
-        @click="navigateToConfig"
-        class="ml-auto"
-        data-cy="config-btn"
-      >
-        <v-icon>{{ customIcons['cog'] }}</v-icon>
+      <v-btn to="/config" icon variant="text" @click="navigateToConfig" data-cy="config-btn">
+        <v-icon right class="mr-2">{{ customIcons['cog'] }}</v-icon>
       </v-btn>
     </v-app-bar>
 
     <!-- Main Content -->
     <v-main>
       <v-container class="py-8" fluid>
-        <v-row justify="center">
-          <v-col cols="12" lg="10" xl="8">
-            <!-- Timer Card -->
-            <v-card class="mb-6" elevation="3">
-              <v-card-text class="pa-4">
-                <!-- Duration Display -->
-                <div class="mb-3">
-                  <v-row align="center" justify="space-between" no-gutters>
-                    <v-col cols="auto">
-                      <div class="d-flex align-center">
-                        <!-- Timer Controls -->
-                        <div class="mr-3 d-flex align-center">
+        <!-- Timer Card -->
+        <v-card class="mb-6" elevation="3">
+          <v-card-text class="pa-4">
+            <!-- Duration Display -->
+            <div class="mb-3">
+              <v-row justify="space-between" no-gutters>
+                <v-col cols="auto">
+                  <div class="d-flex align-center">
+                    <!-- Timer Controls -->
+                    <div class="mr-3 d-flex align-center">
+                      <v-btn
+                        v-if="!meetingData.startTime"
+                        :color="COLORS.SUCCESS"
+                        size="small"
+                        variant="elevated"
+                        @click="startTimer"
+                        :icon="customIcons['play']"
+                        rounded="xl"
+                        data-cy="start-timer-btn"
+                      />
+                      <v-btn
+                        v-else-if="meetingData.isRunning"
+                        :color="COLORS.WARNING"
+                        size="small"
+                        variant="elevated"
+                        @click="pauseTimer"
+                        :icon="customIcons['pause']"
+                        rounded="xl"
+                        data-cy="pause-timer-btn"
+                      />
+                      <v-btn
+                        v-else
+                        :color="COLORS.ERROR"
+                        size="small"
+                        variant="elevated"
+                        @click="stopTimer"
+                        :icon="customIcons['stop']"
+                        rounded="xl"
+                        data-cy="stop-timer-btn"
+                      />
+                    </div>
+                    <v-icon size="32" class="mr-3">{{ customIcons['timer-outline'] }}</v-icon>
+                    <div class="text-h4 font-weight-medium" data-cy="timer-display">
+                      {{ formatDuration(meetingData.duration) }}
+                    </div>
+                    <div v-if="meetingData.startTime" class="ml-4">
+                      <v-chip
+                        v-if="!isEditingStartTime"
+                        @click="startEditingStartTime"
+                        variant="tonal"
+                        size="small"
+                        class="cursor-pointer"
+                        :prepend-icon="customIcons['clock-outline']"
+                        style="font-size: 1.1rem !important; padding: 8px 12px"
+                      >
+                        {{ formatStartTime(meetingData.startTime) }}
+                      </v-chip>
+                      <v-text-field
+                        v-else
+                        v-model="editStartTimeValue"
+                        @keyup.enter="saveStartTime"
+                        @blur="cancelEditStartTime"
+                        variant="outlined"
+                        density="compact"
+                        placeholder="14:30 or 1430"
+                        hint="HH:MM or HHMM format, must be before current time"
+                        persistent-hint
+                        autofocus
+                        style="width: 140px"
+                      >
+                        <template #append-inner>
                           <v-btn
-                            v-if="!meetingData.startTime"
-                            :color="COLORS.SUCCESS"
+                            @click="saveStartTime"
+                            :icon="customIcons['check']"
+                            variant="text"
                             size="small"
-                            variant="elevated"
-                            @click="startTimer"
-                            :icon="customIcons['play']"
-                            rounded="xl"
-                            data-cy="start-timer-btn"
                           />
-                          <v-btn
-                            v-else-if="meetingData.isRunning"
-                            :color="COLORS.WARNING"
-                            size="small"
-                            variant="elevated"
-                            @click="pauseTimer"
-                            :icon="customIcons['pause']"
-                            rounded="xl"
-                            data-cy="pause-timer-btn"
-                          />
-                          <v-btn
-                            v-else
-                            :color="COLORS.ERROR"
-                            size="small"
-                            variant="elevated"
-                            @click="stopTimer"
-                            :icon="customIcons['stop']"
-                            rounded="xl"
-                            data-cy="stop-timer-btn"
-                          />
-                        </div>
-                        <v-icon size="32" class="mr-3">{{ customIcons['timer-outline'] }}</v-icon>
-                        <div class="text-h4 font-weight-medium" data-cy="timer-display">
-                          {{ formatDuration(meetingData.duration) }}
-                        </div>
-                        <div v-if="meetingData.startTime" class="ml-4">
-                          <v-chip
-                            v-if="!isEditingStartTime"
-                            @click="startEditingStartTime"
-                            variant="tonal"
-                            size="small"
-                            class="cursor-pointer"
-                            :prepend-icon="customIcons['clock-outline']"
-                            style="font-size: 1.1rem !important; padding: 8px 12px"
-                          >
-                            {{ formatStartTime(meetingData.startTime) }}
-                          </v-chip>
-                          <v-text-field
-                            v-else
-                            v-model="editStartTimeValue"
-                            @keyup.enter="saveStartTime"
-                            @blur="cancelEditStartTime"
-                            variant="outlined"
-                            density="compact"
-                            placeholder="14:30 or 1430"
-                            hint="HH:MM or HHMM format, must be before current time"
-                            persistent-hint
-                            autofocus
-                            style="width: 140px"
-                          >
-                            <template #append-inner>
-                              <v-btn
-                                @click="saveStartTime"
-                                :icon="customIcons['check']"
-                                variant="text"
-                                size="small"
-                              />
-                            </template>
-                          </v-text-field>
-                        </div>
-                      </div>
-                    </v-col>
-                  </v-row>
+                        </template>
+                      </v-text-field>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card-text>
+        </v-card>
+
+        <!-- Participants Section -->
+        <v-card class="mb-6" elevation="3">
+          <v-card-text class="pa-6">
+            <v-row>
+              <v-col cols="12" md="6">
+                <div class="d-flex align-center">
+                  <v-icon class="mr-3" size="28">{{ customIcons['crown'] }}</v-icon>
+                  <v-text-field
+                    v-model="group1ParticipantsInput"
+                    label="Senior/Management"
+                    type="text"
+                    inputmode="decimal"
+                    variant="outlined"
+                    density="comfortable"
+                    class="flex-grow-1"
+                    data-cy="input-group-1"
+                    @blur="handleGroup1Input"
+                    @keyup.enter="handleGroup1Input"
+                  />
                 </div>
-              </v-card-text>
-            </v-card>
+              </v-col>
 
-            <!-- Participants Section -->
-            <v-card class="mb-6" elevation="3">
-              <v-card-text class="pa-6">
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <div class="d-flex align-center">
-                      <v-icon class="mr-3" size="28">{{ customIcons['crown'] }}</v-icon>
-                      <v-text-field
-                        v-model="group1ParticipantsInput"
-                        label="Senior/Management"
-                        type="text"
-                        inputmode="decimal"
-                        variant="outlined"
-                        density="comfortable"
-                        class="flex-grow-1"
-                        data-cy="input-group-1"
-                        :hint="
-                          config.group1HourlyRate > 0
-                            ? `${formatCurrency(config.group1HourlyRate * meetingData.group1Participants)}/h`
-                            : 'Configure rate in settings'
-                        "
-                        persistent-hint
-                        @blur="handleGroup1Input"
-                        @keyup.enter="handleGroup1Input"
-                      />
+              <v-col cols="12" md="6">
+                <div class="d-flex align-center">
+                  <v-icon class="mr-3" size="28">{{ customIcons['hard-hat'] }}</v-icon>
+                  <v-text-field
+                    v-model="group2ParticipantsInput"
+                    label="Junior/Standard"
+                    type="text"
+                    inputmode="decimal"
+                    variant="outlined"
+                    density="comfortable"
+                    class="flex-grow-1"
+                    data-cy="input-group-2"
+                    persistent-hint
+                    @blur="handleGroup2Input"
+                    @keyup.enter="handleGroup2Input"
+                  />
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <!-- Calculations Results -->
+        <v-card elevation="3">
+          <v-card-text>
+            <v-row>
+              <!-- People Hours / People Days -->
+              <v-col cols="12" md="6">
+                <!-- :color="COLORS.SECONDARY" -->
+                <v-card
+                  variant="tonal"
+                  class="text-center pa-4 cursor-pointer"
+                  @click="navigateToConfig"
+                  data-cy="card-people-hours"
+                >
+                  <div class="text-h4 font-weight-medium">
+                    {{ calculations.peopleHours.toFixed(1) }} /
+                    {{ calculations.peopleDays.toFixed(1) }}
+                  </div>
+                  <div class="text-body-2 mt-1">People hours / days</div>
+                </v-card>
+              </v-col>
+
+              <!-- Duration Hours and Cost -->
+              <!-- :color="COLORS.SECONDARY" -->
+              <v-col cols="12" md="6">
+                <v-card
+                  variant="tonal"
+                  :color="getEfficiencyColor()"
+                  @click="navigateToConfig"
+                  class="text-center pa-4"
+                  data-cy="card-duration-costs"
+                >
+                  <div v-if="hasHourlyRatesConfigured">
+                    <div class="text-h4 font-weight-medium">
+                      {{ formatCurrency(hourlyTotalCost) }}/h
+                      <span v-if="calculations.totalCost > 0">
+                        = {{ formatCurrency(calculations.totalCost) }}
+                      </span>
                     </div>
-                  </v-col>
-
-                  <v-col cols="12" md="6">
-                    <div class="d-flex align-center">
-                      <v-icon class="mr-3" size="28">{{ customIcons['hard-hat'] }}</v-icon>
-                      <v-text-field
-                        v-model="group2ParticipantsInput"
-                        label="Junior/Standard"
-                        type="text"
-                        inputmode="decimal"
-                        variant="outlined"
-                        density="comfortable"
-                        class="flex-grow-1"
-                        data-cy="input-group-2"
-                        :hint="
-                          config.group2HourlyRate > 0
-                            ? `${formatCurrency(config.group2HourlyRate * meetingData.group2Participants)}/h`
-                            : 'Configure rate in settings'
-                        "
-                        persistent-hint
-                        @blur="handleGroup2Input"
-                        @keyup.enter="handleGroup2Input"
-                      />
+                    <div class="text-body-2 mt-1">
+                      {{ calculations.totalParticipants }} Participants
                     </div>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-
-            <!-- Calculations Results -->
-            <v-card elevation="3">
-              <v-card-text>
-                <v-row>
-                  <!-- People Hours / People Days -->
-                  <v-col cols="12" md="6">
-                    <!-- :color="COLORS.SECONDARY" -->
-                    <v-card
-                      variant="tonal"
-                      class="text-center pa-4 cursor-pointer"
-                      @click="navigateToConfig"
-                      data-cy="card-people-hours"
-                    >
-                      <div class="text-h4 font-weight-medium">
-                        {{ calculations.peopleHours.toFixed(1) }} /
-                        {{ calculations.peopleDays.toFixed(1) }}
-                      </div>
-                      <div class="text-body-2 mt-1">People hours / days</div>
-                    </v-card>
-                  </v-col>
-
-                  <!-- Duration Hours and Cost -->
-                  <!-- :color="COLORS.SECONDARY" -->
-                  <v-col cols="12" md="6">
-                    <v-card
-                      variant="tonal"
-                      :color="getEfficiencyColor()"
-                      @click="navigateToConfig"
-                      class="text-center pa-4"
-                      data-cy="card-duration-costs"
-                    >
-                      <div v-if="hasHourlyRatesConfigured">
-                        <div class="text-h4 font-weight-medium">
-                          {{ formatCurrency(hourlyTotalCost) }}/h
-                          <span v-if="calculations.totalCost > 0">
-                            = {{ formatCurrency(calculations.totalCost) }}
-                          </span>
-                        </div>
-                        <div class="text-body-2 mt-1">
-                          {{ calculations.totalParticipants }} Participants
-                        </div>
-                      </div>
-                      <div v-else>
-                        <div class="text-h4 font-weight-medium">
-                          {{ calculations.totalParticipants }}
-                        </div>
-                        <div class="text-body-2 mt-1">Participants</div>
-                      </div>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+                  </div>
+                  <div v-else>
+                    <div class="text-h4 font-weight-medium">
+                      {{ calculations.totalParticipants }}
+                    </div>
+                    <div class="text-body-2 mt-1">Participants</div>
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-container>
     </v-main>
   </v-app>
