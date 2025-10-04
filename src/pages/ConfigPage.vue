@@ -14,90 +14,63 @@
     <!-- Main Content -->
     <v-main>
       <v-container class="py-8" fluid>
-        <v-row justify="center">
-          <v-col cols="12" lg="8" xl="6">
-            <!-- Salary Group 1 -->
-            <v-card class="mb-6" elevation="3">
-              <v-card-text class="pa-6">
-                <div class="d-flex align-center">
-                  <div
-                    class="icon-container mr-4"
-                    style="width: 32px; display: flex; justify-content: center"
-                  >
-                    <v-icon size="28">{{ customIcons['crown'] }}</v-icon>
-                  </div>
-                  <v-text-field
-                    v-model="group1HourlyRateInput"
-                    label="Hourly Rate Manager (€)"
-                    type="text"
-                    inputmode="decimal"
-                    variant="outlined"
-                    density="comfortable"
-                    persistent-hint
-                    class="flex-grow-1"
-                    data-cy="cfg-salary-1"
-                  />
-                </div>
-              </v-card-text>
-            </v-card>
-
-            <!-- Salary Group 2 -->
-            <v-card class="mb-6" elevation="3">
-              <v-card-text class="pa-6">
-                <div class="d-flex align-center">
-                  <div
-                    class="icon-container mr-4"
-                    style="width: 32px; display: flex; justify-content: center"
-                  >
-                    <v-icon size="28">{{ customIcons['hard-hat'] }}</v-icon>
-                  </div>
-                  <v-text-field
-                    v-model="group2HourlyRateInput"
-                    label="Hourly Rate Worker (€)"
-                    type="text"
-                    inputmode="decimal"
-                    variant="outlined"
-                    density="comfortable"
-                    persistent-hint
-                    class="flex-grow-1"
-                    data-cy="cfg-salary-2"
-                  />
-                </div>
-              </v-card-text>
-            </v-card>
-
-            <!-- Working Hours -->
-            <v-card class="mb-6" elevation="3">
-              <v-card-text class="pa-6">
-                <div class="d-flex align-center">
-                  <div
-                    class="icon-container mr-4"
-                    style="width: 32px; display: flex; justify-content: center"
-                  >
-                    <v-icon size="28">{{ customIcons['clock-outline'] }}</v-icon>
-                  </div>
-                  <v-text-field
-                    v-model="workingHoursPerDayInput"
-                    label="Daily Working Hours"
-                    type="text"
-                    inputmode="decimal"
-                    variant="outlined"
-                    density="comfortable"
-                    persistent-hint
-                    class="flex-grow-1"
-                    data-cy="working-hours"
-                  />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+        <v-card class="mb-6" elevation="3">
+          <v-card-text class="pa-6">
+            <v-row>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="group1HourlyRateInput"
+                  label="Hourly Rate Manager (€)"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="cfg-salary-1"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['crown']"
+                />
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="group2HourlyRateInput"
+                  label="Hourly Rate Worker (€)"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="cfg-salary-2"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['hard-hat']"
+                />
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="workingHoursPerDayInput"
+                  label="Daily Working Hours"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="working-hours"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['clock-outline']"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-container>
     </v-main>
   </v-app>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
@@ -145,4 +118,18 @@ const workingHoursPerDayInput = computed({
 function navigateBack(): void {
   router.push('/')
 }
+
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    navigateBack()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleEscape)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleEscape)
+})
 </script>
