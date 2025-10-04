@@ -5,6 +5,43 @@
 import type { Config } from '@/types'
 
 /**
+ * Sanitize input to keep only integer digits (for participant fields)
+ * @param input - The input string to sanitize
+ * @returns Sanitized string containing only digits ("0" if empty)
+ */
+export function sanitizeIntegerInput(input: string): string {
+  // Strip any non-digit characters
+  const digits = input.replace(/\D+/g, '')
+  // Remove leading zeros, but keep single "0"
+  const normalized = digits.replace(/^0+(?=\d)/, '')
+  return normalized === '' ? '0' : normalized
+}
+
+/**
+ * Validate and parse integer input with bounds checking
+ * @param input - The input string to validate
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @param defaultValue - Default value if input is invalid
+ * @returns Validated integer within bounds
+ */
+export function validateIntegerInput(
+  input: string,
+  min: number = 0,
+  max: number = Number.MAX_SAFE_INTEGER,
+  defaultValue: number = 0,
+): number {
+  const sanitized = sanitizeIntegerInput(input)
+  const numValue = parseInt(sanitized, 10)
+
+  if (isNaN(numValue)) {
+    return defaultValue
+  }
+
+  return Math.min(max, Math.max(min, numValue))
+}
+
+/**
  * Format currency amount to display with Euro symbol
  * @param amount - The numeric amount to format
  * @returns Formatted currency string

@@ -27,22 +27,15 @@
                     <v-icon size="28">{{ customIcons['crown'] }}</v-icon>
                   </div>
                   <v-text-field
-                    v-model="localConfig.group1HourlyRate"
+                    v-model="group1HourlyRateInput"
                     label="Hourly Rate Manager (€)"
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     variant="outlined"
                     density="comfortable"
-                    min="0"
-                    step="5"
                     persistent-hint
                     class="flex-grow-1"
-                    data-cy="group1-rate"
-                    :rules="[
-                      (v) =>
-                        v === '' ||
-                        (!isNaN(parseFloat(v)) && parseFloat(v) >= 0) ||
-                        'Must be a positive number',
-                    ]"
+                    data-cy="cfg-salary-1"
                   />
                 </div>
               </v-card-text>
@@ -59,22 +52,15 @@
                     <v-icon size="28">{{ customIcons['hard-hat'] }}</v-icon>
                   </div>
                   <v-text-field
-                    v-model="localConfig.group2HourlyRate"
+                    v-model="group2HourlyRateInput"
                     label="Hourly Rate Worker (€)"
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     variant="outlined"
                     density="comfortable"
-                    min="0"
-                    step="5"
                     persistent-hint
                     class="flex-grow-1"
-                    data-cy="group2-rate"
-                    :rules="[
-                      (v) =>
-                        v === '' ||
-                        (!isNaN(parseFloat(v)) && parseFloat(v) >= 0) ||
-                        'Must be a positive number',
-                    ]"
+                    data-cy="cfg-salary-2"
                   />
                 </div>
               </v-card-text>
@@ -91,25 +77,15 @@
                     <v-icon size="28">{{ customIcons['clock-outline'] }}</v-icon>
                   </div>
                   <v-text-field
-                    v-model="localConfig.workingHoursPerDay"
+                    v-model="workingHoursPerDayInput"
                     label="Daily Working Hours"
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     variant="outlined"
                     density="comfortable"
-                    min="1"
-                    max="24"
-                    step="0.5"
                     persistent-hint
                     class="flex-grow-1"
                     data-cy="working-hours"
-                    :rules="[
-                      (v) =>
-                        v === '' ||
-                        (!isNaN(parseFloat(v)) &&
-                          parseFloat(v) >= LIMITS.MIN_WORKING_HOURS &&
-                          parseFloat(v) <= LIMITS.MAX_WORKING_HOURS) ||
-                        `Must be between ${LIMITS.MIN_WORKING_HOURS} and ${LIMITS.MAX_WORKING_HOURS} hours`,
-                    ]"
                   />
                 </div>
               </v-card-text>
@@ -121,10 +97,11 @@
   </v-app>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed } from 'vue'
+import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
-import { LIMITS, COLORS } from '@/utils/constants'
+import { COLORS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 
 defineOptions({
@@ -134,42 +111,36 @@ defineOptions({
 const router = useRouter()
 const { config, updateConfig } = useMeetingStore()
 
-// Local form state for better UX
-const localConfig = ref({
-  group1HourlyRate: '',
-  group2HourlyRate: '',
-  workingHoursPerDay: '',
-})
-
-// Load current config into form
-onMounted(() => {
-  localConfig.value = {
-    group1HourlyRate: config.value.group1HourlyRate.toString(),
-    group2HourlyRate: config.value.group2HourlyRate.toString(),
-    workingHoursPerDay: config.value.workingHoursPerDay.toString(),
-  }
-})
-
-// Save configuration when form changes
-watch(
-  localConfig,
-  (newConfig) => {
-    try {
-      const configToSave = {
-        group1HourlyRate: Math.max(0, parseFloat(newConfig.group1HourlyRate) || 0),
-        group2HourlyRate: Math.max(0, parseFloat(newConfig.group2HourlyRate) || 0),
-        workingHoursPerDay: Math.max(
-          1,
-          Math.min(24, parseFloat(newConfig.workingHoursPerDay) || 8),
-        ),
-      }
-      updateConfig(configToSave)
-    } catch (error) {
-      console.error('Failed to save configuration:', error)
-    }
+const group1HourlyRateInput = computed({
+  get: () => config.value.group1HourlyRate.toString(),
+  set: (value: string) => {
+    const sanitized = sanitizeIntegerInput(value)
+    const numValue = parseInt(sanitized, 10)
+    updateConfig({ group1HourlyRate: isNaN(numValue) ? 0 : numValue })
   },
-  { deep: true },
-)
+})
+
+const group2HourlyRateInput = computed({
+  get: () => config.value.group2HourlyRate.toString(),
+  set: (value: string) => {
+    const sanitized = sanitizeIntegerInput(value)
+    const numValue = parseInt(sanitized, 10)
+    updateConfig({ group2HourlyRate: isNaN(numValue) ? 0 : numValue })
+  },
+})
+
+const workingHoursPerDayInput = computed({
+  get: () => config.value.workingHoursPerDay.toString(),
+  set: (value: string) => {
+    const validatedValue = validateIntegerInput(
+      value,
+      LIMITS.MIN_WORKING_HOURS,
+      LIMITS.MAX_WORKING_HOURS,
+      LIMITS.MIN_WORKING_HOURS,
+    )
+    updateConfig({ workingHoursPerDay: validatedValue })
+  },
+})
 
 function navigateBack(): void {
   router.push('/')

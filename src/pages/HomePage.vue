@@ -113,48 +113,50 @@
             <v-card class="mb-6" elevation="3">
               <v-card-text class="pa-6">
                 <v-row>
-                  <v-col cols="6">
+                  <v-col cols="12" md="6">
                     <div class="d-flex align-center">
                       <v-icon class="mr-3" size="28">{{ customIcons['crown'] }}</v-icon>
                       <v-text-field
                         v-model="group1ParticipantsInput"
                         label="Senior/Management"
-                        type="number"
+                        type="text"
+                        inputmode="decimal"
                         variant="outlined"
                         density="comfortable"
-                        min="0"
-                        step="1"
                         class="flex-grow-1"
-                        data-cy="participant-group1"
+                        data-cy="input-group-1"
                         :hint="
                           config.group1HourlyRate > 0
                             ? `${formatCurrency(config.group1HourlyRate * meetingData.group1Participants)}/h`
                             : 'Configure rate in settings'
                         "
                         persistent-hint
+                        @blur="handleGroup1Input"
+                        @keyup.enter="handleGroup1Input"
                       />
                     </div>
                   </v-col>
 
-                  <v-col cols="6">
+                  <v-col cols="12" md="6">
                     <div class="d-flex align-center">
                       <v-icon class="mr-3" size="28">{{ customIcons['hard-hat'] }}</v-icon>
                       <v-text-field
                         v-model="group2ParticipantsInput"
                         label="Junior/Standard"
-                        type="number"
+                        type="text"
+                        inputmode="decimal"
                         variant="outlined"
                         density="comfortable"
-                        min="0"
-                        step="1"
                         class="flex-grow-1"
-                        data-cy="participant-group2"
+                        data-cy="input-group-2"
                         :hint="
                           config.group2HourlyRate > 0
                             ? `${formatCurrency(config.group2HourlyRate * meetingData.group2Participants)}/h`
                             : 'Configure rate in settings'
                         "
                         persistent-hint
+                        @blur="handleGroup2Input"
+                        @keyup.enter="handleGroup2Input"
                       />
                     </div>
                   </v-col>
@@ -167,12 +169,13 @@
               <v-card-text>
                 <v-row>
                   <!-- People Hours / People Days -->
-                  <v-col cols="12" md="4">
+                  <v-col cols="12" md="6">
                     <!-- :color="COLORS.SECONDARY" -->
                     <v-card
                       variant="tonal"
                       class="text-center pa-4 cursor-pointer"
                       @click="navigateToConfig"
+                      data-cy="card-people-hours"
                     >
                       <div class="text-h4 font-weight-medium">
                         {{ calculations.peopleHours.toFixed(1) }} /
@@ -184,41 +187,28 @@
 
                   <!-- Duration Hours and Cost -->
                   <!-- :color="COLORS.SECONDARY" -->
-                  <v-col cols="12" md="4">
+                  <v-col cols="12" md="6">
                     <v-card
                       variant="tonal"
                       :color="getEfficiencyColor()"
                       @click="navigateToConfig"
                       class="text-center pa-4"
-                      data-cy="total-participants"
+                      data-cy="card-duration-costs"
                     >
-                      <div
-                        v-if="
-                          config.group1HourlyRate * meetingData.group1Participants +
-                            config.group2HourlyRate * meetingData.group2Participants >
-                          0
-                        "
-                      >
+                      <div v-if="hasHourlyRatesConfigured">
                         <div class="text-h4 font-weight-medium">
-                          {{
-                            formatCurrency(
-                              config.group1HourlyRate * meetingData.group1Participants +
-                                config.group2HourlyRate * meetingData.group2Participants,
-                            )
-                          }}/h
-
+                          {{ formatCurrency(hourlyTotalCost) }}/h
                           <span v-if="calculations.totalCost > 0">
                             = {{ formatCurrency(calculations.totalCost) }}
                           </span>
                         </div>
                         <div class="text-body-2 mt-1">
-                          {{ meetingData.group1Participants + meetingData.group2Participants }}
-                          Participants
+                          {{ calculations.totalParticipants }} Participants
                         </div>
                       </div>
                       <div v-else>
                         <div class="text-h4 font-weight-medium">
-                          {{ meetingData.group1Participants + meetingData.group2Participants }}
+                          {{ calculations.totalParticipants }}
                         </div>
                         <div class="text-body-2 mt-1">Participants</div>
                       </div>
@@ -243,7 +233,13 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
-import { formatCurrency, formatStartTime, parseTimeInput, isTimeBeforeNow } from '@/utils/helpers'
+import {
+  formatCurrency,
+  formatStartTime,
+  parseTimeInput,
+  isTimeBeforeNow,
+  sanitizeIntegerInput,
+} from '@/utils/helpers'
 import { COLORS, EFFICIENCY_THRESHOLDS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 
@@ -328,6 +324,22 @@ const group2ParticipantsInput = computed({
   },
 })
 
+// Computed properties for cost calculations
+const hasHourlyRatesConfigured = computed(() => {
+  return (
+    config.value.group1HourlyRate * meetingData.value.group1Participants +
+      config.value.group2HourlyRate * meetingData.value.group2Participants >
+    0
+  )
+})
+
+const hourlyTotalCost = computed(() => {
+  return (
+    config.value.group1HourlyRate * meetingData.value.group1Participants +
+    config.value.group2HourlyRate * meetingData.value.group2Participants
+  )
+})
+
 // Efficiency indicator based on meeting duration and participant count
 function getEfficiencyColor(): string {
   const durationMinutes = meetingData.value.duration / (1000 * 60)
@@ -346,6 +358,14 @@ function getEfficiencyColor(): string {
     return COLORS.WARNING // Orange - moderate
   }
   return COLORS.ERROR // Red - potentially inefficient
+}
+
+function handleGroup1Input() {
+  group1ParticipantsInput.value = sanitizeIntegerInput(group1ParticipantsInput.value)
+}
+
+function handleGroup2Input() {
+  group2ParticipantsInput.value = sanitizeIntegerInput(group2ParticipantsInput.value)
 }
 
 // function getEfficiencyText(): string {

@@ -1,7 +1,7 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
 import type { Config, MeetingData, Calculations } from '@/types'
 import { loadConfig, saveConfig } from '@/services/configStorage'
-import { STORAGE_KEYS, LIMITS, DEFAULTS } from '@/utils/constants'
+import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS } from '@/utils/constants'
 
 // Type for serialized meeting data in localStorage
 interface SerializedMeetingData {
@@ -41,10 +41,10 @@ function loadMeetingData(): MeetingData | null {
     }
 
     // If startTime exists, check if it's older than 24 hours. If so, clear it and persist the cleared state.
-    const MS_IN_24_HOURS = 24 * 60 * 60 * 1000
+    const MS_IN_EXPIRY_PERIOD = TIMER_SETTINGS.SESSION_EXPIRY_HOURS * 60 * 60 * 1000
     if (startTime) {
       const elapsed = Date.now() - startTime.getTime()
-      if (elapsed > MS_IN_24_HOURS) {
+      if (elapsed > MS_IN_EXPIRY_PERIOD) {
         // Clear the in-memory values
         startTime = null
         parsed.isRunning = false
@@ -56,8 +56,8 @@ function loadMeetingData(): MeetingData | null {
             startTime: null,
             duration: 0,
             isRunning: false,
-            group1Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group1Participants || 0),
-            group2Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group2Participants || 0),
+            group1Participants: Math.max(0, parsed.group1Participants || 0),
+            group2Participants: Math.max(0, parsed.group2Participants || 0),
           })
 
           // (sessionStorage intentionally not used — localStorage is the single source of truth)
@@ -78,8 +78,8 @@ function loadMeetingData(): MeetingData | null {
       startTime,
       duration,
       isRunning: parsed.isRunning || false,
-      group1Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group1Participants || 0),
-      group2Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group2Participants || 0),
+      group1Participants: Math.max(0, parsed.group1Participants || 0),
+      group2Participants: Math.max(0, parsed.group2Participants || 0),
     }
   } catch (error) {
     console.warn('Failed to load meeting data:', error)
@@ -100,8 +100,8 @@ export function useMeetingStore() {
     startTime: null,
     duration: 0,
     isRunning: false,
-    group1Participants: LIMITS.MIN_PARTICIPANTS,
-    group2Participants: LIMITS.MIN_PARTICIPANTS,
+    group1Participants: 0,
+    group2Participants: 0,
   })
 
   // Timer interval reference
@@ -110,29 +110,10 @@ export function useMeetingStore() {
   // Load config on initialization
   const loadedConfig = loadConfig()
   if (loadedConfig) {
-    // Validate and clean the loaded config
-    const validateRate = (rate: number, min: number, max: number, def: number): number =>
-      Number.isFinite(rate) ? Math.max(min, Math.min(max, rate)) : def
-
     config.value = {
-      group1HourlyRate: validateRate(
-        loadedConfig.group1HourlyRate,
-        LIMITS.MIN_HOURLY_RATE,
-        LIMITS.MAX_HOURLY_RATE,
-        DEFAULTS.GROUP1_HOURLY_RATE,
-      ),
-      group2HourlyRate: validateRate(
-        loadedConfig.group2HourlyRate,
-        LIMITS.MIN_HOURLY_RATE,
-        LIMITS.MAX_HOURLY_RATE,
-        DEFAULTS.GROUP2_HOURLY_RATE,
-      ),
-      workingHoursPerDay: validateRate(
-        loadedConfig.workingHoursPerDay,
-        LIMITS.MIN_WORKING_HOURS,
-        LIMITS.MAX_WORKING_HOURS,
-        DEFAULTS.WORKING_HOURS_PER_DAY,
-      ),
+      group1HourlyRate: loadedConfig.group1HourlyRate || 0,
+      group2HourlyRate: loadedConfig.group2HourlyRate || 0,
+      workingHoursPerDay: loadedConfig.workingHoursPerDay || 8,
     }
   }
 
@@ -150,7 +131,7 @@ export function useMeetingStore() {
             Date.now() - meetingData.value.startTime.getTime(),
           )
         }
-      }, 1000)
+      }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
     }
   }
 
@@ -237,7 +218,7 @@ export function useMeetingStore() {
       if (meetingData.value.startTime) {
         meetingData.value.duration = Date.now() - meetingData.value.startTime.getTime()
       }
-    }, 1000)
+    }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
   }
 
   function stopTimer() {
