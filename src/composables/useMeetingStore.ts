@@ -32,12 +32,40 @@ function loadMeetingData(): MeetingData | null {
     if (!saved) return null
 
     const parsed: SerializedMeetingData = JSON.parse(saved)
-    const startTime = parsed.startTime ? new Date(parsed.startTime) : null
+    let startTime = parsed.startTime ? new Date(parsed.startTime) : null
 
     // Validate startTime if it exists
     if (startTime && isNaN(startTime.getTime())) {
       console.warn('Invalid startTime in saved data, ignoring')
       return null
+    }
+
+    // If startTime exists, check if it's older than 24 hours. If so, clear it and persist the cleared state.
+    const MS_IN_24_HOURS = 24 * 60 * 60 * 1000
+    if (startTime) {
+      const elapsed = Date.now() - startTime.getTime()
+      if (elapsed > MS_IN_24_HOURS) {
+        // Clear the in-memory values
+        startTime = null
+        parsed.isRunning = false
+
+        // Persist the cleared timer state back to localStorage and sessionStorage
+        try {
+          // Update localStorage using existing helper
+          saveMeetingData({
+            startTime: null,
+            duration: 0,
+            isRunning: false,
+            group1Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group1Participants || 0),
+            group2Participants: Math.max(LIMITS.MIN_PARTICIPANTS, parsed.group2Participants || 0),
+          })
+
+          // (sessionStorage intentionally not used — localStorage is the single source of truth)
+        } catch {
+          // Swallow persistence errors but warn
+          console.warn('Failed to persist cleared meeting state:')
+        }
+      }
     }
 
     // Recalculate duration from start time if timer is running
@@ -83,9 +111,8 @@ export function useMeetingStore() {
   const loadedConfig = loadConfig()
   if (loadedConfig) {
     // Validate and clean the loaded config
-    function validateRate(rate: number, min: number, max: number, def: number): number {
-      return Number.isFinite(rate) ? Math.max(min, Math.min(max, rate)) : def
-    }
+    const validateRate = (rate: number, min: number, max: number, def: number): number =>
+      Number.isFinite(rate) ? Math.max(min, Math.min(max, rate)) : def
 
     config.value = {
       group1HourlyRate: validateRate(
