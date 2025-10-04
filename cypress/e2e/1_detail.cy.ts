@@ -42,15 +42,15 @@ describe('Detailed Tests', () => {
   describe('Participant Management', () => {
     it('should update participant counts', () => {
       // Set participants for group 1
-      cy.get('[data-cy="participant-group1"] input').clear()
-      cy.get('[data-cy="participant-group1"] input').type('11')
+      cy.get('[data-cy="input-group-1"] input').clear()
+      cy.get('[data-cy="input-group-1"] input').type('11')
 
       // Set participants for group 2
-      cy.get('[data-cy="participant-group2"] input').clear()
-      cy.get('[data-cy="participant-group2"] input').type('22')
+      cy.get('[data-cy="input-group-2"] input').clear()
+      cy.get('[data-cy="input-group-2"] input').type('22')
 
       // Check total participants is displayed correctly
-      cy.get('[data-cy="total-participants"]').should('contain', '33')
+      cy.get('[data-cy="card-duration-costs"]').should('contain', '33')
     })
   })
 
@@ -64,7 +64,7 @@ describe('Detailed Tests', () => {
       cy.get('[data-cy="pause-timer-btn"]').click()
 
       // Should show calculated cost
-      cy.get('[data-cy="total-cost"]').should('not.contain', 'Configure rates')
+      cy.get('[data-cy="card-duration-costs"]').should('not.contain', 'Configure rates')
     })
 
     it('should calculate costs correctly with detailed setup', () => {
@@ -79,7 +79,7 @@ describe('Detailed Tests', () => {
       cy.get('[data-cy="pause-timer-btn"]').click()
 
       // Should show calculated cost instead of "Configure rates"
-      cy.get('[data-cy="total-cost"]').should('contain', '190')
+      cy.get('[data-cy="card-duration-costs"]').should('contain', '190')
     })
   })
 
@@ -93,8 +93,8 @@ describe('Detailed Tests', () => {
       cy.reload()
 
       // Check if data persists
-      cy.get('[data-cy="participant-group1"] input').should('have.value', '4')
-      cy.get('[data-cy="participant-group2"] input').should('have.value', '6')
+      cy.get('[data-cy="input-group-1"] input').should('have.value', '4')
+      cy.get('[data-cy="input-group-2"] input').should('have.value', '6')
       cy.get('[data-cy="pause-timer-btn"]').should('be.visible')
     })
   })

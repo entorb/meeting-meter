@@ -7,8 +7,6 @@ export const STORAGE_KEYS = {
 // UI Colors
 export const COLORS = {
   PRIMARY: '#0091e3', // blue of icon
-  // SECONDARY: '#2E5984', // muted steel blue
-  // for efficiency card and play button
   SUCCESS: '#2e7d32', // deep green
   WARNING: '#ff9800', // warm amber
   ERROR: '#d32f2f', // strong red
@@ -16,9 +14,6 @@ export const COLORS = {
 
 // Validation limits
 export const LIMITS = {
-  MIN_PARTICIPANTS: 0,
-  MAX_HOURLY_RATE: 999,
-  MIN_HOURLY_RATE: 0,
   MAX_WORKING_HOURS: 12,
   MIN_WORKING_HOURS: 4,
 } as const
@@ -36,4 +31,10 @@ export const DEFAULTS = {
   WORKING_HOURS_PER_DAY: 8,
   GROUP1_HOURLY_RATE: 0,
   GROUP2_HOURLY_RATE: 0,
+} as const
+
+// Timer settings
+export const TIMER_SETTINGS = {
+  UPDATE_INTERVAL_MS: 1000,
+  SESSION_EXPIRY_HOURS: 24,
 } as const
