@@ -30,6 +30,39 @@
                   <v-row align="center" justify="space-between" no-gutters>
                     <v-col cols="auto">
                       <div class="d-flex align-center">
+                        <!-- Timer Controls -->
+                        <div class="mr-3 d-flex align-center">
+                          <v-btn
+                            v-if="!meetingData.startTime"
+                            :color="COLORS.SUCCESS"
+                            size="small"
+                            variant="elevated"
+                            @click="startTimer"
+                            :icon="customIcons['play']"
+                            rounded="xl"
+                            data-cy="start-timer-btn"
+                          />
+                          <v-btn
+                            v-else-if="meetingData.isRunning"
+                            :color="COLORS.WARNING"
+                            size="small"
+                            variant="elevated"
+                            @click="pauseTimer"
+                            :icon="customIcons['pause']"
+                            rounded="xl"
+                            data-cy="pause-timer-btn"
+                          />
+                          <v-btn
+                            v-else
+                            :color="COLORS.ERROR"
+                            size="small"
+                            variant="elevated"
+                            @click="stopTimer"
+                            :icon="customIcons['stop']"
+                            rounded="xl"
+                            data-cy="stop-timer-btn"
+                          />
+                        </div>
                         <v-icon size="32" class="mr-3">{{ customIcons['timer-outline'] }}</v-icon>
                         <div class="text-h4 font-weight-medium" data-cy="timer-display">
                           {{ formatDuration(meetingData.duration) }}
@@ -69,44 +102,6 @@
                             </template>
                           </v-text-field>
                         </div>
-                      </div>
-                    </v-col>
-                    <v-col cols="auto">
-                      <!-- Timer Controls at far right -->
-                      <div>
-                        <!-- Play Button - shown when timer hasn't started -->
-                        <v-btn
-                          v-if="!meetingData.startTime"
-                          :color="COLORS.SUCCESS"
-                          size="small"
-                          variant="elevated"
-                          @click="startTimer"
-                          :icon="customIcons['play']"
-                          rounded="xl"
-                          data-cy="start-timer-btn"
-                        />
-                        <!-- Pause Button - shown when timer is running -->
-                        <v-btn
-                          v-else-if="meetingData.isRunning"
-                          :color="COLORS.WARNING"
-                          size="small"
-                          variant="elevated"
-                          @click="pauseTimer"
-                          :icon="customIcons['pause']"
-                          rounded="xl"
-                          data-cy="pause-timer-btn"
-                        />
-                        <!-- Stop Button - shown when timer is paused -->
-                        <v-btn
-                          v-else
-                          :color="COLORS.ERROR"
-                          size="small"
-                          variant="elevated"
-                          @click="stopTimer"
-                          :icon="customIcons['stop']"
-                          rounded="xl"
-                          data-cy="stop-timer-btn"
-                        />
                       </div>
                     </v-col>
                   </v-row>
@@ -171,11 +166,29 @@
             <v-card elevation="3">
               <v-card-text>
                 <v-row>
-                  <!-- Duration Hours -->
-                  <v-col cols="6" md="3">
+                  <!-- People Hours / People Days -->
+                  <v-col cols="12" md="4">
+                    <!-- :color="COLORS.SECONDARY" -->
                     <v-card
                       variant="tonal"
-                      :color="COLORS.SECONDARY"
+                      class="text-center pa-4 cursor-pointer"
+                      @click="navigateToConfig"
+                    >
+                      <div class="text-h4 font-weight-medium">
+                        {{ calculations.peopleHours.toFixed(1) }} /
+                        {{ calculations.peopleDays.toFixed(1) }}
+                      </div>
+                      <div class="text-body-2 mt-1">People hours / days</div>
+                    </v-card>
+                  </v-col>
+
+                  <!-- Duration Hours and Cost -->
+                  <!-- :color="COLORS.SECONDARY" -->
+                  <v-col cols="12" md="4">
+                    <v-card
+                      variant="tonal"
+                      :color="getEfficiencyColor()"
+                      @click="navigateToConfig"
                       class="text-center pa-4"
                       data-cy="total-participants"
                     >
@@ -186,75 +199,29 @@
                           0
                         "
                       >
-                        <div class="text-h4 font-weight-medium text-white">
+                        <div class="text-h4 font-weight-medium">
                           {{
                             formatCurrency(
                               config.group1HourlyRate * meetingData.group1Participants +
                                 config.group2HourlyRate * meetingData.group2Participants,
                             )
                           }}/h
+
+                          <span v-if="calculations.totalCost > 0">
+                            = {{ formatCurrency(calculations.totalCost) }}
+                          </span>
                         </div>
-                        <div class="text-body-2 text-white mt-1">
+                        <div class="text-body-2 mt-1">
                           {{ meetingData.group1Participants + meetingData.group2Participants }}
                           Participants
                         </div>
                       </div>
                       <div v-else>
-                        <div class="text-h4 font-weight-medium text-white">
+                        <div class="text-h4 font-weight-medium">
                           {{ meetingData.group1Participants + meetingData.group2Participants }}
                         </div>
-                        <div class="text-body-2 text-white mt-1">Participants</div>
+                        <div class="text-body-2 mt-1">Participants</div>
                       </div>
-                    </v-card>
-                  </v-col>
-
-                  <!-- People Hours / People Days -->
-                  <v-col cols="6" md="3">
-                    <v-card
-                      variant="tonal"
-                      :color="COLORS.SECONDARY"
-                      class="text-center pa-4 cursor-pointer"
-                      @click="navigateToConfig"
-                    >
-                      <div class="text-h4 font-weight-medium text-white">
-                        {{ calculations.peopleHours.toFixed(1) }} /
-                        {{ calculations.peopleDays.toFixed(1) }}
-                      </div>
-                      <div class="text-body-2 text-white mt-1">People hours / days</div>
-                    </v-card>
-                  </v-col>
-
-                  <!-- Total Cost -->
-                  <v-col cols="6" md="3">
-                    <v-card
-                      variant="tonal"
-                      :color="COLORS.SECONDARY"
-                      class="text-center pa-4 cursor-pointer"
-                      @click="navigateToConfig"
-                      data-cy="total-cost"
-                    >
-                      <div class="text-h4 font-weight-medium text-white">
-                        <span v-if="calculations.totalCost > 0">
-                          {{ formatCurrency(calculations.totalCost) }}
-                        </span>
-                        <span v-else class="text-body-1">Configure rates</span>
-                      </div>
-                      <div class="text-body-2 text-white mt-1">Total Cost</div>
-                    </v-card>
-                  </v-col>
-
-                  <!-- Meeting Efficiency Indicator -->
-                  <v-col cols="6" md="3">
-                    <v-card
-                      variant="tonal"
-                      :color="getEfficiencyColor()"
-                      class="text-center pa-4"
-                      data-cy="efficiency-indicator"
-                    >
-                      <div class="text-h4 font-weight-medium text-white">
-                        {{ getEfficiencyText() }}
-                      </div>
-                      <div class="text-body-2 text-white mt-1">Efficiency</div>
                     </v-card>
                   </v-col>
                 </v-row>
@@ -381,22 +348,22 @@ function getEfficiencyColor(): string {
   return COLORS.ERROR // Red - potentially inefficient
 }
 
-function getEfficiencyText(): string {
-  const durationMinutes = meetingData.value.duration / (1000 * 60)
-  const totalParticipants = calculations.value.totalParticipants
+// function getEfficiencyText(): string {
+//   const durationMinutes = meetingData.value.duration / (1000 * 60)
+//   const totalParticipants = calculations.value.totalParticipants
 
-  if (
-    durationMinutes <= EFFICIENCY_THRESHOLDS.OPTIMAL_DURATION_MINUTES &&
-    totalParticipants <= EFFICIENCY_THRESHOLDS.OPTIMAL_PARTICIPANT_COUNT
-  ) {
-    return '✓'
-  }
-  if (
-    durationMinutes <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_DURATION_MINUTES &&
-    totalParticipants <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_PARTICIPANT_COUNT
-  ) {
-    return '⚠'
-  }
-  return '⚠'
-}
+//   if (
+//     durationMinutes <= EFFICIENCY_THRESHOLDS.OPTIMAL_DURATION_MINUTES &&
+//     totalParticipants <= EFFICIENCY_THRESHOLDS.OPTIMAL_PARTICIPANT_COUNT
+//   ) {
+//     return '✓'
+//   }
+//   if (
+//     durationMinutes <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_DURATION_MINUTES &&
+//     totalParticipants <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_PARTICIPANT_COUNT
+//   ) {
+//     return '⚠'
+//   }
+//   return '⚠'
+// }
 </script>
