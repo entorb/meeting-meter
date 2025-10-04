@@ -8,15 +8,22 @@ Cypress.Commands.add(
   (group1Rate: number, group2Rate: number, workingHours?: number) => {
     cy.visit('/meeting-meter/config')
 
-    cy.get('[data-cy="group1-rate"] input').clear()
-    cy.get('[data-cy="group1-rate"] input').type(group1Rate.toString())
+    // Try multiple selector strategies for Vuetify v-text-field
+    cy.get('[data-cy="cfg-salary-1"]').within(() => {
+      cy.get('input').clear()
+      cy.get('input').type(group1Rate.toString())
+    })
 
-    cy.get('[data-cy="group2-rate"] input').clear()
-    cy.get('[data-cy="group2-rate"] input').type(group2Rate.toString())
+    cy.get('[data-cy="cfg-salary-2"]').within(() => {
+      cy.get('input').clear()
+      cy.get('input').type(group2Rate.toString())
+    })
 
     if (workingHours) {
-      cy.get('[data-cy="working-hours"] input').clear()
-      cy.get('[data-cy="working-hours"] input').type(workingHours.toString())
+      cy.get('[data-cy="working-hours"]').within(() => {
+        cy.get('input').clear()
+        cy.get('input').type(workingHours.toString())
+      })
     }
 
     cy.get('[data-cy="back-btn"]').click()
@@ -25,16 +32,16 @@ Cypress.Commands.add(
 
 // Set participants helper command
 Cypress.Commands.add('setParticipants', (group1Count: number, group2Count: number) => {
-  // Use force and direct value setting to avoid input concatenation issues
-  cy.get('[data-cy="participant-group1"] input').clear()
-  cy.get('[data-cy="participant-group1"] input').invoke('val', group1Count.toString())
-  cy.get('[data-cy="participant-group1"] input').trigger('input')
-  cy.get('[data-cy="participant-group1"] input').trigger('change')
+  // Use within() to scope the search and avoid input concatenation issues
+  cy.get('[data-cy="input-group-1"]').within(() => {
+    cy.get('input').clear()
+    cy.get('input').type(group1Count.toString())
+  })
 
-  cy.get('[data-cy="participant-group2"] input').clear()
-  cy.get('[data-cy="participant-group2"] input').invoke('val', group2Count.toString())
-  cy.get('[data-cy="participant-group2"] input').trigger('input')
-  cy.get('[data-cy="participant-group2"] input').trigger('change')
+  cy.get('[data-cy="input-group-2"]').within(() => {
+    cy.get('input').clear()
+    cy.get('input').type(group2Count.toString())
+  })
 })
 
 // Start timer and wait for it to tick
