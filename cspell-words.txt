@@ -1,7 +1,10 @@
+appinstalled
+beforeinstallprompt
 iconsets
-navigatable
+infobar
 Matomo
 Menke
+navigatable
 roboto
 SonarCloud
 SonarQube
