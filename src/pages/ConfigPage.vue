@@ -67,13 +67,37 @@
         </v-card>
         <PWAInstallPrompt />
         <PWAUpdatePrompt />
+        <!-- Footer Section -->
+        <v-container class="pt-8 pb-4" fluid>
+          <v-row justify="center" align="center">
+            <v-col cols="12" md="8" class="text-center">
+              <a
+                href="https://entorb.net"
+                target="_blank"
+                class="mb-2 text-primary text-decoration-underline d-inline-block"
+                style="margin-right: 16px"
+                >Home and Disclaimer</a
+              >
+              <a
+                href="https://github.com/entorb/meeting-meter"
+                target="_blank"
+                class="mb-2 text-primary text-decoration-underline d-inline-block"
+                >GitHub Repo</a
+              >
+              <div class="mt-4 text-body-2 grey--text">
+                {{ meetingsMetered }} meetings metered so far
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
       </v-container>
     </v-main>
   </v-app>
 </template>
+
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted } from 'vue'
-import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { sanitizeIntegerInput, validateIntegerInput, helperStatsDataRead } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
 import { COLORS, LIMITS } from '@/utils/constants'
@@ -87,6 +111,12 @@ defineOptions({
 
 const router = useRouter()
 const { config, updateConfig } = useMeetingStore()
+
+const meetingsMetered = ref<number>(0)
+
+async function fetchMeetingsMetered() {
+  meetingsMetered.value = await helperStatsDataRead()
+}
 
 const group1HourlyRateInput = computed({
   get: () => config.value.group1HourlyRate.toString(),
@@ -131,6 +161,7 @@ function handleEscape(event: KeyboardEvent) {
 
 onMounted(() => {
   window.addEventListener('keydown', handleEscape)
+  fetchMeetingsMetered()
 })
 
 onUnmounted(() => {

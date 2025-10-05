@@ -28,7 +28,7 @@
                         :color="COLORS.SUCCESS"
                         size="small"
                         variant="elevated"
-                        @click="startTimer"
+                        @click="startTimerWithStats"
                         :icon="customIcons['play']"
                         rounded="xl"
                         data-cy="start-timer-btn"
@@ -191,6 +191,9 @@
                       {{ calculations.totalParticipants }}
                     </div>
                     <div class="text-body-2 mt-1">Participants</div>
+                    <div class="mt-1 text-caption" style="font-size: 0.85rem">
+                      (Click to configure costs)
+                    </div>
                   </div>
                 </v-card>
               </v-col>
@@ -217,6 +220,7 @@ import {
   parseTimeInput,
   isTimeBeforeNow,
   sanitizeIntegerInput,
+  helperStatsDataWrite,
 } from '@/utils/helpers'
 import { COLORS, EFFICIENCY_THRESHOLDS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
@@ -248,6 +252,11 @@ function startEditingStartTime() {
     editStartTimeValue.value = `${hours}:${minutes}`
     isEditingStartTime.value = true
   }
+}
+
+async function startTimerWithStats() {
+  await startTimer()
+  await helperStatsDataWrite()
 }
 
 function saveStartTime() {
