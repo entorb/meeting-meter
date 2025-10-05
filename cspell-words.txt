@@ -1,5 +1,7 @@
+accesscounts
 appinstalled
 beforeinstallprompt
+firstaccess
 iconsets
 infobar
 Matomo
