@@ -1,36 +1,86 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import pluginVue from 'eslint-plugin-vue'
-import pluginVitest from '@vitest/eslint-plugin'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import pluginCypress from 'eslint-plugin-cypress'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import pluginPrettier from 'eslint-plugin-prettier'
+import tsParser from '@typescript-eslint/parser'
+import tsPlugin from '@typescript-eslint/eslint-plugin'
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
-
-export default defineConfigWithVueTs(
+export default [
+  // Global ignores
   {
-    name: 'app/files-to-lint',
-    files: ['**/*.{ts,mts,tsx,vue}'],
+    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
-
-  pluginVue.configs['flat/essential'],
-  vueTsConfigs.recommended,
-
+  // TypeScript files
   {
-    ...pluginVitest.configs.recommended,
-    files: ['src/**/__tests__/*'],
+    files: ['**/*.{ts,mts,tsx}'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+    },
   },
 
+  // Vue files with essential config and TypeScript support
+  ...pluginVue.configs['flat/essential'].map((config) => ({
+    ...config,
+    languageOptions: {
+      ...config.languageOptions,
+      parserOptions: {
+        ...config.languageOptions?.parserOptions,
+        parser: tsParser,
+      },
+    },
+    plugins: {
+      ...config.plugins,
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      ...config.rules,
+      // Add TypeScript rules for Vue files
+      '@typescript-eslint/no-unused-vars': 'error',
+    },
+  })),
+
+  // Generated TypeScript files - relax rules (must come after main TS config)
   {
-    ...pluginCypress.configs.recommended,
+    files: ['**/components.d.ts', '**/typed-router.d.ts', '**/env.d.ts'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+
+  // Cypress files
+  {
     files: ['cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/support/**/*.{js,ts,jsx,tsx}'],
+    plugins: {
+      cypress: pluginCypress,
+    },
+    rules: {
+      ...pluginCypress.configs.recommended.rules,
+    },
   },
+
+  // Prettier enforcement
+  {
+    files: ['**/*.{ts,tsx,js,jsx,vue}'],
+    plugins: {
+      prettier: pluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  },
+
+  // Apply skip formatting last
   skipFormatting,
-)
+]
