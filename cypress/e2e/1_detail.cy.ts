@@ -1,7 +1,7 @@
 describe('Detailed Tests', () => {
   beforeEach(() => {
     cy.clearLocalStorage()
-    cy.visit('/meeting-meter/')
+    cy.visit('/')
   })
 
   describe('Timer Operations', () => {
