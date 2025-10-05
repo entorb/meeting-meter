@@ -1,4 +1,7 @@
+cypress/screenshots/
 dist/
+examples/
 node_modules/
+
 .cspellcache
 .eslintcache
