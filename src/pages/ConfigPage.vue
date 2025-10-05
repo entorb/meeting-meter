@@ -65,6 +65,8 @@
             </v-row>
           </v-card-text>
         </v-card>
+        <PWAInstallPrompt />
+        <PWAUpdatePrompt />
       </v-container>
     </v-main>
   </v-app>
@@ -76,6 +78,8 @@ import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
 import { COLORS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
+import PWAUpdatePrompt from '@/components/PWAUpdatePrompt.vue'
 
 defineOptions({
   name: 'ConfigurationPage',
