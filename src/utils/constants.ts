@@ -1,8 +1,11 @@
 // Storage keys
 export const STORAGE_KEYS = {
-  CONFIG: 'mcc-config',
-  MEETING: 'mcc-meeting',
+  CONFIG: 'mma-config',
+  MEETING: 'mma-meeting',
 } as const
+
+// name to be used in web-stats-json.php
+export const STATS_DB_COL = 'meeting-meter'
 
 // UI Colors
 export const COLORS = {

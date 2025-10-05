@@ -1,4 +1,45 @@
 /**
+ * Fetch stats data from remote server
+ */
+/**
+ * Fetch meetings metered stats from remote server
+ * @returns number of meetings metered, or 0 on error
+ */
+
+import { STATS_DB_COL } from './constants'
+
+export const helperStatsDataRead = async (): Promise<number> => {
+  try {
+    const url = 'https://entorb.net/web-stats-json.php?origin=' + STATS_DB_COL + '&action=read'
+    const response = await fetch(url)
+    if (response.ok) {
+      // {'accesscounts':0, 'accesscounts7':0, 'firstaccess':'2025-09-01}
+      const respData = await response.json()
+      if (typeof respData.accesscounts === 'number') {
+        return respData.accesscounts
+      }
+    }
+    console.error('Failed to fetch stats data or invalid response')
+    return 0
+  } catch (error) {
+    console.error('Error:', error)
+    return 0
+  }
+}
+
+export const helperStatsDataWrite = async () => {
+  try {
+    const url = 'https://entorb.net/web-stats-json.php?origin=' + STATS_DB_COL + '&action=write'
+    const response = await fetch(url)
+    if (!response.ok) {
+      console.error('Failed to update stats data')
+    }
+  } catch (error) {
+    console.error('Error:', error)
+  }
+}
+
+/**
  * Utility functions for formatting and common operations
  */
 
