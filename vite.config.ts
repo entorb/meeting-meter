@@ -43,6 +43,15 @@ export default defineConfig({
       'unplugin-vue-router/data-loaders',
       'unplugin-vue-router/data-loaders/basic',
     ],
+    include: ['vue', 'vue-router', 'vuetify'],
+  },
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
   },
   define: { 'process.env': {} },
   resolve: {
