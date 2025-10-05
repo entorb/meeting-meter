@@ -6,7 +6,7 @@
 Cypress.Commands.add(
   'configureRates',
   (group1Rate: number, group2Rate: number, workingHours?: number) => {
-    cy.visit('/meeting-meter/config')
+    cy.visit('/config')
 
     // Try multiple selector strategies for Vuetify v-text-field
     cy.get('[data-cy="cfg-salary-1"]').within(() => {
