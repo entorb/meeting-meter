@@ -71,19 +71,38 @@
         <v-container class="pt-8 pb-4" fluid>
           <v-row justify="center" align="center">
             <v-col cols="12" md="8" class="text-center">
-              <a
-                href="https://entorb.net"
-                target="_blank"
-                class="mb-2 text-primary text-decoration-underline d-inline-block"
-                style="margin-right: 16px"
-                >Home and Disclaimer</a
-              >
-              <a
-                href="https://github.com/entorb/meeting-meter"
-                target="_blank"
-                class="mb-2 text-primary text-decoration-underline d-inline-block"
-                >GitHub Repo</a
-              >
+              <div class="mt-4 text-body-2 grey--text">
+                Non of your data is stored on the server.
+              </div>
+              <div class="mt-4 text-body-2 grey--text">
+                <a
+                  href="https://entorb.net"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Home</a
+                >
+                <a
+                  href="https://entorb.net/contact.php?origin=MeetingMeter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Contact</a
+                >
+                <a
+                  href="https://entorb.net/impressum.php"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Disclaimer</a
+                >
+                <a
+                  href="https://github.com/entorb/meeting-meter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  >GitHub</a
+                >
+              </div>
               <div class="mt-4 text-body-2 grey--text">
                 {{ meetingsMetered }} meetings metered so far
               </div>
