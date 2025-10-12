@@ -10,7 +10,7 @@ export default mergeConfig(
         reporter: ['text', 'lcov']
       },
       environment: 'jsdom',
-      exclude: [...configDefaults.exclude, 'e2e/**'],
+      exclude: [...configDefaults.exclude, 'e2e/**', 'node_modules/'],
       root: fileURLToPath(new URL('./', import.meta.url))
     }
   })
