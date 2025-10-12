@@ -25,22 +25,31 @@ export default defineConfig({
     target: 'esnext'
   },
 
+  optimizeDeps: {
+    exclude: [
+      'vuetify',
+      'vue-router',
+      'unplugin-vue-router/runtime',
+      'unplugin-vue-router/data-loaders',
+      'unplugin-vue-router/data-loaders/basic'
+    ],
+    include: ['vue', 'vue-router', 'vuetify']
+  },
   plugins: [
-    vueDevTools(),
-
-    VueRouter({
-      dts: 'src/typed-router.d.ts'
-    }),
     Vue({
       template: { transformAssetUrls }
     }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
       autoImport: true,
       styles: {
         configFile: 'src/styles/settings.scss'
       }
     }),
+    vueDevTools(),
+    VueRouter({
+      dts: 'src/typed-router.d.ts'
+    }),
+    // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Components({
       dts: 'src/components.d.ts'
     }),
@@ -65,16 +74,6 @@ export default defineConfig({
       }
     })
   ],
-  optimizeDeps: {
-    exclude: [
-      'vuetify',
-      'vue-router',
-      'unplugin-vue-router/runtime',
-      'unplugin-vue-router/data-loaders',
-      'unplugin-vue-router/data-loaders/basic'
-    ],
-    include: ['vue', 'vue-router', 'vuetify']
-  },
   define: { 'process.env': {} },
   resolve: {
     alias: {

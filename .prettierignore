@@ -1,0 +1,15 @@
+# Build outputs
+coverage
+dist
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+public
+
+# Generated files
+*.d.ts
+
+# Cache
+.cspellcache
+.eslintcache
