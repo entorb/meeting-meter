@@ -1,119 +1,3 @@
-<template>
-  <v-app>
-    <!-- App Bar -->
-    <v-app-bar :color="COLORS.PRIMARY" dark elevation="2">
-      <v-btn icon variant="text" @click="navigateBack" data-cy="back-btn">
-        <v-icon>{{ customIcons['arrow-left'] }}</v-icon>
-      </v-btn>
-      <v-toolbar-title class="text-h5 font-weight-medium">
-        <v-icon left class="mr-2">{{ customIcons['cog'] }}</v-icon>
-        Configuration
-      </v-toolbar-title>
-    </v-app-bar>
-
-    <!-- Main Content -->
-    <v-main>
-      <v-container class="py-8" fluid>
-        <v-card class="mb-6" elevation="3">
-          <v-card-text class="pa-6">
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="group1HourlyRateInput"
-                  label="Hourly Rate Manager (€)"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="cfg-salary-1"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['crown']"
-                />
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="group2HourlyRateInput"
-                  label="Hourly Rate Worker (€)"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="cfg-salary-2"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['hard-hat']"
-                />
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="workingHoursPerDayInput"
-                  label="Daily Working Hours"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="working-hours"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['clock-outline']"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-        <PWAInstallPrompt />
-        <PWAUpdatePrompt />
-        <!-- Footer Section -->
-        <v-container class="pt-8 pb-4" fluid>
-          <v-row justify="center" align="center">
-            <v-col cols="12" md="8" class="text-center">
-              <div class="mt-4 text-body-2 grey--text">
-                Non of your data is stored on the server.
-              </div>
-              <div class="mt-4 text-body-2 grey--text">
-                <a
-                  href="https://entorb.net"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Home</a
-                >
-                <a
-                  href="https://entorb.net/contact.php?origin=MeetingMeter"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Contact</a
-                >
-                <a
-                  href="https://entorb.net/impressum.php"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Disclaimer</a
-                >
-                <a
-                  href="https://github.com/entorb/meeting-meter"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  >GitHub</a
-                >
-              </div>
-              <div class="mt-4 text-body-2 grey--text">
-                {{ meetingsMetered }} meetings metered so far
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-container>
-    </v-main>
-  </v-app>
-</template>
-
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { sanitizeIntegerInput, validateIntegerInput, helperStatsDataRead } from '@/utils/helpers'
@@ -187,3 +71,157 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleEscape)
 })
 </script>
+
+<template>
+  <v-app>
+    <!-- App Bar -->
+    <v-app-bar
+      :color="COLORS.PRIMARY"
+      dark
+      elevation="2"
+    >
+      <v-btn
+        icon
+        variant="text"
+        @click="navigateBack"
+        data-cy="back-btn"
+      >
+        <v-icon>{{ customIcons['arrow-left'] }}</v-icon>
+      </v-btn>
+      <v-toolbar-title class="text-h5 font-weight-medium">
+        <v-icon
+          left
+          class="mr-2"
+          >{{ customIcons['cog'] }}</v-icon
+        >
+        Configuration
+      </v-toolbar-title>
+    </v-app-bar>
+
+    <!-- Main Content -->
+    <v-main>
+      <v-container
+        class="py-8"
+        fluid
+      >
+        <v-card
+          class="mb-6"
+          elevation="3"
+        >
+          <v-card-text class="pa-6">
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="group1HourlyRateInput"
+                  label="Hourly Rate Manager (€)"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="cfg-salary-1"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['crown']"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="group2HourlyRateInput"
+                  label="Hourly Rate Worker (€)"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="cfg-salary-2"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['hard-hat']"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="workingHoursPerDayInput"
+                  label="Daily Working Hours"
+                  type="text"
+                  inputmode="decimal"
+                  variant="outlined"
+                  density="comfortable"
+                  persistent-hint
+                  class="flex-grow-1"
+                  data-cy="working-hours"
+                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
+                  :prepend-icon="customIcons['clock-outline']"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+        <PWAInstallPrompt />
+        <PWAUpdatePrompt />
+        <!-- Footer Section -->
+        <v-container
+          class="pt-8 pb-4"
+          fluid
+        >
+          <v-row
+            justify="center"
+            align="center"
+          >
+            <v-col
+              cols="12"
+              md="8"
+              class="text-center"
+            >
+              <div class="mt-4 text-body-2 grey--text">
+                Non of your data is stored on the server.
+              </div>
+              <div class="mt-4 text-body-2 grey--text">
+                <a
+                  href="https://entorb.net"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Home</a
+                >
+                <a
+                  href="https://entorb.net/contact.php?origin=MeetingMeter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Contact</a
+                >
+                <a
+                  href="https://entorb.net/impressum.php"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Disclaimer</a
+                >
+                <a
+                  href="https://github.com/entorb/meeting-meter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  >GitHub</a
+                >
+              </div>
+              <div class="mt-4 text-body-2 grey--text">
+                {{ meetingsMetered }} meetings metered so far
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-container>
+    </v-main>
+  </v-app>
+</template>

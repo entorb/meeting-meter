@@ -10,7 +10,7 @@ import { STATS_DB_COL } from './constants'
 
 export const helperStatsDataRead = async (): Promise<number> => {
   try {
-    const url = 'https://entorb.net/web-stats-json.php?origin=' + STATS_DB_COL + '&action=read'
+    const url = `https://entorb.net/web-stats-json.php?origin=${STATS_DB_COL}&action=read`
     const response = await fetch(url)
     if (response.ok) {
       // {'accesscounts':0, 'accesscounts7':0, 'firstaccess':'2025-09-01}
@@ -29,7 +29,7 @@ export const helperStatsDataRead = async (): Promise<number> => {
 
 export const helperStatsDataWrite = async () => {
   try {
-    const url = 'https://entorb.net/web-stats-json.php?origin=' + STATS_DB_COL + '&action=write'
+    const url = `https://entorb.net/web-stats-json.php?origin=${STATS_DB_COL}&action=write`
     const response = await fetch(url)
     if (!response.ok) {
       console.error('Failed to update stats data')
@@ -88,7 +88,7 @@ export function validateIntegerInput(
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number): string {
-  return Math.round(amount) + ' €'
+  return `${Math.round(amount)} €`
 }
 
 /**

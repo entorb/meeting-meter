@@ -1,23 +1,3 @@
-<template>
-  <v-snackbar
-    v-model="showInstallPrompt"
-    :timeout="-1"
-    location="bottom"
-    color="primary"
-    variant="elevated"
-  >
-    <div class="d-flex align-center">
-      <v-icon start>mdi-download</v-icon>
-      <span>Install Meeting Meter as an app for the best experience!</span>
-    </div>
-
-    <template #actions>
-      <v-btn variant="text" color="white" @click="installPWA"> Install </v-btn>
-      <v-btn variant="text" color="white" @click="dismissPrompt"> Later </v-btn>
-    </template>
-  </v-snackbar>
-</template>
-
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 
@@ -76,3 +56,35 @@ const dismissPrompt = () => {
   deferredPrompt = null
 }
 </script>
+
+<template>
+  <v-snackbar
+    v-model="showInstallPrompt"
+    :timeout="-1"
+    location="bottom"
+    color="primary"
+    variant="elevated"
+  >
+    <div class="d-flex align-center">
+      <v-icon start>mdi-download</v-icon>
+      <span>Install Meeting Meter as an app for the best experience!</span>
+    </div>
+
+    <template #actions>
+      <v-btn
+        variant="text"
+        color="white"
+        @click="installPWA"
+      >
+        Install
+      </v-btn>
+      <v-btn
+        variant="text"
+        color="white"
+        @click="dismissPrompt"
+      >
+        Later
+      </v-btn>
+    </template>
+  </v-snackbar>
+</template>
