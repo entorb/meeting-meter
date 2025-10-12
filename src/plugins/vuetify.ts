@@ -4,10 +4,8 @@
  * Framework documentation: https://vuetifyjs.com
  */
 
-// Styles
 import 'vuetify/styles'
 
-// Composables
 import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 import { customIcons } from '@/utils/icons'
@@ -19,20 +17,20 @@ export default createVuetify({
     aliases: {
       ...aliases,
       ...Object.fromEntries(
-        Object.entries(customIcons).map(([key, value]) => [`mdi-${key}`, value]),
-      ),
+        Object.entries(customIcons).map(([key, value]) => [`mdi-${key}`, value])
+      )
     },
     sets: {
-      mdi,
-    },
+      mdi
+    }
   },
   theme: {
-    defaultTheme: 'system',
+    defaultTheme: 'system'
   },
   defaults: {
     VApp: {
       // Disable Vuetify's default font loading
-      style: 'font-family: Roboto, sans-serif !important',
-    },
-  },
+      style: 'font-family: Roboto, sans-serif !important'
+    }
+  }
 })

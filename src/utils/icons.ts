@@ -14,7 +14,7 @@ import {
   mdiPause,
   mdiPlay,
   mdiStop,
-  mdiTimerOutline,
+  mdiTimerOutline
 } from '@mdi/js'
 
 export const customIcons = {
@@ -28,5 +28,5 @@ export const customIcons = {
   pause: mdiPause,
   play: mdiPlay,
   stop: mdiStop,
-  'timer-outline': mdiTimerOutline,
+  'timer-outline': mdiTimerOutline
 }

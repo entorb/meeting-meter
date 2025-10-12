@@ -7,7 +7,7 @@ import {
   validateIntegerInput,
   sanitizeIntegerInput,
   formatStartTime,
-  getConfigFromForm,
+  getConfigFromForm
 } from '@/utils/helpers'
 
 describe('Helper Functions', () => {
@@ -183,7 +183,7 @@ describe('Helper Functions', () => {
       const formData = {
         group1HourlyRate: '50',
         group2HourlyRate: '30',
-        workingHoursPerDay: '8',
+        workingHoursPerDay: '8'
       }
 
       const result = getConfigFromForm(formData)
@@ -191,7 +191,7 @@ describe('Helper Functions', () => {
       expect(result).toEqual({
         group1HourlyRate: 50,
         group2HourlyRate: 30,
-        workingHoursPerDay: 8,
+        workingHoursPerDay: 8
       })
     })
 
@@ -199,7 +199,7 @@ describe('Helper Functions', () => {
       const formData = {
         group1HourlyRate: 'invalid',
         group2HourlyRate: undefined,
-        workingHoursPerDay: '',
+        workingHoursPerDay: ''
       }
 
       const result = getConfigFromForm(formData)
@@ -207,7 +207,7 @@ describe('Helper Functions', () => {
       expect(result).toEqual({
         group1HourlyRate: 0,
         group2HourlyRate: 0,
-        workingHoursPerDay: 8,
+        workingHoursPerDay: 8
       })
     })
 
@@ -217,7 +217,7 @@ describe('Helper Functions', () => {
       expect(result).toEqual({
         group1HourlyRate: 0,
         group2HourlyRate: 0,
-        workingHoursPerDay: 8,
+        workingHoursPerDay: 8
       })
     })
 
@@ -225,7 +225,7 @@ describe('Helper Functions', () => {
       const formData = {
         group1HourlyRate: '50.75',
         group2HourlyRate: '30.25',
-        workingHoursPerDay: '7.5',
+        workingHoursPerDay: '7.5'
       }
 
       const result = getConfigFromForm(formData)
@@ -233,7 +233,7 @@ describe('Helper Functions', () => {
       expect(result).toEqual({
         group1HourlyRate: 50.75,
         group2HourlyRate: 30.25,
-        workingHoursPerDay: 7.5,
+        workingHoursPerDay: 7.5
       })
     })
   })
