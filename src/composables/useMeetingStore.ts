@@ -250,27 +250,6 @@ export function useMeetingStore() {
     }
   }
 
-  function adjustStartTime(minutes: number) {
-    if (!meetingData.value.startTime) return
-
-    const newStartTime = new Date(meetingData.value.startTime)
-    newStartTime.setMinutes(newStartTime.getMinutes() - minutes)
-
-    // Round to nearest 5 minutes
-    const mins = newStartTime.getMinutes()
-    const roundedMins = Math.round(mins / 5) * 5
-    newStartTime.setMinutes(roundedMins)
-    newStartTime.setSeconds(0)
-    newStartTime.setMilliseconds(0)
-
-    meetingData.value.startTime = newStartTime
-
-    // Recalculate duration if timer is running
-    if (meetingData.value.isRunning) {
-      meetingData.value.duration = Date.now() - newStartTime.getTime()
-    }
-  }
-
   function setManualStartTime(timeString: string) {
     if (!timeString || !timeString.match(/^\d{1,2}:\d{2}$/)) return
 
@@ -323,7 +302,6 @@ export function useMeetingStore() {
     startTimer,
     stopTimer,
     pauseTimer,
-    adjustStartTime,
     setManualStartTime,
     formatDuration,
     updateConfig
