@@ -184,7 +184,7 @@ onUnmounted(() => {
               class="text-center"
             >
               <div class="mt-4 text-body-2 grey--text">
-                Non of your data is stored on the server.
+                None of your data is stored on the server.
               </div>
               <div class="mt-4 text-body-2 grey--text">
                 <a
