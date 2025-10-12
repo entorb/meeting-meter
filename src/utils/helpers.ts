@@ -70,7 +70,7 @@ export function validateIntegerInput(
   input: string,
   min: number = 0,
   max: number = Number.MAX_SAFE_INTEGER,
-  defaultValue: number = 0,
+  defaultValue: number = 0
 ): number {
   const sanitized = sanitizeIntegerInput(input)
   const numValue = parseInt(sanitized, 10)
@@ -149,7 +149,7 @@ export function isTimeBeforeNow(hours: number, minutes: number): boolean {
     hours,
     minutes,
     0,
-    0,
+    0
   )
   return proposedTime < now
 }
@@ -176,6 +176,6 @@ export function getConfigFromForm(formData: Record<string, string | undefined>):
   return {
     group1HourlyRate: toNumber(formData.group1HourlyRate, 0),
     group2HourlyRate: toNumber(formData.group2HourlyRate, 0),
-    workingHoursPerDay: toNumber(formData.workingHoursPerDay, 8),
+    workingHoursPerDay: toNumber(formData.workingHoursPerDay, 8)
   }
 }
