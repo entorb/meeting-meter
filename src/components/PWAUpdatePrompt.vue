@@ -30,7 +30,7 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({
   },
   onRegisterError(error) {
     console.log('SW registration error', error)
-  },
+  }
 })
 
 // Show update prompt when needed
@@ -42,7 +42,7 @@ onMounted(() => {
 
 // Watch for needRefresh changes
 import { watch } from 'vue'
-watch(needRefresh, (value) => {
+watch(needRefresh, value => {
   if (value) {
     showUpdatePrompt.value = true
   }

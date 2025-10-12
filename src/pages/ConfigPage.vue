@@ -125,7 +125,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
 import PWAUpdatePrompt from '@/components/PWAUpdatePrompt.vue'
 
 defineOptions({
-  name: 'ConfigurationPage',
+  name: 'ConfigurationPage'
 })
 
 const router = useRouter()
@@ -143,7 +143,7 @@ const group1HourlyRateInput = computed({
     const sanitized = sanitizeIntegerInput(value)
     const numValue = parseInt(sanitized, 10)
     updateConfig({ group1HourlyRate: isNaN(numValue) ? 0 : numValue })
-  },
+  }
 })
 
 const group2HourlyRateInput = computed({
@@ -152,7 +152,7 @@ const group2HourlyRateInput = computed({
     const sanitized = sanitizeIntegerInput(value)
     const numValue = parseInt(sanitized, 10)
     updateConfig({ group2HourlyRate: isNaN(numValue) ? 0 : numValue })
-  },
+  }
 })
 
 const workingHoursPerDayInput = computed({
@@ -162,10 +162,10 @@ const workingHoursPerDayInput = computed({
       value,
       LIMITS.MIN_WORKING_HOURS,
       LIMITS.MAX_WORKING_HOURS,
-      LIMITS.MIN_WORKING_HOURS,
+      LIMITS.MIN_WORKING_HOURS
     )
     updateConfig({ workingHoursPerDay: validatedValue })
-  },
+  }
 })
 
 function navigateBack(): void {

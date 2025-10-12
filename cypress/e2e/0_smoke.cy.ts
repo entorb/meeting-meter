@@ -38,7 +38,7 @@ describe('Application Smoke Test', () => {
     cy.get('[data-cy="cfg-salary-2"] input').clear()
     cy.get('[data-cy="cfg-salary-2"] input').blur() // Leave empty and blur to trigger validation
     // Check localStorage values
-    cy.window().then((window) => {
+    cy.window().then(window => {
       const config = JSON.parse(window.localStorage.getItem(STORAGE_KEYS.CONFIG) || '{}')
       expect(config.group1HourlyRate).to.equal(100)
       expect(config.group2HourlyRate).to.equal(0)

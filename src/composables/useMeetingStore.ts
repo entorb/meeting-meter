@@ -18,7 +18,7 @@ function saveMeetingData(data: MeetingData): void {
       startTime: data.startTime ? data.startTime.toISOString() : null,
       isRunning: data.isRunning,
       group1Participants: data.group1Participants,
-      group2Participants: data.group2Participants,
+      group2Participants: data.group2Participants
     }
     localStorage.setItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
   } catch (error) {
@@ -57,7 +57,7 @@ function loadMeetingData(): MeetingData | null {
             duration: 0,
             isRunning: false,
             group1Participants: Math.max(0, parsed.group1Participants || 0),
-            group2Participants: Math.max(0, parsed.group2Participants || 0),
+            group2Participants: Math.max(0, parsed.group2Participants || 0)
           })
 
           // (sessionStorage intentionally not used — localStorage is the single source of truth)
@@ -79,7 +79,7 @@ function loadMeetingData(): MeetingData | null {
       duration,
       isRunning: parsed.isRunning || false,
       group1Participants: Math.max(0, parsed.group1Participants || 0),
-      group2Participants: Math.max(0, parsed.group2Participants || 0),
+      group2Participants: Math.max(0, parsed.group2Participants || 0)
     }
   } catch (error) {
     console.warn('Failed to load meeting data:', error)
@@ -92,7 +92,7 @@ export function useMeetingStore() {
   const config = ref<Config>({
     group1HourlyRate: DEFAULTS.GROUP1_HOURLY_RATE,
     group2HourlyRate: DEFAULTS.GROUP2_HOURLY_RATE,
-    workingHoursPerDay: DEFAULTS.WORKING_HOURS_PER_DAY,
+    workingHoursPerDay: DEFAULTS.WORKING_HOURS_PER_DAY
   })
 
   // Meeting state
@@ -101,7 +101,7 @@ export function useMeetingStore() {
     duration: 0,
     isRunning: false,
     group1Participants: 0,
-    group2Participants: 0,
+    group2Participants: 0
   })
 
   // Timer interval reference
@@ -113,7 +113,7 @@ export function useMeetingStore() {
     config.value = {
       group1HourlyRate: loadedConfig.group1HourlyRate || 0,
       group2HourlyRate: loadedConfig.group2HourlyRate || 0,
-      workingHoursPerDay: loadedConfig.workingHoursPerDay || 8,
+      workingHoursPerDay: loadedConfig.workingHoursPerDay || 8
     }
   }
 
@@ -128,7 +128,7 @@ export function useMeetingStore() {
         if (meetingData.value.startTime) {
           meetingData.value.duration = Math.max(
             0,
-            Date.now() - meetingData.value.startTime.getTime(),
+            Date.now() - meetingData.value.startTime.getTime()
           )
         }
       }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
@@ -149,27 +149,27 @@ export function useMeetingStore() {
   // Save config when it changes
   watch(
     config,
-    (newConfig) => {
+    newConfig => {
       try {
         saveConfig(newConfig)
       } catch (error) {
         console.warn('Failed to save config:', error)
       }
     },
-    { deep: true },
+    { deep: true }
   )
 
   // Save meeting data when it changes
   watch(
     meetingData,
-    (newMeetingData) => {
+    newMeetingData => {
       try {
         saveMeetingData(newMeetingData)
       } catch (error) {
         console.warn('Failed to save meeting data:', error)
       }
     },
-    { deep: true },
+    { deep: true }
   )
 
   // Computed calculations
@@ -193,7 +193,7 @@ export function useMeetingStore() {
       totalCost,
       totalParticipants,
       group1Cost,
-      group2Cost,
+      group2Cost
     }
   })
 
@@ -291,7 +291,7 @@ export function useMeetingStore() {
       hours,
       minutes,
       0,
-      0,
+      0
     )
 
     meetingData.value.startTime = newStartTime
@@ -326,6 +326,6 @@ export function useMeetingStore() {
     adjustStartTime,
     setManualStartTime,
     formatDuration,
-    updateConfig,
+    updateConfig
   }
 }

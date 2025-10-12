@@ -27,7 +27,7 @@ Cypress.Commands.add(
     }
 
     cy.get('[data-cy="back-btn"]').click()
-  },
+  }
 )
 
 // Set participants helper command

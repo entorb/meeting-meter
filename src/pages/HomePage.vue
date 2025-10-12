@@ -204,6 +204,7 @@
     </v-main>
   </v-app>
 </template>
+
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
@@ -220,14 +221,14 @@ import {
   parseTimeInput,
   isTimeBeforeNow,
   sanitizeIntegerInput,
-  helperStatsDataWrite,
+  helperStatsDataWrite
 } from '@/utils/helpers'
 import { COLORS, EFFICIENCY_THRESHOLDS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 
 // Component name for linting compliance
 defineOptions({
-  name: 'HomePage',
+  name: 'HomePage'
 })
 
 const router = useRouter()
@@ -242,7 +243,7 @@ const {
   stopTimer,
   pauseTimer,
   setManualStartTime,
-  formatDuration,
+  formatDuration
 } = useMeetingStore()
 
 function startEditingStartTime() {
@@ -300,7 +301,7 @@ const group1ParticipantsInput = computed({
   set: (value: string) => {
     const numValue = parseInt(value, 10)
     meetingData.value.group1Participants = isNaN(numValue) || numValue < 0 ? 0 : numValue
-  },
+  }
 })
 
 const group2ParticipantsInput = computed({
@@ -308,7 +309,7 @@ const group2ParticipantsInput = computed({
   set: (value: string) => {
     const numValue = parseInt(value, 10)
     meetingData.value.group2Participants = isNaN(numValue) || numValue < 0 ? 0 : numValue
-  },
+  }
 })
 
 // Computed properties for cost calculations
