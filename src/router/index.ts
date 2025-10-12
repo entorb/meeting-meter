@@ -13,18 +13,18 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HomePage,
+    component: HomePage
   },
   {
     path: '/config',
     name: 'Config',
-    component: ConfigPage,
-  },
+    component: ConfigPage
+  }
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
@@ -33,7 +33,7 @@ router.onError((err, to) => {
     if (localStorage.getItem('vuetify:dynamic-reload')) {
       console.error('Dynamic import error, reloading page did not fix it', err)
     } else {
-      console.log('Reloading page to fix dynamic import error')
+      console.warn('Reloading page to fix dynamic import error')
       localStorage.setItem('vuetify:dynamic-reload', 'true')
       location.assign(to.fullPath)
     }

@@ -31,7 +31,7 @@ onMounted(() => {
   }
 
   // Listen for the beforeinstallprompt event
-  window.addEventListener('beforeinstallprompt', (e) => {
+  window.addEventListener('beforeinstallprompt', e => {
     // Prevent the mini-infobar from appearing on mobile
     e.preventDefault()
     // Save the event so it can be triggered later
