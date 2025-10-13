@@ -86,16 +86,16 @@ function navigateToConfig(): void {
 const group1ParticipantsInput = computed({
   get: () => meetingData.value.group1Participants.toString(),
   set: (value: string) => {
-    const numValue = parseInt(value, 10)
-    meetingData.value.group1Participants = isNaN(numValue) || numValue < 0 ? 0 : numValue
+    const numValue = Number.parseInt(value, 10)
+    meetingData.value.group1Participants = Number.isNaN(numValue) || numValue < 0 ? 0 : numValue
   }
 })
 
 const group2ParticipantsInput = computed({
   get: () => meetingData.value.group2Participants.toString(),
   set: (value: string) => {
-    const numValue = parseInt(value, 10)
-    meetingData.value.group2Participants = isNaN(numValue) || numValue < 0 ? 0 : numValue
+    const numValue = Number.parseInt(value, 10)
+    meetingData.value.group2Participants = Number.isNaN(numValue) || numValue < 0 ? 0 : numValue
   }
 })
 
