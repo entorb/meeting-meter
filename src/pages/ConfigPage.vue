@@ -25,8 +25,8 @@ const group1HourlyRateInput = computed({
   get: () => config.value.group1HourlyRate.toString(),
   set: (value: string) => {
     const sanitized = sanitizeIntegerInput(value)
-    const numValue = parseInt(sanitized, 10)
-    updateConfig({ group1HourlyRate: isNaN(numValue) ? 0 : numValue })
+    const numValue = Number.parseInt(sanitized, 10)
+    updateConfig({ group1HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
   }
 })
 
@@ -34,8 +34,8 @@ const group2HourlyRateInput = computed({
   get: () => config.value.group2HourlyRate.toString(),
   set: (value: string) => {
     const sanitized = sanitizeIntegerInput(value)
-    const numValue = parseInt(sanitized, 10)
-    updateConfig({ group2HourlyRate: isNaN(numValue) ? 0 : numValue })
+    const numValue = Number.parseInt(sanitized, 10)
+    updateConfig({ group2HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
   }
 })
 
