@@ -73,9 +73,9 @@ export function validateIntegerInput(
   defaultValue: number = 0
 ): number {
   const sanitized = sanitizeIntegerInput(input)
-  const numValue = parseInt(sanitized, 10)
+  const numValue = Number.parseInt(sanitized, 10)
 
-  if (isNaN(numValue)) {
+  if (Number.isNaN(numValue)) {
     return defaultValue
   }
 
@@ -116,18 +116,25 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
     // HH:MM format
     const parts = trimmedValue.split(':')
     if (parts.length !== 2) return null
-    hours = parseInt(parts[0] || '0', 10)
-    minutes = parseInt(parts[1] || '0', 10)
+    hours = Number.parseInt(parts[0] || '0', 10)
+    minutes = Number.parseInt(parts[1] || '0', 10)
   } else if (trimmedValue.length === 4 && /^\d{4}$/.test(trimmedValue)) {
     // HHMM format (e.g., 1234 -> 12:34)
-    hours = parseInt(trimmedValue.substring(0, 2), 10)
-    minutes = parseInt(trimmedValue.substring(2, 4), 10)
+    hours = Number.parseInt(trimmedValue.substring(0, 2), 10)
+    minutes = Number.parseInt(trimmedValue.substring(2, 4), 10)
   } else {
     return null
   }
 
   // Validate time format
-  if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+  if (
+    Number.isNaN(hours) ||
+    Number.isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
     return null
   }
 
@@ -163,8 +170,8 @@ export function isTimeBeforeNow(hours: number, minutes: number): boolean {
 export function toNumber(value: string | number | null | undefined, defaultValue: number): number {
   if (typeof value === 'number') return value
   if (value === '' || value === null || value === undefined) return defaultValue
-  const num = parseFloat(value)
-  return isNaN(num) ? defaultValue : num
+  const num = Number.parseFloat(value)
+  return Number.isNaN(num) ? defaultValue : num
 }
 
 /**
