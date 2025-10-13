@@ -11,6 +11,14 @@ interface SerializedMeetingData {
   group2Participants: number
 }
 
+// RegExp moved to highest scope for reuse
+const TIME_FORMAT_REGEX = /^\d{1,2}:\d{2}$/
+
+// Helper function moved to highest scope
+function padNumber(num: number): string {
+  return (num < 10 ? '0' : '') + num
+}
+
 // Meeting data persistence functions
 function saveMeetingData(data: MeetingData): void {
   try {
@@ -35,7 +43,7 @@ function loadMeetingData(): MeetingData | null {
     let startTime = parsed.startTime ? new Date(parsed.startTime) : null
 
     // Validate startTime if it exists
-    if (startTime && isNaN(startTime.getTime())) {
+    if (startTime && Number.isNaN(startTime.getTime())) {
       console.warn('Invalid startTime in saved data, ignoring')
       return null
     }
@@ -49,7 +57,7 @@ function loadMeetingData(): MeetingData | null {
         startTime = null
         parsed.isRunning = false
 
-        // Persist the cleared timer state back to localStorage and sessionStorage
+        // Persist the cleared timer state back to localStorage
         try {
           // Update localStorage using existing helper
           saveMeetingData({
@@ -59,11 +67,9 @@ function loadMeetingData(): MeetingData | null {
             group1Participants: Math.max(0, parsed.group1Participants || 0),
             group2Participants: Math.max(0, parsed.group2Participants || 0)
           })
-
-          // (sessionStorage intentionally not used — localStorage is the single source of truth)
         } catch {
           // Swallow persistence errors but warn
-          console.warn('Failed to persist cleared meeting state:')
+          console.warn('Failed to persist cleared meeting state')
         }
       }
     }
@@ -251,15 +257,24 @@ export function useMeetingStore() {
   }
 
   function setManualStartTime(timeString: string) {
-    if (!timeString || !timeString.match(/^\d{1,2}:\d{2}$/)) return
+    if (!timeString) return
+    const match = TIME_FORMAT_REGEX.exec(timeString)
+    if (!match) return
 
     const timeParts = timeString.split(':')
     if (timeParts.length !== 2 || !timeParts[0] || !timeParts[1]) return
 
-    const hours = parseInt(timeParts[0], 10)
-    const minutes = parseInt(timeParts[1], 10)
+    const hours = Number.parseInt(timeParts[0], 10)
+    const minutes = Number.parseInt(timeParts[1], 10)
 
-    if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59)
+    if (
+      Number.isNaN(hours) ||
+      Number.isNaN(minutes) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59
+    )
       return
 
     const today = new Date()
@@ -287,8 +302,7 @@ export function useMeetingStore() {
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
 
-    const pad = (num: number): string => (num < 10 ? '0' : '') + num
-    return `${hours}:${pad(minutes)}:${pad(seconds)}`
+    return `${hours}:${padNumber(minutes)}:${padNumber(seconds)}`
   }
 
   function updateConfig(newConfig: Partial<Config>) {

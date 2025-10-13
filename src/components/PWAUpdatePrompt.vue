@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 
 const showUpdatePrompt = ref(false)
@@ -21,7 +21,6 @@ onMounted(() => {
 })
 
 // Watch for needRefresh changes
-import { watch } from 'vue'
 watch(needRefresh, value => {
   if (value) {
     showUpdatePrompt.value = true
