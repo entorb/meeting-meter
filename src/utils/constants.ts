@@ -18,7 +18,9 @@ export const COLORS = {
 // Validation limits
 export const LIMITS = {
   MAX_WORKING_HOURS: 12,
-  MIN_WORKING_HOURS: 4
+  MIN_WORKING_HOURS: 4,
+  MAX_PARTICIPANTS: 1000,
+  MIN_PARTICIPANTS: 0
 } as const
 
 // Meeting efficiency thresholds
@@ -40,4 +42,13 @@ export const DEFAULTS = {
 export const TIMER_SETTINGS = {
   UPDATE_INTERVAL_MS: 1000,
   SESSION_EXPIRY_HOURS: 24
+} as const
+
+// Time conversion constants
+export const TIME_CONSTANTS = {
+  MILLISECONDS_IN_SECOND: 1000,
+  SECONDS_IN_MINUTE: 60,
+  MINUTES_IN_HOUR: 60,
+  HOURS_IN_DAY: 24,
+  PAD_THRESHOLD: 10
 } as const

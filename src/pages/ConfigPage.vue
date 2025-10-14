@@ -6,7 +6,6 @@ import { useMeetingStore } from '@/composables/useMeetingStore'
 import { COLORS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
-import PWAUpdatePrompt from '@/components/PWAUpdatePrompt.vue'
 
 defineOptions({
   name: 'ConfigurationPage'
@@ -63,12 +62,12 @@ function handleEscape(event: KeyboardEvent) {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleEscape)
+  globalThis.addEventListener('keydown', handleEscape)
   fetchMeetingsMetered()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleEscape)
+  globalThis.removeEventListener('keydown', handleEscape)
 })
 </script>
 
@@ -168,7 +167,6 @@ onUnmounted(() => {
           </v-card-text>
         </v-card>
         <PWAInstallPrompt />
-        <PWAUpdatePrompt />
         <!-- Footer Section -->
         <v-container
           class="pt-8 pb-4"
