@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
 import {
@@ -165,6 +165,20 @@ function handleGroup1Input() {
 function handleGroup2Input() {
   group2ParticipantsInput.value = sanitizeIntegerInput(group2ParticipantsInput.value)
 }
+
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    router.push('/config/')
+  }
+}
+
+onMounted(() => {
+  globalThis.addEventListener('keydown', handleEscape)
+})
+
+onUnmounted(() => {
+  globalThis.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <template>
