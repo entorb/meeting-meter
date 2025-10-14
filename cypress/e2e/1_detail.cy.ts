@@ -98,4 +98,54 @@ describe('Detailed Tests', () => {
       cy.get('[data-cy="pause-timer-btn"]').should('be.visible')
     })
   })
+
+  describe('Keyboard Navigation', () => {
+    it('should navigate from home to config page with ESC key', () => {
+      // Start on home page
+      cy.url().should('not.include', '/config')
+      cy.contains('Meeting Meter').should('be.visible')
+
+      // Press ESC key to navigate to config
+      cy.get('body').type('{esc}')
+
+      // Should navigate to config page
+      cy.url().should('include', '/config')
+      cy.contains('Configuration').should('be.visible')
+    })
+
+    it('should navigate from config to home page with ESC key', () => {
+      // Navigate to config page
+      cy.get('[data-cy="config-btn"]').click()
+      cy.url().should('include', '/config')
+      cy.contains('Configuration').should('be.visible')
+
+      // Press ESC key to navigate back to home
+      cy.get('body').type('{esc}')
+
+      // Should navigate back to home page
+      cy.url().should('not.include', '/config')
+      cy.contains('Meeting Meter').should('be.visible')
+    })
+
+    it('should toggle between pages multiple times with ESC key', () => {
+      // Start on home
+      cy.url().should('not.include', '/config')
+
+      // ESC to config
+      cy.get('body').type('{esc}')
+      cy.url().should('include', '/config')
+
+      // ESC to home
+      cy.get('body').type('{esc}')
+      cy.url().should('not.include', '/config')
+
+      // ESC to config again
+      cy.get('body').type('{esc}')
+      cy.url().should('include', '/config')
+
+      // ESC to home again
+      cy.get('body').type('{esc}')
+      cy.url().should('not.include', '/config')
+    })
+  })
 })
