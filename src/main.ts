@@ -6,6 +6,7 @@
 
 // Plugins
 import { registerPlugins } from '@/plugins'
+import router from '@/router'
 
 // Components
 import App from './App.vue'
@@ -28,4 +29,8 @@ app.config.errorHandler = (err, _instance, info) => {
 
 registerPlugins(app)
 
-app.mount('#app')
+// Wait for router to be ready before mounting
+router.isReady().then(() => {
+  localStorage.removeItem('vuetify:dynamic-reload')
+  app.mount('#app')
+})
