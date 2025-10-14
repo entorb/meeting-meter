@@ -272,6 +272,7 @@ onUnmounted(() => {
                         "
                         rounded="pill"
                         aria-label="Edit meeting start time"
+                        data-cy="start-time-chip"
                       >
                         {{ formatStartTime(meetingData.startTime) }}
                       </v-btn>
@@ -289,6 +290,7 @@ onUnmounted(() => {
                         style="width: 140px"
                         aria-label="Edit meeting start time"
                         aria-describedby="start-time-hint"
+                        data-cy="start-time-input"
                       >
                         <template #append-inner>
                           <v-btn
@@ -296,6 +298,7 @@ onUnmounted(() => {
                             :icon="customIcons['check']"
                             variant="text"
                             size="small"
+                            data-cy="start-time-confirm-btn"
                           />
                         </template>
                       </v-text-field>
