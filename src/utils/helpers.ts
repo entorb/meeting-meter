@@ -6,7 +6,7 @@
  * @returns number of meetings metered, or 0 on error
  */
 
-import { STATS_DB_COL } from './constants'
+import { STATS_DB_COL, TIME_CONSTANTS } from './constants'
 
 export const helperStatsDataRead = async (): Promise<number> => {
   try {
@@ -229,4 +229,19 @@ export function getConfigFromForm(formData: Record<string, string | undefined>):
     group2HourlyRate: toNumber(formData.group2HourlyRate, CONFIG_DEFAULTS.HOURLY_RATE),
     workingHoursPerDay: toNumber(formData.workingHoursPerDay, CONFIG_DEFAULTS.WORKING_HOURS)
   }
+}
+
+function padNumber(num: number): string {
+  return (num < 10 ? '0' : '') + num
+}
+
+export function formatDuration(milliseconds: number): string {
+  const totalSeconds = Math.floor(milliseconds / TIME_CONSTANTS.MILLISECONDS_IN_SECOND)
+  const hours = Math.floor(totalSeconds / TIME_CONSTANTS.SECONDS_IN_HOUR)
+  const minutes = Math.floor(
+    (totalSeconds % TIME_CONSTANTS.SECONDS_IN_HOUR) / TIME_CONSTANTS.SECONDS_IN_MINUTE
+  )
+  const seconds = totalSeconds % TIME_CONSTANTS.SECONDS_IN_MINUTE
+
+  return `${hours}:${padNumber(minutes)}:${padNumber(seconds)}`
 }

@@ -9,7 +9,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     PWAInstallPrompt: typeof import('./components/PWAInstallPrompt.vue')['default']
-    PWAUpdatePrompt: typeof import('./components/PWAUpdatePrompt.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
