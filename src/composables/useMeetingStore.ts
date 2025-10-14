@@ -1,7 +1,8 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
 import type { Config, MeetingData, Calculations } from '@/types'
 import { loadConfig, saveConfig } from '@/services/configStorage'
-import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS } from '@/utils/constants'
+import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS, TIME_CONSTANTS } from '@/utils/constants'
+import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
 
 // Type for serialized meeting data in localStorage
 interface SerializedMeetingData {
@@ -11,12 +12,12 @@ interface SerializedMeetingData {
   group2Participants: number
 }
 
-// RegExp moved to highest scope for reuse
+// Constants for time formatting and validation
 const TIME_FORMAT_REGEX = /^\d{1,2}:\d{2}$/
 
 // Helper function moved to highest scope
 function padNumber(num: number): string {
-  return (num < 10 ? '0' : '') + num
+  return (num < TIME_CONSTANTS.PAD_THRESHOLD ? '0' : '') + num
 }
 
 // Meeting data persistence functions
@@ -28,15 +29,15 @@ function saveMeetingData(data: MeetingData): void {
       group1Participants: data.group1Participants,
       group2Participants: data.group2Participants
     }
-    localStorage.setItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
-  } catch (error) {
-    console.warn('Failed to save meeting data:', error)
+    safeSetItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
+  } catch {
+    // Silently fail - localStorage might be full or disabled
   }
 }
 
 function loadMeetingData(): MeetingData | null {
   try {
-    const saved = localStorage.getItem(STORAGE_KEYS.MEETING)
+    const saved = safeGetItem(STORAGE_KEYS.MEETING)
     if (!saved) return null
 
     const parsed: SerializedMeetingData = JSON.parse(saved)
@@ -44,12 +45,15 @@ function loadMeetingData(): MeetingData | null {
 
     // Validate startTime if it exists
     if (startTime && Number.isNaN(startTime.getTime())) {
-      console.warn('Invalid startTime in saved data, ignoring')
       return null
     }
 
-    // If startTime exists, check if it's older than 24 hours. If so, clear it and persist the cleared state.
-    const MS_IN_EXPIRY_PERIOD = TIMER_SETTINGS.SESSION_EXPIRY_HOURS * 60 * 60 * 1000
+    // If startTime exists, check if it's older than SESSION_EXPIRY_HOURS. If so, clear it and persist the cleared state.
+    const MS_IN_EXPIRY_PERIOD =
+      TIMER_SETTINGS.SESSION_EXPIRY_HOURS *
+      TIME_CONSTANTS.MINUTES_IN_HOUR *
+      TIME_CONSTANTS.SECONDS_IN_MINUTE *
+      TIME_CONSTANTS.MILLISECONDS_IN_SECOND
     if (startTime) {
       const elapsed = Date.now() - startTime.getTime()
       if (elapsed > MS_IN_EXPIRY_PERIOD) {
@@ -58,19 +62,14 @@ function loadMeetingData(): MeetingData | null {
         parsed.isRunning = false
 
         // Persist the cleared timer state back to localStorage
-        try {
-          // Update localStorage using existing helper
-          saveMeetingData({
-            startTime: null,
-            duration: 0,
-            isRunning: false,
-            group1Participants: Math.max(0, parsed.group1Participants || 0),
-            group2Participants: Math.max(0, parsed.group2Participants || 0)
-          })
-        } catch {
-          // Swallow persistence errors but warn
-          console.warn('Failed to persist cleared meeting state')
-        }
+        // Update localStorage using existing helper
+        saveMeetingData({
+          startTime: null,
+          duration: 0,
+          isRunning: false,
+          group1Participants: Math.max(0, parsed.group1Participants || 0),
+          group2Participants: Math.max(0, parsed.group2Participants || 0)
+        })
       }
     }
 
@@ -87,8 +86,8 @@ function loadMeetingData(): MeetingData | null {
       group1Participants: Math.max(0, parsed.group1Participants || 0),
       group2Participants: Math.max(0, parsed.group2Participants || 0)
     }
-  } catch (error) {
-    console.warn('Failed to load meeting data:', error)
+  } catch {
+    // Return null on any error - app will start fresh
     return null
   }
 }
@@ -156,11 +155,7 @@ export function useMeetingStore() {
   watch(
     config,
     newConfig => {
-      try {
-        saveConfig(newConfig)
-      } catch (error) {
-        console.warn('Failed to save config:', error)
-      }
+      saveConfig(newConfig)
     },
     { deep: true }
   )
@@ -169,18 +164,18 @@ export function useMeetingStore() {
   watch(
     meetingData,
     newMeetingData => {
-      try {
-        saveMeetingData(newMeetingData)
-      } catch (error) {
-        console.warn('Failed to save meeting data:', error)
-      }
+      saveMeetingData(newMeetingData)
     },
     { deep: true }
   )
 
   // Computed calculations
   const calculations = computed<Calculations>(() => {
-    const durationHours = meetingData.value.duration / (1000 * 60 * 60) // Convert ms to hours
+    const millisecondsInHour =
+      TIME_CONSTANTS.MILLISECONDS_IN_SECOND *
+      TIME_CONSTANTS.SECONDS_IN_MINUTE *
+      TIME_CONSTANTS.MINUTES_IN_HOUR
+    const durationHours = meetingData.value.duration / millisecondsInHour // Convert ms to hours
     const group1People = meetingData.value.group1Participants || 0
     const group2People = meetingData.value.group2Participants || 0
     const totalParticipants = group1People + group2People
@@ -267,13 +262,16 @@ export function useMeetingStore() {
     const hours = Number.parseInt(timeParts[0], 10)
     const minutes = Number.parseInt(timeParts[1], 10)
 
+    const maxHours = TIME_CONSTANTS.HOURS_IN_DAY - 1
+    const maxMinutes = TIME_CONSTANTS.SECONDS_IN_MINUTE - 1
+
     if (
       Number.isNaN(hours) ||
       Number.isNaN(minutes) ||
       hours < 0 ||
-      hours > 23 ||
+      hours > maxHours ||
       minutes < 0 ||
-      minutes > 59
+      minutes > maxMinutes
     )
       return
 
@@ -297,10 +295,11 @@ export function useMeetingStore() {
   }
 
   function formatDuration(milliseconds: number): string {
-    const totalSeconds = Math.floor(milliseconds / 1000)
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
+    const totalSeconds = Math.floor(milliseconds / TIME_CONSTANTS.MILLISECONDS_IN_SECOND)
+    const secondsInHour = TIME_CONSTANTS.SECONDS_IN_MINUTE * TIME_CONSTANTS.MINUTES_IN_HOUR
+    const hours = Math.floor(totalSeconds / secondsInHour)
+    const minutes = Math.floor((totalSeconds % secondsInHour) / TIME_CONSTANTS.SECONDS_IN_MINUTE)
+    const seconds = totalSeconds % TIME_CONSTANTS.SECONDS_IN_MINUTE
 
     return `${hours}:${padNumber(minutes)}:${padNumber(seconds)}`
   }

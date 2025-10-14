@@ -10,7 +10,7 @@ import {
   sanitizeIntegerInput,
   helperStatsDataWrite
 } from '@/utils/helpers'
-import { COLORS, EFFICIENCY_THRESHOLDS } from '@/utils/constants'
+import { COLORS, EFFICIENCY_THRESHOLDS, TIME_CONSTANTS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 
 // Component name for linting compliance
@@ -33,10 +33,19 @@ const {
   formatDuration
 } = useMeetingStore()
 
+const TIME_PAD_LENGTH = 2
+const TIME_PAD_CHAR = '0'
+
 function startEditingStartTime() {
   if (meetingData.value.startTime) {
-    const hours = meetingData.value.startTime.getHours().toString().padStart(2, '0')
-    const minutes = meetingData.value.startTime.getMinutes().toString().padStart(2, '0')
+    const hours = meetingData.value.startTime
+      .getHours()
+      .toString()
+      .padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)
+    const minutes = meetingData.value.startTime
+      .getMinutes()
+      .toString()
+      .padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)
     editStartTimeValue.value = `${hours}:${minutes}`
     isEditingStartTime.value = true
   }
@@ -66,7 +75,7 @@ function saveStartTime() {
     return
   }
 
-  const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  const timeString = `${hours.toString().padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)}:${minutes.toString().padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)}`
   setManualStartTime(timeString)
 
   isEditingStartTime.value = false
@@ -87,7 +96,13 @@ const group1ParticipantsInput = computed({
   get: () => meetingData.value.group1Participants.toString(),
   set: (value: string) => {
     const numValue = Number.parseInt(value, 10)
-    meetingData.value.group1Participants = Number.isNaN(numValue) || numValue < 0 ? 0 : numValue
+    if (Number.isNaN(numValue) || numValue < LIMITS.MIN_PARTICIPANTS) {
+      meetingData.value.group1Participants = LIMITS.MIN_PARTICIPANTS
+    } else if (numValue > LIMITS.MAX_PARTICIPANTS) {
+      meetingData.value.group1Participants = LIMITS.MAX_PARTICIPANTS
+    } else {
+      meetingData.value.group1Participants = numValue
+    }
   }
 })
 
@@ -95,7 +110,13 @@ const group2ParticipantsInput = computed({
   get: () => meetingData.value.group2Participants.toString(),
   set: (value: string) => {
     const numValue = Number.parseInt(value, 10)
-    meetingData.value.group2Participants = Number.isNaN(numValue) || numValue < 0 ? 0 : numValue
+    if (Number.isNaN(numValue) || numValue < LIMITS.MIN_PARTICIPANTS) {
+      meetingData.value.group2Participants = LIMITS.MIN_PARTICIPANTS
+    } else if (numValue > LIMITS.MAX_PARTICIPANTS) {
+      meetingData.value.group2Participants = LIMITS.MAX_PARTICIPANTS
+    } else {
+      meetingData.value.group2Participants = numValue
+    }
   }
 })
 
@@ -117,7 +138,9 @@ const hourlyTotalCost = computed(() => {
 
 // Efficiency indicator based on meeting duration and participant count
 function getEfficiencyColor(): string {
-  const durationMinutes = meetingData.value.duration / (1000 * 60)
+  const durationMinutes =
+    meetingData.value.duration /
+    (TIME_CONSTANTS.MILLISECONDS_IN_SECOND * TIME_CONSTANTS.SECONDS_IN_MINUTE)
   const totalParticipants = calculations.value.totalParticipants
 
   if (
@@ -142,25 +165,6 @@ function handleGroup1Input() {
 function handleGroup2Input() {
   group2ParticipantsInput.value = sanitizeIntegerInput(group2ParticipantsInput.value)
 }
-
-// function getEfficiencyText(): string {
-//   const durationMinutes = meetingData.value.duration / (1000 * 60)
-//   const totalParticipants = calculations.value.totalParticipants
-
-//   if (
-//     durationMinutes <= EFFICIENCY_THRESHOLDS.OPTIMAL_DURATION_MINUTES &&
-//     totalParticipants <= EFFICIENCY_THRESHOLDS.OPTIMAL_PARTICIPANT_COUNT
-//   ) {
-//     return '✓'
-//   }
-//   if (
-//     durationMinutes <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_DURATION_MINUTES &&
-//     totalParticipants <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_PARTICIPANT_COUNT
-//   ) {
-//     return '⚠'
-//   }
-//   return '⚠'
-// }
 </script>
 
 <template>
@@ -221,6 +225,7 @@ function handleGroup2Input() {
                         :icon="customIcons['play']"
                         rounded="xl"
                         data-cy="start-timer-btn"
+                        aria-label="Start meeting timer"
                       />
                       <v-btn
                         v-else-if="meetingData.isRunning"
@@ -231,6 +236,7 @@ function handleGroup2Input() {
                         :icon="customIcons['pause']"
                         rounded="xl"
                         data-cy="pause-timer-btn"
+                        aria-label="Pause meeting timer"
                       />
                       <v-btn
                         v-else
@@ -241,6 +247,7 @@ function handleGroup2Input() {
                         :icon="customIcons['stop']"
                         rounded="xl"
                         data-cy="stop-timer-btn"
+                        aria-label="Stop and reset meeting timer"
                       />
                     </div>
                     <v-icon
@@ -258,17 +265,24 @@ function handleGroup2Input() {
                       v-if="meetingData.startTime"
                       class="ml-4"
                     >
-                      <v-chip
+                      <v-btn
                         v-if="!isEditingStartTime"
                         @click="startEditingStartTime"
                         variant="tonal"
                         size="small"
                         class="cursor-pointer"
                         :prepend-icon="customIcons['clock-outline']"
-                        style="font-size: 1.1rem !important; padding: 8px 12px"
+                        style="
+                          font-size: 1.1rem !important;
+                          padding: 8px 12px;
+                          text-transform: none;
+                          letter-spacing: normal;
+                        "
+                        rounded="pill"
+                        aria-label="Edit meeting start time"
                       >
                         {{ formatStartTime(meetingData.startTime) }}
-                      </v-chip>
+                      </v-btn>
                       <v-text-field
                         v-else
                         v-model="editStartTimeValue"
@@ -277,10 +291,12 @@ function handleGroup2Input() {
                         variant="outlined"
                         density="compact"
                         placeholder="14:30 or 1430"
-                        hint="HH:MM or HHMM format, must be before current time"
+                        hint="HH:MM or HHMM"
                         persistent-hint
                         autofocus
                         style="width: 140px"
+                        aria-label="Edit meeting start time"
+                        aria-describedby="start-time-hint"
                       >
                         <template #append-inner>
                           <v-btn
@@ -327,6 +343,7 @@ function handleGroup2Input() {
                     data-cy="input-group-1"
                     @blur="handleGroup1Input"
                     @keyup.enter="handleGroup1Input"
+                    aria-label="Number of senior or management participants"
                   />
                 </div>
               </v-col>
@@ -353,6 +370,7 @@ function handleGroup2Input() {
                     persistent-hint
                     @blur="handleGroup2Input"
                     @keyup.enter="handleGroup2Input"
+                    aria-label="Number of junior or standard participants"
                   />
                 </div>
               </v-col>
