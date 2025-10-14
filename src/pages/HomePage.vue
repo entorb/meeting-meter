@@ -140,7 +140,7 @@ const hourlyTotalCost = computed(() => {
 function getEfficiencyColor(): string {
   const durationMinutes =
     meetingData.value.duration /
-    (TIME_CONSTANTS.MILLISECONDS_IN_SECOND * TIME_CONSTANTS.SECONDS_IN_MINUTE)
+    (TIME_CONSTANTS.SECONDS_IN_MINUTE * TIME_CONSTANTS.MILLISECONDS_IN_SECOND)
   const totalParticipants = calculations.value.totalParticipants
 
   if (
