@@ -150,6 +150,34 @@ function handleEscape(event: KeyboardEvent) {
   }
 }
 
+// Statistics comparisons
+const showStatistics = computed(() => {
+  return calculations.value.peopleHours > 0 || calculations.value.totalCost > 0
+})
+
+const alternativeActivities = computed(() => {
+  const hours = calculations.value.peopleHours
+  return [
+    { activity: 'Lines of code written', value: Math.round(hours * 50) },
+    { activity: 'Emails answered', value: Math.round(hours * 12) },
+    { activity: 'km Jogging', value: Math.round(hours * 10) },
+    { activity: 'Drinks consumed', value: Math.round((hours * 60) / 7) },
+    { activity: 'Movies watched', value: Math.round(hours * 1.5) }
+  ]
+})
+
+const alternativePurchases = computed(() => {
+  const cost = calculations.value.totalCost
+  if (cost === 0) return []
+
+  return [
+    { item: 'Coffees', value: Math.round(cost / 2) },
+    { item: 'Pizzas', value: Math.round(cost / 15) },
+    { item: 'Conference tickets', value: Math.round(cost / 500) },
+    { item: 'Laptops', value: Math.round(cost / 1000) }
+  ]
+})
+
 onMounted(() => {
   globalThis.addEventListener('keydown', handleEscape)
 })
@@ -434,6 +462,88 @@ onUnmounted(() => {
                     </div>
                   </div>
                 </v-card>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <!-- Statistics Section -->
+        <v-card
+          v-if="showStatistics"
+          elevation="3"
+          class="mt-6"
+        >
+          <v-card-title class="text-h6 pa-4">
+            <v-icon
+              class="mr-2"
+              size="24"
+            >
+              {{ customIcons['chart-bar'] }}
+            </v-icon>
+            What could have been done instead?
+          </v-card-title>
+          <v-card-text class="pa-4">
+            <v-row>
+              <!-- Alternative Activities (based on people hours) -->
+              <v-col
+                v-if="calculations.peopleHours > 0"
+                cols="12"
+                :md="hasHourlyRatesConfigured && calculations.totalCost > 0 ? 6 : 12"
+              >
+                <v-list
+                  density="compact"
+                  class="bg-transparent"
+                >
+                  <v-list-item
+                    v-for="item in alternativeActivities"
+                    :key="item.activity"
+                    class="px-0"
+                  >
+                    <template #prepend>
+                      <v-icon
+                        size="20"
+                        class="mr-2"
+                      >
+                        {{ customIcons['check-circle'] }}
+                      </v-icon>
+                    </template>
+                    <v-list-item-title>
+                      <span class="font-weight-medium">{{ item.value }}</span>
+                      {{ item.activity }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+
+              <!-- Alternative Purchases (based on cost) -->
+              <v-col
+                v-if="hasHourlyRatesConfigured && calculations.totalCost > 0"
+                cols="12"
+                :md="calculations.peopleHours > 0 ? 6 : 12"
+              >
+                <v-list
+                  density="compact"
+                  class="bg-transparent"
+                >
+                  <v-list-item
+                    v-for="item in alternativePurchases"
+                    :key="item.item"
+                    class="px-0"
+                  >
+                    <template #prepend>
+                      <v-icon
+                        size="20"
+                        class="mr-2"
+                      >
+                        {{ customIcons['currency-eur'] }}
+                      </v-icon>
+                    </template>
+                    <v-list-item-title>
+                      <span class="font-weight-medium">{{ item.value }}</span>
+                      {{ item.item }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
               </v-col>
             </v-row>
           </v-card-text>
