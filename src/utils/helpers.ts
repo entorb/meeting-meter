@@ -12,30 +12,30 @@ export const helperStatsDataRead = async (): Promise<number> => {
   try {
     const url = `https://entorb.net/web-stats-json.php?origin=${STATS_DB_COL}&action=read`
     const response = await fetch(url)
-    if (response.ok) {
-      // {'accesscounts':0, 'accesscounts7':0, 'firstaccess':'2025-09-01}
-      const respData = await response.json()
-      if (typeof respData.accesscounts === 'number') {
-        return respData.accesscounts
-      }
+
+    if (!response.ok) {
+      return 0
     }
-    console.error('Failed to fetch stats data or invalid response')
+
+    const respData = await response.json()
+    if (typeof respData.accesscounts === 'number' && respData.accesscounts >= 0) {
+      return respData.accesscounts
+    }
+
     return 0
-  } catch (error) {
-    console.error('Error:', error)
+  } catch {
+    // Silently fail - stats are not critical for app functionality
     return 0
   }
 }
 
-export const helperStatsDataWrite = async () => {
+export const helperStatsDataWrite = async (): Promise<void> => {
   try {
     const url = `https://entorb.net/web-stats-json.php?origin=${STATS_DB_COL}&action=write`
-    const response = await fetch(url)
-    if (!response.ok) {
-      console.error('Failed to update stats data')
-    }
-  } catch (error) {
-    console.error('Error:', error)
+    await fetch(url)
+    // Silently ignore errors - stats are not critical for app functionality
+  } catch {
+    // Silently ignore errors - stats are not critical for app functionality
   }
 }
 
@@ -91,16 +91,42 @@ export function formatCurrency(amount: number): string {
   return `${Math.round(amount)} €`
 }
 
+// Time formatting constants
+const TIME_FORMAT = {
+  PAD_LENGTH: 2,
+  PAD_CHAR: '0'
+} as const
+
 /**
  * Format a Date object to HH:MM time string
  * @param startTime - The Date object to format
  * @returns Time string in HH:MM format
  */
 export function formatStartTime(startTime: Date): string {
-  const hours = startTime.getHours().toString().padStart(2, '0')
-  const minutes = startTime.getMinutes().toString().padStart(2, '0')
+  const hours = startTime
+    .getHours()
+    .toString()
+    .padStart(TIME_FORMAT.PAD_LENGTH, TIME_FORMAT.PAD_CHAR)
+  const minutes = startTime
+    .getMinutes()
+    .toString()
+    .padStart(TIME_FORMAT.PAD_LENGTH, TIME_FORMAT.PAD_CHAR)
   return `${hours}:${minutes}`
 }
+
+// Time validation constants
+const TIME_VALIDATION = {
+  MAX_HOURS: 23,
+  MIN_HOURS: 0,
+  MAX_MINUTES: 59,
+  MIN_MINUTES: 0,
+  HHMM_FORMAT_LENGTH: 4,
+  TIME_PARTS_COUNT: 2,
+  HOURS_START_INDEX: 0,
+  HOURS_END_INDEX: 2,
+  MINUTES_START_INDEX: 2,
+  MINUTES_END_INDEX: 4
+} as const
 
 /**
  * Parse time input in HH:MM or HHMM format
@@ -115,13 +141,25 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
   if (trimmedValue.includes(':')) {
     // HH:MM format
     const parts = trimmedValue.split(':')
-    if (parts.length !== 2) return null
+    if (parts.length !== TIME_VALIDATION.TIME_PARTS_COUNT) return null
     hours = Number.parseInt(parts[0] || '0', 10)
     minutes = Number.parseInt(parts[1] || '0', 10)
-  } else if (trimmedValue.length === 4 && /^\d{4}$/.test(trimmedValue)) {
+  } else if (
+    trimmedValue.length === TIME_VALIDATION.HHMM_FORMAT_LENGTH &&
+    /^\d{4}$/.test(trimmedValue)
+  ) {
     // HHMM format (e.g., 1234 -> 12:34)
-    hours = Number.parseInt(trimmedValue.substring(0, 2), 10)
-    minutes = Number.parseInt(trimmedValue.substring(2, 4), 10)
+    hours = Number.parseInt(
+      trimmedValue.substring(TIME_VALIDATION.HOURS_START_INDEX, TIME_VALIDATION.HOURS_END_INDEX),
+      10
+    )
+    minutes = Number.parseInt(
+      trimmedValue.substring(
+        TIME_VALIDATION.MINUTES_START_INDEX,
+        TIME_VALIDATION.MINUTES_END_INDEX
+      ),
+      10
+    )
   } else {
     return null
   }
@@ -130,10 +168,10 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
   if (
     Number.isNaN(hours) ||
     Number.isNaN(minutes) ||
-    hours < 0 ||
-    hours > 23 ||
-    minutes < 0 ||
-    minutes > 59
+    hours < TIME_VALIDATION.MIN_HOURS ||
+    hours > TIME_VALIDATION.MAX_HOURS ||
+    minutes < TIME_VALIDATION.MIN_MINUTES ||
+    minutes > TIME_VALIDATION.MAX_MINUTES
   ) {
     return null
   }
@@ -174,6 +212,12 @@ export function toNumber(value: string | number | null | undefined, defaultValue
   return Number.isNaN(num) ? defaultValue : num
 }
 
+// Default configuration values
+const CONFIG_DEFAULTS = {
+  HOURLY_RATE: 0,
+  WORKING_HOURS: 8
+} as const
+
 /**
  * Convert form data to config object
  * @param formData - The form data object with string values
@@ -181,8 +225,8 @@ export function toNumber(value: string | number | null | undefined, defaultValue
  */
 export function getConfigFromForm(formData: Record<string, string | undefined>): Config {
   return {
-    group1HourlyRate: toNumber(formData.group1HourlyRate, 0),
-    group2HourlyRate: toNumber(formData.group2HourlyRate, 0),
-    workingHoursPerDay: toNumber(formData.workingHoursPerDay, 8)
+    group1HourlyRate: toNumber(formData.group1HourlyRate, CONFIG_DEFAULTS.HOURLY_RATE),
+    group2HourlyRate: toNumber(formData.group2HourlyRate, CONFIG_DEFAULTS.HOURLY_RATE),
+    workingHoursPerDay: toNumber(formData.workingHoursPerDay, CONFIG_DEFAULTS.WORKING_HOURS)
   }
 }

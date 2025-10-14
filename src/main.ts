@@ -18,6 +18,14 @@ import '@/styles/fonts.css'
 
 const app = createApp(App)
 
+// Global error handler
+app.config.errorHandler = (err, _instance, info) => {
+  // Log error for debugging
+  console.error('Vue error:', err)
+  console.error('Error info:', info)
+  // In production, you could send this to a monitoring service
+}
+
 registerPlugins(app)
 
 app.mount('#app')
