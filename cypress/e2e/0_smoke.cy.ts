@@ -12,18 +12,14 @@ describe('Application Smoke Test', () => {
     cy.get('[data-cy="config-btn"]').should('be.visible')
   })
 
-  it('should load the config page', () => {
+  it('should load the config page and navigate back', () => {
+    // Navigate to config page
     cy.get('[data-cy="config-btn"]').click()
+    cy.url().should('include', '/config')
     cy.get('.v-toolbar-title__placeholder').contains('Configuration').should('be.visible')
     cy.get('[data-cy="cfg-salary-1"]').should('be.visible')
     cy.get('[data-cy="cfg-salary-2"]').should('be.visible')
     cy.get('[data-cy="working-hours"]').should('be.visible')
-  })
-  it('should navigate between pages', () => {
-    // Navigate to config page
-    cy.get('[data-cy="config-btn"]').click()
-    cy.url().should('include', '/config')
-    cy.contains('Configuration').should('be.visible')
 
     // Navigate back to home
     cy.get('[data-cy="back-btn"]').click()

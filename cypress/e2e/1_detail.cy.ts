@@ -23,20 +23,6 @@ describe('Detailed Tests', () => {
       cy.get('[data-cy="timer-display"]').should('contain', '0:00:00')
       cy.get('[data-cy="start-timer-btn"]').should('be.visible')
     })
-
-    it('should handle timer operations with participants', () => {
-      // Set participants first
-      cy.setParticipants(2, 3)
-
-      // Start timer and let it run briefly
-      cy.startTimerAndWait()
-
-      // Pause timer
-      cy.get('[data-cy="pause-timer-btn"]').click()
-
-      // Verify timer shows elapsed time
-      cy.get('[data-cy="timer-display"]').should('not.contain', '0:00:00')
-    })
   })
 
   describe('Participant Management', () => {
@@ -57,7 +43,6 @@ describe('Detailed Tests', () => {
   describe('Cost Calculations', () => {
     it('should calculate costs when rates are configured', () => {
       cy.configureRates(50, 30)
-
       cy.setParticipants(2, 3)
 
       cy.startTimerAndWait()
@@ -65,20 +50,6 @@ describe('Detailed Tests', () => {
 
       // Should show calculated cost
       cy.get('[data-cy="card-duration-costs"]').should('not.contain', 'Configure rates')
-    })
-
-    it('should calculate costs correctly with detailed setup', () => {
-      // Configure rates
-      cy.configureRates(50, 30)
-
-      // Set participants
-      cy.setParticipants(2, 3)
-
-      // Start timer briefly
-      cy.startTimerAndWait()
-      cy.get('[data-cy="pause-timer-btn"]').click()
-
-      // Should show calculated cost instead of "Configure rates"
       cy.get('[data-cy="card-duration-costs"]').should('contain', '190')
     })
   })
@@ -100,52 +71,61 @@ describe('Detailed Tests', () => {
   })
 
   describe('Keyboard Navigation', () => {
-    it('should navigate from home to config page with ESC key', () => {
+    it('should toggle between pages with ESC key', () => {
       // Start on home page
       cy.url().should('not.include', '/config')
       cy.contains('Meeting Meter').should('be.visible')
 
-      // Press ESC key to navigate to config
+      // ESC to navigate to config
       cy.get('body').type('{esc}')
-
-      // Should navigate to config page
-      cy.url().should('include', '/config')
-      cy.contains('Configuration').should('be.visible')
-    })
-
-    it('should navigate from config to home page with ESC key', () => {
-      // Navigate to config page
-      cy.get('[data-cy="config-btn"]').click()
       cy.url().should('include', '/config')
       cy.contains('Configuration').should('be.visible')
 
-      // Press ESC key to navigate back to home
+      // ESC to navigate back to home
       cy.get('body').type('{esc}')
-
-      // Should navigate back to home page
       cy.url().should('not.include', '/config')
       cy.contains('Meeting Meter').should('be.visible')
     })
+  })
 
-    it('should toggle between pages multiple times with ESC key', () => {
-      // Start on home
-      cy.url().should('not.include', '/config')
+  describe('Manual Start Time Editing', () => {
+    it('should allow editing start time by clicking the start time chip', () => {
+      // Start timer first
+      cy.get('[data-cy="start-timer-btn"]').click()
+      // Wait for timer to tick (use assertion instead of arbitrary wait)
+      cy.get('[data-cy="timer-display"]').should('not.contain', '0:00:00')
 
-      // ESC to config
-      cy.get('body').type('{esc}')
-      cy.url().should('include', '/config')
+      // Find and click the start time chip
+      cy.get('[data-cy="start-time-chip"]').should('be.visible')
+      cy.get('[data-cy="start-time-chip"]').click()
 
-      // ESC to home
-      cy.get('body').type('{esc}')
-      cy.url().should('not.include', '/config')
+      // Dialog or input should appear for editing start time
+      cy.get('[data-cy="start-time-input"]').should('be.visible')
+    })
 
-      // ESC to config again
-      cy.get('body').type('{esc}')
-      cy.url().should('include', '/config')
+    it('should update timer duration when start time is edited', () => {
+      // Configure rates and participants for visible cost calculation
+      cy.configureRates(50, 30)
+      cy.setParticipants(2, 3)
 
-      // ESC to home again
-      cy.get('body').type('{esc}')
-      cy.url().should('not.include', '/config')
+      // Start timer
+      cy.get('[data-cy="start-timer-btn"]').click()
+      // Wait for timer to tick (use assertion instead of arbitrary wait)
+      cy.get('[data-cy="timer-display"]').should('not.contain', '0:00:00')
+
+      // Get current time and calculate a time 30 minutes ago
+      const now = new Date()
+      const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000)
+      const timeString = `${thirtyMinutesAgo.getHours().toString().padStart(2, '0')}:${thirtyMinutesAgo.getMinutes().toString().padStart(2, '0')}`
+
+      // Click start time chip and edit
+      cy.get('[data-cy="start-time-chip"]').click()
+      cy.get('[data-cy="start-time-input"] input').clear()
+      cy.get('[data-cy="start-time-input"] input').type(timeString)
+      cy.get('[data-cy="start-time-confirm-btn"]').click()
+
+      // Timer should show approximately 30 minutes
+      cy.get('[data-cy="timer-display"]').should('contain', '0:30:')
     })
   })
 })
