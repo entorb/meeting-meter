@@ -2,6 +2,7 @@ import { computed, ref, watch, onUnmounted } from 'vue'
 import type { Config, MeetingData, Calculations } from '@/types'
 import { loadConfig, saveConfig } from '@/services/configStorage'
 import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS, TIME_CONSTANTS } from '@/utils/constants'
+import { formatDuration, parseTimeInput, isTimeBeforeNow } from '@/utils/helpers'
 import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
 
 // Type for serialized meeting data in localStorage
@@ -10,25 +11,6 @@ interface SerializedMeetingData {
   isRunning: boolean
   group1Participants: number
   group2Participants: number
-}
-
-// Constants for time formatting and validation
-const TIME_FORMAT_REGEX = /^\d{1,2}:\d{2}$/
-
-// Helper function moved to highest scope
-function padNumber(num: number): string {
-  return (num < 10 ? '0' : '') + num
-}
-
-function formatDuration(milliseconds: number): string {
-  const totalSeconds = Math.floor(milliseconds / TIME_CONSTANTS.MILLISECONDS_IN_SECOND)
-  const hours = Math.floor(totalSeconds / TIME_CONSTANTS.SECONDS_IN_HOUR)
-  const minutes = Math.floor(
-    (totalSeconds % TIME_CONSTANTS.SECONDS_IN_HOUR) / TIME_CONSTANTS.SECONDS_IN_MINUTE
-  )
-  const seconds = totalSeconds % TIME_CONSTANTS.SECONDS_IN_MINUTE
-
-  return `${hours}:${padNumber(minutes)}:${padNumber(seconds)}`
 }
 
 // Meeting data persistence functions
@@ -100,6 +82,11 @@ function loadMeetingData(): MeetingData | null {
   }
 }
 
+/**
+ * Composable for managing meeting state, including timer, participants, and cost calculations.
+ *
+ * @returns A reactive store with meeting data, configuration, and control functions.
+ */
 export function useMeetingStore() {
   // Configuration state
   const config = ref<Config>({
@@ -120,33 +107,39 @@ export function useMeetingStore() {
   // Timer interval reference
   let timerInterval: ReturnType<typeof setInterval> | null = null
 
-  // Load config on initialization
-  const loadedConfig = loadConfig()
-  if (loadedConfig) {
-    config.value = {
-      group1HourlyRate: loadedConfig.group1HourlyRate || 0,
-      group2HourlyRate: loadedConfig.group2HourlyRate || 0,
-      workingHoursPerDay: loadedConfig.workingHoursPerDay || 8
+  // Encapsulated initialization logic
+  function initialize() {
+    // Load config on initialization
+    const loadedConfig = loadConfig()
+    if (loadedConfig) {
+      config.value = {
+        group1HourlyRate: loadedConfig.group1HourlyRate || 0,
+        group2HourlyRate: loadedConfig.group2HourlyRate || 0,
+        workingHoursPerDay: loadedConfig.workingHoursPerDay || 8
+      }
+    }
+
+    // Load meeting data on initialization
+    const savedMeetingData = loadMeetingData()
+    if (savedMeetingData) {
+      meetingData.value = savedMeetingData
+
+      // If timer was running, restart the interval
+      if (savedMeetingData.isRunning && savedMeetingData.startTime) {
+        timerInterval = setInterval(() => {
+          if (meetingData.value.startTime) {
+            meetingData.value.duration = Math.max(
+              0,
+              Date.now() - meetingData.value.startTime.getTime()
+            )
+          }
+        }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
+      }
     }
   }
 
-  // Load meeting data on initialization
-  const savedMeetingData = loadMeetingData()
-  if (savedMeetingData) {
-    meetingData.value = savedMeetingData
-
-    // If timer was running, restart the interval
-    if (savedMeetingData.isRunning && savedMeetingData.startTime) {
-      timerInterval = setInterval(() => {
-        if (meetingData.value.startTime) {
-          meetingData.value.duration = Math.max(
-            0,
-            Date.now() - meetingData.value.startTime.getTime()
-          )
-        }
-      }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
-    }
-  }
+  // Run initialization
+  initialize()
 
   // Cleanup function for timer
   const cleanup = (): void => {
@@ -203,7 +196,13 @@ export function useMeetingStore() {
     }
   })
 
-  // Timer functions
+  // --- Timer Control Functions ---
+
+  /**
+   * Starts or resumes the meeting timer.
+   * If the timer is paused, it resumes from the current duration.
+   * If the timer is stopped, it starts from zero.
+   */
   function startTimer() {
     const now = new Date()
 
@@ -227,6 +226,9 @@ export function useMeetingStore() {
     }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
   }
 
+  /**
+   * Stops and resets the meeting timer and duration.
+   */
   function stopTimer() {
     // Stop and reset everything
     meetingData.value.isRunning = false
@@ -239,6 +241,9 @@ export function useMeetingStore() {
     }
   }
 
+  /**
+   * Pauses the meeting timer, preserving the current duration.
+   */
   function pauseTimer() {
     // Pause the timer - stop updates but keep state
     if (!meetingData.value.isRunning) return
@@ -256,26 +261,16 @@ export function useMeetingStore() {
     }
   }
 
+  /**
+   * Sets the start time of the meeting manually based on a time string (e.g., "14:30").
+   * @param timeString - The time string in HH:MM or HHMM format.
+   */
   function setManualStartTime(timeString: string) {
-    if (!timeString) return
-    const match = TIME_FORMAT_REGEX.exec(timeString)
-    if (!match) return
+    const parsedTime = parseTimeInput(timeString)
+    if (!parsedTime) return
 
-    const timeParts = timeString.split(':')
-    if (timeParts.length !== 2 || !timeParts[0] || !timeParts[1]) return
-
-    const hours = Number.parseInt(timeParts[0], 10)
-    const minutes = Number.parseInt(timeParts[1], 10)
-
-    if (
-      Number.isNaN(hours) ||
-      Number.isNaN(minutes) ||
-      hours < 0 ||
-      hours > TIME_CONSTANTS.HOURS_IN_DAY - 1 ||
-      minutes < 0 ||
-      minutes > TIME_CONSTANTS.SECONDS_IN_MINUTE - 1
-    )
-      return
+    const { hours, minutes } = parsedTime
+    if (!isTimeBeforeNow(hours, minutes)) return
 
     const today = new Date()
     const newStartTime = new Date(
