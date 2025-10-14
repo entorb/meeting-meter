@@ -2,7 +2,7 @@ name: Update
 
 on:
   schedule:
-    - cron: '51 5 * * 0' # Every Sunday morning
+    - cron: '51 5 12 * *' # At 05:51 on 12th day-of-month
   workflow_dispatch: # Manual trigger
 
 permissions:
@@ -40,8 +40,8 @@ jobs:
             git config --local user.name "GitHub Action"
             git config --local user.email "action@github.com"
             git add pnpm-lock.yaml
-            git commit -m "Update pnpm-lock.yaml"
+            git commit -m "Update pnpm-lock.yaml" || true
             git add package.json
-            git commit -m "Update Vite, etc."
+            git commit -m "Update Vite, etc." || true
             git push
           fi

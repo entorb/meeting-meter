@@ -55,7 +55,7 @@ jobs:
         run: pnpm run spell
 
       - name: Run unit tests
-        run: pnpm run test
+        run: pnpm run test-cov
 
       - name: Run Cypress
         uses: cypress-io/github-action@v6
