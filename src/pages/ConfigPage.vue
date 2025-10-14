@@ -212,6 +212,12 @@ onUnmounted(() => {
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   >GitHub</a
                 >
+                <a
+                  href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  >LinkedIn Post</a
+                >
               </div>
               <div class="mt-4 text-body-2 grey--text">
                 {{ meetingsMetered }} meetings metered so far
