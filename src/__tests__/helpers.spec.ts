@@ -7,10 +7,32 @@ import {
   validateIntegerInput,
   sanitizeIntegerInput,
   formatStartTime,
-  getConfigFromForm
+  getConfigFromForm,
+  formatDuration
 } from '@/utils/helpers'
 
 describe('Helper Functions', () => {
+  describe('formatDuration', () => {
+    it('formats milliseconds into HH:MM:SS', () => {
+      expect(formatDuration(0)).toBe('0:00:00')
+      expect(formatDuration(1000)).toBe('0:00:01') // 1 second
+      expect(formatDuration(60000)).toBe('0:01:00') // 1 minute
+      expect(formatDuration(3600000)).toBe('1:00:00') // 1 hour
+    })
+
+    it('handles complex durations', () => {
+      // 1 hour, 23 minutes, 45 seconds
+      const ms = 1 * 3600000 + 23 * 60000 + 45 * 1000
+      expect(formatDuration(ms)).toBe('1:23:45')
+    })
+
+    it('pads numbers correctly', () => {
+      // 1 hour, 2 minutes, 3 seconds
+      const ms = 1 * 3600000 + 2 * 60000 + 3 * 1000
+      expect(formatDuration(ms)).toBe('1:02:03')
+    })
+  })
+
   describe('formatCurrency', () => {
     it('formats positive numbers correctly', () => {
       expect(formatCurrency(123.45)).toBe('123 €')
@@ -127,9 +149,8 @@ describe('Helper Functions', () => {
       expect(validateIntegerInput('', 1, 10, 3)).toBe(1) // '' -> '0' -> 0 -> clamped to min 1
     })
 
-    it('uses default when bounds check fails completely', () => {
-      // Test with a custom validateIntegerInput that can return NaN
-      // This would require modifying the function or testing edge cases differently
+    it('clamps out-of-bounds values to min/max', () => {
+      // Test clamping for values outside the specified range
       expect(validateIntegerInput('0', 5, 10, 7)).toBe(5) // 0 is below min 5, gets clamped to min
       expect(validateIntegerInput('15', 5, 10, 7)).toBe(10) // 15 is above max 10, gets clamped to max
     })

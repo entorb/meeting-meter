@@ -5,8 +5,6 @@ import { useMeetingStore } from '@/composables/useMeetingStore'
 import {
   formatCurrency,
   formatStartTime,
-  parseTimeInput,
-  isTimeBeforeNow,
   sanitizeIntegerInput,
   helperStatsDataWrite
 } from '@/utils/helpers'
@@ -57,27 +55,7 @@ async function startTimerWithStats() {
 }
 
 function saveStartTime() {
-  const parsedTime = parseTimeInput(editStartTimeValue.value)
-
-  if (!parsedTime) {
-    // Invalid format
-    isEditingStartTime.value = false
-    editStartTimeValue.value = ''
-    return
-  }
-
-  const { hours, minutes } = parsedTime
-
-  // Check if proposed time is before current time
-  if (!isTimeBeforeNow(hours, minutes)) {
-    isEditingStartTime.value = false
-    editStartTimeValue.value = ''
-    return
-  }
-
-  const timeString = `${hours.toString().padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)}:${minutes.toString().padStart(TIME_PAD_LENGTH, TIME_PAD_CHAR)}`
-  setManualStartTime(timeString)
-
+  setManualStartTime(editStartTimeValue.value)
   isEditingStartTime.value = false
   editStartTimeValue.value = ''
 }
