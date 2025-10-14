@@ -210,7 +210,14 @@ onUnmounted(() => {
                   href="https://github.com/entorb/meeting-meter"
                   target="_blank"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
                   >GitHub</a
+                >
+                <a
+                  href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  >LinkedIn Post</a
                 >
               </div>
               <div class="mt-4 text-body-2 grey--text">
