@@ -1,0 +1,17 @@
+accesscounts
+appinstalled
+beforeinstallprompt
+firstaccess
+iconsets
+infobar
+Matomo
+Menke
+navigatable
+roboto
+SonarCloud
+SonarQube
+Torben
+unplugin
+Vite
+vitest
+vuetify
