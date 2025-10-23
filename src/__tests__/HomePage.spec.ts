@@ -22,6 +22,7 @@ vi.mock('@/utils/helpers', () => ({
     return `${h}:${m}`
   }),
   sanitizeIntegerInput: vi.fn((input: string) => input.replace(/\D+/g, '') || '0'),
+  helperStatsDataRead: vi.fn().mockResolvedValue(42),
   helperStatsDataWrite: vi.fn().mockResolvedValue(undefined)
 }))
 

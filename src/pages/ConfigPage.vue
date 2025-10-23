@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { sanitizeIntegerInput, validateIntegerInput, helperStatsDataRead } from '@/utils/helpers'
+import { computed, onMounted, onUnmounted } from 'vue'
+import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
 import { useMeetingStore } from '@/composables/useMeetingStore'
 import { COLORS, LIMITS } from '@/utils/constants'
@@ -13,12 +13,6 @@ defineOptions({
 
 const router = useRouter()
 const { config, updateConfig } = useMeetingStore()
-
-const meetingsMetered = ref<number>(0)
-
-async function fetchMeetingsMetered() {
-  meetingsMetered.value = await helperStatsDataRead()
-}
 
 const group1HourlyRateInput = computed({
   get: () => config.value.group1HourlyRate.toString(),
@@ -63,7 +57,6 @@ function handleEscape(event: KeyboardEvent) {
 
 onMounted(() => {
   globalThis.addEventListener('keydown', handleEscape)
-  fetchMeetingsMetered()
 })
 
 onUnmounted(() => {
@@ -167,65 +160,6 @@ onUnmounted(() => {
           </v-card-text>
         </v-card>
         <PWAInstallPrompt />
-        <!-- Footer Section -->
-        <v-container
-          class="pt-8 pb-4"
-          fluid
-        >
-          <v-row
-            justify="center"
-            align="center"
-          >
-            <v-col
-              cols="12"
-              md="8"
-              class="text-center"
-            >
-              <div class="mt-4 text-body-2 grey--text">
-                None of your data is stored on the server.
-              </div>
-              <div class="mt-4 text-body-2 grey--text">
-                <a
-                  href="https://entorb.net"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Home</a
-                >
-                <a
-                  href="https://entorb.net/contact.php?origin=MeetingMeter"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Contact</a
-                >
-                <a
-                  href="https://entorb.net/impressum.php"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >Disclaimer</a
-                >
-                <a
-                  href="https://github.com/entorb/meeting-meter"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  style="margin-right: 16px"
-                  >GitHub</a
-                >
-                <a
-                  href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
-                  target="_blank"
-                  class="mb-2 text-primary text-decoration-underline d-inline-block"
-                  >LinkedIn Post</a
-                >
-              </div>
-              <div class="mt-4 text-body-2 grey--text">
-                {{ meetingsMetered }} meetings metered so far
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
       </v-container>
     </v-main>
   </v-app>
