@@ -6,7 +6,8 @@ import {
   formatCurrency,
   formatStartTime,
   sanitizeIntegerInput,
-  helperStatsDataWrite
+  helperStatsDataWrite,
+  helperStatsDataRead
 } from '@/utils/helpers'
 import { COLORS, EFFICIENCY_THRESHOLDS, TIME_CONSTANTS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
@@ -155,6 +156,12 @@ const showStatistics = computed(() => {
   return calculations.value.peopleHours > 0 || calculations.value.totalCost > 0
 })
 
+const meetingsMetered = ref<number>(0)
+
+async function fetchMeetingsMetered() {
+  meetingsMetered.value = await helperStatsDataRead()
+}
+
 const alternativeActivities = computed(() => {
   const hours = calculations.value.peopleHours
   return [
@@ -180,6 +187,7 @@ const alternativePurchases = computed(() => {
 
 onMounted(() => {
   globalThis.addEventListener('keydown', handleEscape)
+  fetchMeetingsMetered()
 })
 
 onUnmounted(() => {
@@ -548,6 +556,63 @@ onUnmounted(() => {
             </v-row>
           </v-card-text>
         </v-card>
+        <!-- Footer Section -->
+        <v-container
+          class="pt-8 pb-4"
+          fluid
+        >
+          <v-row
+            justify="center"
+            align="center"
+          >
+            <v-col
+              cols="12"
+              md="8"
+              class="text-center"
+            >
+              <div class="mt-4 text-body-2 grey--text">
+                {{ meetingsMetered }} meetings metered so far. None of your data is stored on the
+                server.
+              </div>
+              <div class="mt-4 text-body-2 grey--text">
+                <a
+                  href="https://entorb.net/contact.php?origin=MeetingMeter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >by Torben</a
+                >
+                <a
+                  href="https://entorb.net"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Home</a
+                >
+                <a
+                  href="https://entorb.net/impressum.php"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >Disclaimer</a
+                >
+                <a
+                  href="https://github.com/entorb/meeting-meter"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  style="margin-right: 16px"
+                  >GitHub</a
+                >
+                <a
+                  href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
+                  target="_blank"
+                  class="mb-2 text-primary text-decoration-underline d-inline-block"
+                  >LinkedIn Post</a
+                >
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
       </v-container>
     </v-main>
   </v-app>

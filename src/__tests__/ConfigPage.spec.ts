@@ -18,8 +18,7 @@ vi.mock('@/utils/helpers', () => ({
   validateIntegerInput: vi.fn((input: string, min = 0, max = 100) => {
     const num = parseInt(input.replace(/\D+/g, '') || '0', 10)
     return Math.min(max, Math.max(min, num))
-  }),
-  helperStatsDataRead: vi.fn().mockResolvedValue(42)
+  })
 }))
 
 // Mock the composable
@@ -99,34 +98,6 @@ describe('ConfigPage', () => {
       await createWrapper()
       const backBtn = wrapper.find('[data-cy="back-btn"]')
       expect(backBtn.exists()).toBe(true)
-    })
-
-    it('displays footer links', async () => {
-      await createWrapper()
-      expect(wrapper.text()).toContain('None of your data is stored on the server')
-      expect(wrapper.html()).toContain('https://entorb.net')
-      expect(wrapper.html()).toContain('https://github.com/entorb/meeting-meter')
-    })
-  })
-
-  describe('Stats Display', () => {
-    it('fetches and displays meeting count on mount', async () => {
-      const { helperStatsDataRead } = await import('@/utils/helpers')
-      await createWrapper()
-      await wrapper.vm.$nextTick()
-
-      expect(helperStatsDataRead).toHaveBeenCalled()
-      expect(wrapper.text()).toContain('42 meetings metered so far')
-    })
-
-    it('displays 0 when stats fetch fails', async () => {
-      const { helperStatsDataRead } = await import('@/utils/helpers')
-      vi.mocked(helperStatsDataRead).mockResolvedValueOnce(0)
-
-      await createWrapper()
-      await wrapper.vm.$nextTick()
-
-      expect(wrapper.text()).toContain('0 meetings metered so far')
     })
   })
 
