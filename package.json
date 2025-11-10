@@ -17,7 +17,7 @@
     "cy:open": "cypress open --e2e",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --cache --fix --ignore-pattern .gitignore",
-    "format": "prettier --cache --write src/ cypress/ *.html *.ts *.json *.md",
+    "format": "prettier --cache --write src/ cypress/ *.html *.ts *.json *.md --log-level silent",
     "spell": "cspell --cache --quiet \"src/**/*.{txt,md,html,js,ts,vue,json,yml,py}\"",
     "spell-store": "cspell --cache --quiet --words-only --unique \"src/**/*.{txt,md,html,js,ts,vue,json,yml,py}\" > cspell-unknown-words.txt",
     "check": "run-p format lint type-check spell test"
