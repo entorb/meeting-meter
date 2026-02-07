@@ -1,4 +1,5 @@
-import { computed, ref, watch, onUnmounted } from 'vue'
+import { defineStore } from 'pinia'
+import { ref, watch, computed } from 'vue'
 
 import { loadConfig, saveConfig } from '@/services/configStorage'
 import type { Config, MeetingData, Calculations } from '@/types'
@@ -14,81 +15,7 @@ interface SerializedMeetingData {
   group2Participants: number
 }
 
-// Meeting data persistence functions
-function saveMeetingData(data: MeetingData): void {
-  try {
-    const serializedData: SerializedMeetingData = {
-      startTime: data.startTime ? data.startTime.toISOString() : null,
-      isRunning: data.isRunning,
-      group1Participants: data.group1Participants,
-      group2Participants: data.group2Participants
-    }
-    safeSetItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
-  } catch {
-    // Silently fail - localStorage might be full or disabled
-  }
-}
-
-function loadMeetingData(): MeetingData | null {
-  try {
-    const saved = safeGetItem(STORAGE_KEYS.MEETING)
-    if (!saved) return null
-
-    const parsed: SerializedMeetingData = JSON.parse(saved)
-    let startTime = parsed.startTime ? new Date(parsed.startTime) : null
-
-    // Validate startTime if it exists
-    if (startTime && Number.isNaN(startTime.getTime())) {
-      return null
-    }
-
-    // If startTime exists, check if it's older than SESSION_EXPIRY_HOURS. If so, clear it and persist the cleared state.
-    const MS_IN_EXPIRY_PERIOD =
-      TIMER_SETTINGS.SESSION_EXPIRY_HOURS * TIME_CONSTANTS.MILLISECONDS_IN_HOUR
-    if (startTime) {
-      const elapsed = Date.now() - startTime.getTime()
-      if (elapsed > MS_IN_EXPIRY_PERIOD) {
-        // Clear the in-memory values
-        startTime = null
-        parsed.isRunning = false
-
-        // Persist the cleared timer state back to localStorage
-        // Update localStorage using existing helper
-        saveMeetingData({
-          startTime: null,
-          duration: 0,
-          isRunning: false,
-          group1Participants: Math.max(0, parsed.group1Participants || 0),
-          group2Participants: Math.max(0, parsed.group2Participants || 0)
-        })
-      }
-    }
-
-    // Recalculate duration from start time if timer is running
-    let duration = 0
-    if (startTime && parsed.isRunning) {
-      duration = Math.max(0, Date.now() - startTime.getTime())
-    }
-
-    return {
-      startTime,
-      duration,
-      isRunning: parsed.isRunning || false,
-      group1Participants: Math.max(0, parsed.group1Participants || 0),
-      group2Participants: Math.max(0, parsed.group2Participants || 0)
-    }
-  } catch {
-    // Return null on any error - app will start fresh
-    return null
-  }
-}
-
-/**
- * Composable for managing meeting state, including timer, participants, and cost calculations.
- *
- * @returns A reactive store with meeting data, configuration, and control functions.
- */
-export function useMeetingStore() {
+export const useMeetingStore = defineStore('meeting', () => {
   // Configuration state
   const config = ref<Config>({
     group1HourlyRate: DEFAULTS.GROUP1_HOURLY_RATE,
@@ -105,8 +32,76 @@ export function useMeetingStore() {
     group2Participants: 0
   })
 
-  // Timer interval reference
+  // Timer interval reference (used in timer control actions)
   let timerInterval: ReturnType<typeof setInterval> | null = null
+
+  // Meeting data persistence functions
+  function saveMeetingData(data: MeetingData): void {
+    try {
+      const serializedData: SerializedMeetingData = {
+        startTime: data.startTime ? data.startTime.toISOString() : null,
+        isRunning: data.isRunning,
+        group1Participants: data.group1Participants,
+        group2Participants: data.group2Participants
+      }
+      safeSetItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
+    } catch {
+      // Silently fail - localStorage might be full or disabled
+    }
+  }
+
+  function loadMeetingData(): MeetingData | null {
+    try {
+      const saved = safeGetItem(STORAGE_KEYS.MEETING)
+      if (!saved) return null
+
+      const parsed: SerializedMeetingData = JSON.parse(saved)
+      let startTime = parsed.startTime ? new Date(parsed.startTime) : null
+
+      // Validate startTime if it exists
+      if (startTime && Number.isNaN(startTime.getTime())) {
+        return null
+      }
+
+      // If startTime exists, check if it's older than SESSION_EXPIRY_HOURS. If so, clear it and persist the cleared state.
+      const MS_IN_EXPIRY_PERIOD =
+        TIMER_SETTINGS.SESSION_EXPIRY_HOURS * TIME_CONSTANTS.MILLISECONDS_IN_HOUR
+      if (startTime) {
+        const elapsed = Date.now() - startTime.getTime()
+        if (elapsed > MS_IN_EXPIRY_PERIOD) {
+          // Clear the in-memory values
+          startTime = null
+          parsed.isRunning = false
+
+          // Persist the cleared timer state back to localStorage
+          saveMeetingData({
+            startTime: null,
+            duration: 0,
+            isRunning: false,
+            group1Participants: Math.max(0, parsed.group1Participants || 0),
+            group2Participants: Math.max(0, parsed.group2Participants || 0)
+          })
+        }
+      }
+
+      // Recalculate duration from start time if timer is running
+      let duration = 0
+      if (startTime && parsed.isRunning) {
+        duration = Math.max(0, Date.now() - startTime.getTime())
+      }
+
+      return {
+        startTime,
+        duration,
+        isRunning: parsed.isRunning || false,
+        group1Participants: Math.max(0, parsed.group1Participants || 0),
+        group2Participants: Math.max(0, parsed.group2Participants || 0)
+      }
+    } catch {
+      // Return null on any error - app will start fresh
+      return null
+    }
+  }
 
   // Encapsulated initialization logic
   function initialize() {
@@ -142,34 +137,9 @@ export function useMeetingStore() {
   // Run initialization
   initialize()
 
-  // Cleanup function for timer
-  const cleanup = (): void => {
-    if (timerInterval) {
-      clearInterval(timerInterval)
-      timerInterval = null
-    }
-  }
-
-  // Cleanup on unmount
-  onUnmounted(cleanup)
-
-  // Save config when it changes
-  watch(
-    config,
-    newConfig => {
-      saveConfig(newConfig)
-    },
-    { deep: true }
-  )
-
-  // Save meeting data when it changes
-  watch(
-    meetingData,
-    newMeetingData => {
-      saveMeetingData(newMeetingData)
-    },
-    { deep: true }
-  )
+  // Persistence watchers
+  watch(config, newConfig => saveConfig(newConfig), { deep: true })
+  watch(meetingData, newData => saveMeetingData(newData), { deep: true })
 
   // Computed calculations
   const calculations = computed<Calculations>(() => {
@@ -292,6 +262,10 @@ export function useMeetingStore() {
     }
   }
 
+  /**
+   * Updates the configuration with new values using direct mutation pattern.
+   * @param newConfig - Partial configuration object with values to update.
+   */
   function updateConfig(newConfig: Partial<Config>) {
     config.value = { ...config.value, ...newConfig }
   }
@@ -304,7 +278,7 @@ export function useMeetingStore() {
     stopTimer,
     pauseTimer,
     setManualStartTime,
-    formatDuration,
-    updateConfig
+    updateConfig,
+    formatDuration
   }
-}
+})

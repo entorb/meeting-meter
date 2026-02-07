@@ -4,43 +4,22 @@
  * Manual routes configuration
  */
 
-// Composables
 import { createRouter, createWebHistory } from 'vue-router'
-
-import ConfigPage from '../pages/ConfigPage.vue'
-import HomePage from '../pages/HomePage.vue'
-
-const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: HomePage
-  },
-  {
-    path: '/config',
-    name: 'Config',
-    component: ConfigPage
-  }
-]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
-
-// Workaround for https://github.com/vitejs/vite/issues/11804
-router.onError((err, to) => {
-  if (err?.message?.includes?.('Failed to fetch dynamically imported module')) {
-    if (localStorage.getItem('vuetify:dynamic-reload')) {
-      console.error('Dynamic import error, reloading page did not fix it', err)
-    } else {
-      console.warn('Reloading page to fix dynamic import error')
-      localStorage.setItem('vuetify:dynamic-reload', 'true')
-      location.assign(to.fullPath)
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/pages/HomePage.vue')
+    },
+    {
+      path: '/config',
+      name: 'config',
+      component: () => import('@/pages/ConfigPage.vue')
     }
-  } else {
-    console.error(err)
-  }
+  ]
 })
 
 export default router

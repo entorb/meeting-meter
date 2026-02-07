@@ -15,4 +15,4 @@ Torben
 unplugin
 Vite
 vitest
-vuetify
+vueuse

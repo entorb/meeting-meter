@@ -91,27 +91,12 @@ export function formatCurrency(amount: number): string {
   return `${Math.round(amount)} €`
 }
 
-// Time formatting constants
-const TIME_FORMAT = {
-  PAD_LENGTH: 2,
-  PAD_CHAR: '0'
-} as const
-
-/**
- * Format a Date object to HH:MM time string
- * @param startTime - The Date object to format
- * @returns Time string in HH:MM format
- */
 export function formatStartTime(startTime: Date): string {
-  const hours = startTime
-    .getHours()
-    .toString()
-    .padStart(TIME_FORMAT.PAD_LENGTH, TIME_FORMAT.PAD_CHAR)
-  const minutes = startTime
-    .getMinutes()
-    .toString()
-    .padStart(TIME_FORMAT.PAD_LENGTH, TIME_FORMAT.PAD_CHAR)
-  return `${hours}:${minutes}`
+  return startTime.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 }
 
 // Time validation constants
