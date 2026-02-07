@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
 import { useMeetingStore } from '@/composables/useMeetingStore'
+import { COLORS, EFFICIENCY_THRESHOLDS, TIME_CONSTANTS, LIMITS } from '@/utils/constants'
 import {
   formatCurrency,
   formatStartTime,
@@ -9,7 +11,6 @@ import {
   helperStatsDataWrite,
   helperStatsDataRead
 } from '@/utils/helpers'
-import { COLORS, EFFICIENCY_THRESHOLDS, TIME_CONSTANTS, LIMITS } from '@/utils/constants'
 import { customIcons } from '@/utils/icons'
 
 // Component name for linting compliance
@@ -211,8 +212,8 @@ onUnmounted(() => {
         to="/config"
         icon
         variant="text"
-        @click="navigateToConfig"
         data-cy="config-btn"
+        @click="navigateToConfig"
       >
         <v-icon
           right
@@ -249,33 +250,33 @@ onUnmounted(() => {
                         :color="COLORS.SUCCESS"
                         size="small"
                         variant="elevated"
-                        @click="startTimerWithStats"
                         :icon="customIcons['play']"
                         rounded="xl"
                         data-cy="start-timer-btn"
                         aria-label="Start meeting timer"
+                        @click="startTimerWithStats"
                       />
                       <v-btn
                         v-else-if="meetingData.isRunning"
                         :color="COLORS.WARNING"
                         size="small"
                         variant="elevated"
-                        @click="pauseTimer"
                         :icon="customIcons['pause']"
                         rounded="xl"
                         data-cy="pause-timer-btn"
                         aria-label="Pause meeting timer"
+                        @click="pauseTimer"
                       />
                       <v-btn
                         v-else
                         :color="COLORS.ERROR"
                         size="small"
                         variant="elevated"
-                        @click="stopTimer"
                         :icon="customIcons['stop']"
                         rounded="xl"
                         data-cy="stop-timer-btn"
                         aria-label="Stop and reset meeting timer"
+                        @click="stopTimer"
                       />
                     </div>
                     <v-icon
@@ -295,7 +296,6 @@ onUnmounted(() => {
                     >
                       <v-btn
                         v-if="!isEditingStartTime"
-                        @click="startEditingStartTime"
                         variant="tonal"
                         size="small"
                         class="cursor-pointer"
@@ -309,32 +309,32 @@ onUnmounted(() => {
                         rounded="pill"
                         aria-label="Edit meeting start time"
                         data-cy="start-time-chip"
+                        @click="startEditingStartTime"
                       >
                         {{ formatStartTime(meetingData.startTime) }}
                       </v-btn>
                       <v-text-field
                         v-else
                         v-model="editStartTimeValue"
-                        @keyup.enter="saveStartTime"
-                        @blur="cancelEditStartTime"
                         variant="outlined"
                         density="compact"
                         placeholder="14:30 or 1430"
                         hint="HH:MM or HHMM"
                         persistent-hint
-                        autofocus
                         style="width: 140px"
                         aria-label="Edit meeting start time"
                         aria-describedby="start-time-hint"
                         data-cy="start-time-input"
+                        @keyup.enter="saveStartTime"
+                        @blur="cancelEditStartTime"
                       >
                         <template #append-inner>
                           <v-btn
-                            @click="saveStartTime"
                             :icon="customIcons['check']"
                             variant="text"
                             size="small"
                             data-cy="start-time-confirm-btn"
+                            @click="saveStartTime"
                           />
                         </template>
                       </v-text-field>
@@ -372,9 +372,9 @@ onUnmounted(() => {
                     density="comfortable"
                     class="flex-grow-1"
                     data-cy="input-group-1"
+                    aria-label="Number of senior or management participants"
                     @blur="handleGroup1Input"
                     @keyup.enter="handleGroup1Input"
-                    aria-label="Number of senior or management participants"
                   />
                 </div>
               </v-col>
@@ -399,9 +399,9 @@ onUnmounted(() => {
                     class="flex-grow-1"
                     data-cy="input-group-2"
                     persistent-hint
+                    aria-label="Number of junior or standard participants"
                     @blur="handleGroup2Input"
                     @keyup.enter="handleGroup2Input"
-                    aria-label="Number of junior or standard participants"
                   />
                 </div>
               </v-col>
@@ -422,8 +422,8 @@ onUnmounted(() => {
                 <v-card
                   variant="tonal"
                   class="text-center pa-4 cursor-pointer"
-                  @click="navigateToConfig"
                   data-cy="card-people-hours"
+                  @click="navigateToConfig"
                 >
                   <div class="text-h4 font-weight-medium">
                     {{ calculations.peopleHours.toFixed(1) }} /
@@ -442,9 +442,9 @@ onUnmounted(() => {
                 <v-card
                   variant="tonal"
                   :color="getEfficiencyColor()"
-                  @click="navigateToConfig"
                   class="text-center pa-4"
                   data-cy="card-duration-costs"
+                  @click="navigateToConfig"
                 >
                   <div v-if="hasHourlyRatesConfigured">
                     <div class="text-h4 font-weight-medium">
@@ -578,6 +578,7 @@ onUnmounted(() => {
                 <a
                   href="https://entorb.net/contact.php?origin=MeetingMeter"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   style="margin-right: 16px"
                   >by Torben</a
@@ -585,6 +586,7 @@ onUnmounted(() => {
                 <a
                   href="https://entorb.net"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   style="margin-right: 16px"
                   >Home</a
@@ -592,6 +594,7 @@ onUnmounted(() => {
                 <a
                   href="https://entorb.net/impressum.php"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   style="margin-right: 16px"
                   >Disclaimer</a
@@ -599,6 +602,7 @@ onUnmounted(() => {
                 <a
                   href="https://github.com/entorb/meeting-meter"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   style="margin-right: 16px"
                   >GitHub</a
@@ -606,6 +610,7 @@ onUnmounted(() => {
                 <a
                   href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="mb-2 text-primary text-decoration-underline d-inline-block"
                   >LinkedIn Post</a
                 >

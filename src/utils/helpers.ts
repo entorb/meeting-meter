@@ -6,7 +6,13 @@
  * @returns number of meetings metered, or 0 on error
  */
 
+import type { Config } from '@/types'
+
 import { STATS_DB_COL, TIME_CONSTANTS } from './constants'
+
+/**
+ * Utility functions for formatting and common operations
+ */
 
 export const helperStatsDataRead = async (): Promise<number> => {
   try {
@@ -38,12 +44,6 @@ export const helperStatsDataWrite = async (): Promise<void> => {
     // Silently ignore errors - stats are not critical for app functionality
   }
 }
-
-/**
- * Utility functions for formatting and common operations
- */
-
-import type { Config } from '@/types'
 
 /**
  * Sanitize input to keep only integer digits (for participant fields)
