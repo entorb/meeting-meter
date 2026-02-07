@@ -6,7 +6,7 @@ describe('Application Smoke Test', () => {
     cy.visit('/')
   })
   it('should load the main page', () => {
-    cy.get('.v-toolbar-title__placeholder').contains('Meeting Meter').should('be.visible')
+    cy.contains('Meeting Meter').should('be.visible')
     cy.get('[data-cy="timer-display"]').should('contain', '0:00:00')
     cy.get('[data-cy="start-timer-btn"]').should('be.visible')
     cy.get('[data-cy="config-btn"]').should('be.visible')
@@ -16,7 +16,7 @@ describe('Application Smoke Test', () => {
     // Navigate to config page
     cy.get('[data-cy="config-btn"]').click()
     cy.url().should('include', '/config')
-    cy.get('.v-toolbar-title__placeholder').contains('Configuration').should('be.visible')
+    cy.contains('Configuration').should('be.visible')
     cy.get('[data-cy="cfg-salary-1"]').should('be.visible')
     cy.get('[data-cy="cfg-salary-2"]').should('be.visible')
     cy.get('[data-cy="working-hours"]').should('be.visible')

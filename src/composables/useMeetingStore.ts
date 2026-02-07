@@ -1,6 +1,7 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
-import type { Config, MeetingData, Calculations } from '@/types'
+
 import { loadConfig, saveConfig } from '@/services/configStorage'
+import type { Config, MeetingData, Calculations } from '@/types'
 import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS, TIME_CONSTANTS } from '@/utils/constants'
 import { formatDuration, parseTimeInput, isTimeBeforeNow } from '@/utils/helpers'
 import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
