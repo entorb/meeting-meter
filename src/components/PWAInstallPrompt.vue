@@ -9,23 +9,17 @@ interface BeforeInstallPromptEvent extends Event {
 const showInstallPrompt = ref(false)
 let deferredPrompt: BeforeInstallPromptEvent | null = null
 
-// Detect if user is on Safari (iOS or macOS) - more robust detection
-const isSafari = computed(() => {
-  // More reliable Safari detection
-  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+// Simplified platform detection
+const platform = computed(() => {
+  const ua = navigator.userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua)) return 'ios'
+  if (ua.includes('mac') && /safari/.test(ua) && !/chrome/.test(ua)) return 'macos'
+  return 'other'
 })
 
-// Check if running on iOS
-const isIOS = computed(() => {
-  const ua = navigator.userAgent.toLowerCase()
-  return /iphone|ipad|ipod/.test(ua)
-})
-
-// Check if running on macOS
-const isMacOS = computed(() => {
-  const ua = navigator.userAgent.toLowerCase()
-  return ua.includes('mac') && !isIOS.value
-})
+const isSafari = computed(() => platform.value !== 'other')
+const isIOS = computed(() => platform.value === 'ios')
+const isMacOS = computed(() => platform.value === 'macos')
 
 onMounted(() => {
   // Check if PWA is already installed
@@ -83,59 +77,58 @@ const dismissPrompt = () => {
 </script>
 
 <template>
-  <v-snackbar
+  <q-dialog
     v-model="showInstallPrompt"
-    :timeout="-1"
-    location="bottom"
-    color="primary"
-    variant="elevated"
+    persistent
   >
-    <!-- Safari (iOS/macOS) instructions -->
-    <div
-      v-if="isSafari"
-      class="d-flex align-center"
-    >
-      <v-icon start>mdi-information-outline</v-icon>
-      <span v-if="isIOS">
-        Tap the Share button
-        <v-icon
-          size="small"
-          class="mx-1"
-          >mdi-export-variant</v-icon
-        >
-        then select "Add to Home Screen"
-      </span>
-      <span v-else-if="isMacOS">
-        Click the Share button in Safari's toolbar, then select "Add to Dock"
-      </span>
-    </div>
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Install App</div>
+      </q-card-section>
 
-    <!-- Chrome/Edge automatic install -->
-    <div
-      v-else
-      class="d-flex align-center"
-    >
-      <v-icon start>mdi-download</v-icon>
-      <span>Install Meeting Meter as an app for the best experience!</span>
-    </div>
+      <q-card-section>
+        <!-- Safari (iOS/macOS) instructions -->
+        <div v-if="isSafari">
+          <q-icon name="info_outline" />
+          <span v-if="isIOS">
+            Tap the Share button
+            <q-icon
+              name="ios_share"
+              size="sm"
+            />
+            then select "Add to Home Screen"
+          </span>
+          <span v-else-if="isMacOS">
+            Click the Share button in Safari's toolbar, then select "Add to Dock"
+          </span>
+        </div>
 
-    <template #actions>
-      <!-- Show Install button only for Chrome/Edge -->
-      <v-btn
-        v-if="!isSafari"
-        variant="text"
-        color="white"
-        @click="installPWA"
-      >
-        Install
-      </v-btn>
-      <v-btn
-        variant="text"
-        color="white"
-        @click="dismissPrompt"
-      >
-        {{ isSafari ? 'Got it' : 'Later' }}
-      </v-btn>
-    </template>
-  </v-snackbar>
+        <!-- Chrome/Edge automatic install -->
+        <div v-else>
+          <q-icon name="download" />
+          Install Meeting Meter as an app for the best experience!
+        </div>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <!-- Show Install button only for Chrome/Edge -->
+        <q-btn
+          v-if="!isSafari"
+          type="button"
+          flat
+          label="Install"
+          color="primary"
+          aria-label="Install application"
+          @click="installPWA"
+        />
+        <q-btn
+          type="button"
+          flat
+          :label="isSafari ? 'Got it' : 'Later'"
+          aria-label="Dismiss install prompt"
+          @click="dismissPrompt"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
