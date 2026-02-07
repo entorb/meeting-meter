@@ -1,37 +1,34 @@
 /**
  * main.ts
  *
- * Bootstraps Vuetify and other plugins then mounts the App
+ * Bootstraps Quasar and other plugins then mounts the App
  */
 
-// Plugins
+import { createPinia } from 'pinia'
+import { Quasar, Notify, Dialog, Loading, Dark } from 'quasar'
 import { createApp } from 'vue'
 
-import { registerPlugins } from '@/plugins'
-import router from '@/router'
-
-// Components
 import App from './App.vue'
-
-// Composables
+import router from './router'
 
 // Styles
-import '@/styles/fonts.css'
+import 'quasar/dist/quasar.css'
+import '@quasar/extras/material-icons/material-icons.css'
 
-const app = createApp(App)
+// Enable dark mode
+Dark.set(true)
 
-// Global error handler
-app.config.errorHandler = (err, _instance, info) => {
-  // Log error for debugging
-  console.error('Vue error:', err)
-  console.error('Error info:', info)
-  // In production, you could send this to a monitoring service
-}
-
-registerPlugins(app)
-
-// Wait for router to be ready before mounting
-router.isReady().then(() => {
-  localStorage.removeItem('vuetify:dynamic-reload')
-  app.mount('#app')
-})
+createApp(App)
+  .use(createPinia())
+  .use(router)
+  .use(Quasar, {
+    plugins: { Notify, Dialog, Loading },
+    config: {
+      dark: true,
+      notify: {
+        position: 'top',
+        timeout: 3000
+      }
+    }
+  })
+  .mount('#app')
