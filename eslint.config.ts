@@ -53,11 +53,7 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      ...(sonarjs.configs?.recommended != null &&
-      typeof sonarjs.configs.recommended === 'object' &&
-      'rules' in sonarjs.configs.recommended
-        ? sonarjs.configs.recommended.rules
-        : {}),
+      ...(sonarjs.configs.recommended.rules ?? {}),
       // Type safety
       '@typescript-eslint/consistent-type-imports': [
         'error',
@@ -392,7 +388,6 @@ export default [
       '**/typed-router.d.ts',
       '**/env.d.ts',
       '**/auto-imports.d.ts',
-      '**/vuetify-import.d.ts',
       'vite.config.d.ts',
       'vitest.config.d.ts'
     ],

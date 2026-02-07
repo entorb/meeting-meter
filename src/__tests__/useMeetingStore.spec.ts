@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { nextTick } from 'vue'
-import { useMeetingStore } from '@/composables/useMeetingStore'
+import { createPinia, setActivePinia } from 'pinia'
+import { useMeetingStore } from '@/stores/meetingStore'
 import * as configStorage from '@/services/configStorage'
 import * as localStorageHelper from '@/utils/localStorageHelper'
 import * as helpers from '@/utils/helpers'
@@ -46,6 +47,9 @@ describe('useMeetingStore', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
 
+    // Create a fresh Pinia instance for each test
+    setActivePinia(createPinia())
+
     // Default mocks
     vi.mocked(configStorage.loadConfig).mockReturnValue(null)
     vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(null)
@@ -61,9 +65,9 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.config.value.group1HourlyRate).toBe(0)
-      expect(store.config.value.group2HourlyRate).toBe(0)
-      expect(store.config.value.workingHoursPerDay).toBe(8)
+      expect(store.config.group1HourlyRate).toBe(0)
+      expect(store.config.group2HourlyRate).toBe(0)
+      expect(store.config.workingHoursPerDay).toBe(8)
     })
 
     it('loads saved config on initialization', () => {
@@ -75,9 +79,9 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.config.value.group1HourlyRate).toBe(50)
-      expect(store.config.value.group2HourlyRate).toBe(30)
-      expect(store.config.value.workingHoursPerDay).toBe(7)
+      expect(store.config.group1HourlyRate).toBe(50)
+      expect(store.config.group2HourlyRate).toBe(30)
+      expect(store.config.workingHoursPerDay).toBe(7)
     })
 
     it('initializes with default meeting data when no saved data exists', () => {
@@ -85,11 +89,11 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.startTime).toBeNull()
-      expect(store.meetingData.value.duration).toBe(0)
-      expect(store.meetingData.value.isRunning).toBe(false)
-      expect(store.meetingData.value.group1Participants).toBe(0)
-      expect(store.meetingData.value.group2Participants).toBe(0)
+      expect(store.meetingData.startTime).toBeNull()
+      expect(store.meetingData.duration).toBe(0)
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.group1Participants).toBe(0)
+      expect(store.meetingData.group2Participants).toBe(0)
     })
 
     it('loads saved meeting data on initialization', () => {
@@ -110,10 +114,10 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.startTime).not.toBeNull()
-      expect(store.meetingData.value.startTime?.getTime()).toBe(startTime.getTime())
-      expect(store.meetingData.value.group1Participants).toBe(5)
-      expect(store.meetingData.value.group2Participants).toBe(3)
+      expect(store.meetingData.startTime).not.toBeNull()
+      expect(store.meetingData.startTime?.getTime()).toBe(startTime.getTime())
+      expect(store.meetingData.group1Participants).toBe(5)
+      expect(store.meetingData.group2Participants).toBe(3)
     })
 
     it('clears expired meeting data older than SESSION_EXPIRY_HOURS', () => {
@@ -129,9 +133,9 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.startTime).toBeNull()
-      expect(store.meetingData.value.isRunning).toBe(false)
-      expect(store.meetingData.value.duration).toBe(0)
+      expect(store.meetingData.startTime).toBeNull()
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.duration).toBe(0)
       expect(localStorageHelper.safeSetItem).toHaveBeenCalled()
     })
 
@@ -148,8 +152,8 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.isRunning).toBe(true)
-      expect(store.meetingData.value.duration).toBeGreaterThan(0)
+      expect(store.meetingData.isRunning).toBe(true)
+      expect(store.meetingData.duration).toBeGreaterThan(0)
     })
 
     it('handles invalid JSON in saved meeting data', () => {
@@ -157,8 +161,8 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.startTime).toBeNull()
-      expect(store.meetingData.value.duration).toBe(0)
+      expect(store.meetingData.startTime).toBeNull()
+      expect(store.meetingData.duration).toBe(0)
     })
 
     it('handles invalid date in saved meeting data', () => {
@@ -173,7 +177,7 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.startTime).toBeNull()
+      expect(store.meetingData.startTime).toBeNull()
     })
 
     it('clamps negative participants to 0', () => {
@@ -188,8 +192,8 @@ describe('useMeetingStore', () => {
 
       const store = useMeetingStore()
 
-      expect(store.meetingData.value.group1Participants).toBe(0)
-      expect(store.meetingData.value.group2Participants).toBe(0)
+      expect(store.meetingData.group1Participants).toBe(0)
+      expect(store.meetingData.group2Participants).toBe(0)
     })
   })
 
@@ -201,9 +205,9 @@ describe('useMeetingStore', () => {
 
       store.startTimer()
 
-      expect(store.meetingData.value.startTime?.toISOString()).toBe(now.toISOString())
-      expect(store.meetingData.value.duration).toBe(0)
-      expect(store.meetingData.value.isRunning).toBe(true)
+      expect(store.meetingData.startTime?.toISOString()).toBe(now.toISOString())
+      expect(store.meetingData.duration).toBe(0)
+      expect(store.meetingData.isRunning).toBe(true)
     })
 
     it('updates duration while timer is running', () => {
@@ -216,7 +220,7 @@ describe('useMeetingStore', () => {
       // Advance time by 5 seconds
       vi.advanceTimersByTime(5000)
 
-      expect(store.meetingData.value.duration).toBeGreaterThanOrEqual(5000)
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
     it('resumes timer from current duration when paused', () => {
@@ -229,14 +233,14 @@ describe('useMeetingStore', () => {
       vi.advanceTimersByTime(5000)
       store.pauseTimer()
 
-      const pausedDuration = store.meetingData.value.duration
+      const pausedDuration = store.meetingData.duration
 
       // Resume
       vi.advanceTimersByTime(1000)
       store.startTimer()
       vi.advanceTimersByTime(3000)
 
-      expect(store.meetingData.value.duration).toBeGreaterThanOrEqual(pausedDuration + 3000)
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(pausedDuration + 3000)
     })
 
     it('pauses timer and preserves duration', () => {
@@ -249,8 +253,8 @@ describe('useMeetingStore', () => {
 
       store.pauseTimer()
 
-      expect(store.meetingData.value.isRunning).toBe(false)
-      expect(store.meetingData.value.duration).toBeGreaterThanOrEqual(5000)
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
     it('stops timer and resets all values', () => {
@@ -263,9 +267,9 @@ describe('useMeetingStore', () => {
 
       store.stopTimer()
 
-      expect(store.meetingData.value.isRunning).toBe(false)
-      expect(store.meetingData.value.startTime).toBeNull()
-      expect(store.meetingData.value.duration).toBe(0)
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.startTime).toBeNull()
+      expect(store.meetingData.duration).toBe(0)
     })
 
     it('does nothing when pausing already paused timer', () => {
@@ -273,7 +277,7 @@ describe('useMeetingStore', () => {
 
       store.pauseTimer()
 
-      expect(store.meetingData.value.isRunning).toBe(false)
+      expect(store.meetingData.isRunning).toBe(false)
     })
 
     it('clears interval on stop', () => {
@@ -308,8 +312,8 @@ describe('useMeetingStore', () => {
 
       store.setManualStartTime('14:30')
 
-      expect(store.meetingData.value.startTime?.getHours()).toBe(14)
-      expect(store.meetingData.value.startTime?.getMinutes()).toBe(30)
+      expect(store.meetingData.startTime?.getHours()).toBe(14)
+      expect(store.meetingData.startTime?.getMinutes()).toBe(30)
     })
 
     it('recalculates duration when timer is running', () => {
@@ -323,18 +327,18 @@ describe('useMeetingStore', () => {
       store.startTimer()
       store.setManualStartTime('14:30')
 
-      expect(store.meetingData.value.duration).toBeGreaterThan(0)
+      expect(store.meetingData.duration).toBeGreaterThan(0)
     })
 
     it('ignores invalid time string', () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue(null)
 
       const store = useMeetingStore()
-      const originalStartTime = store.meetingData.value.startTime
+      const originalStartTime = store.meetingData.startTime
 
       store.setManualStartTime('invalid')
 
-      expect(store.meetingData.value.startTime).toBe(originalStartTime)
+      expect(store.meetingData.startTime).toBe(originalStartTime)
     })
 
     it('ignores time in the future', () => {
@@ -342,11 +346,11 @@ describe('useMeetingStore', () => {
       vi.mocked(helpers.isTimeBeforeNow).mockReturnValue(false)
 
       const store = useMeetingStore()
-      const originalStartTime = store.meetingData.value.startTime
+      const originalStartTime = store.meetingData.startTime
 
       store.setManualStartTime('18:00')
 
-      expect(store.meetingData.value.startTime).toBe(originalStartTime)
+      expect(store.meetingData.startTime).toBe(originalStartTime)
     })
 
     it('handles time string without colon', () => {
@@ -359,8 +363,8 @@ describe('useMeetingStore', () => {
 
       store.setManualStartTime('1430')
 
-      expect(store.meetingData.value.startTime?.getHours()).toBe(14)
-      expect(store.meetingData.value.startTime?.getMinutes()).toBe(30)
+      expect(store.meetingData.startTime?.getHours()).toBe(14)
+      expect(store.meetingData.startTime?.getMinutes()).toBe(30)
     })
   })
 
@@ -370,9 +374,9 @@ describe('useMeetingStore', () => {
 
       store.updateConfig({ group1HourlyRate: 75 })
 
-      expect(store.config.value.group1HourlyRate).toBe(75)
-      expect(store.config.value.group2HourlyRate).toBe(0)
-      expect(store.config.value.workingHoursPerDay).toBe(8)
+      expect(store.config.group1HourlyRate).toBe(75)
+      expect(store.config.group2HourlyRate).toBe(0)
+      expect(store.config.workingHoursPerDay).toBe(8)
     })
 
     it('updates multiple config values', () => {
@@ -383,8 +387,8 @@ describe('useMeetingStore', () => {
         group2HourlyRate: 30
       })
 
-      expect(store.config.value.group1HourlyRate).toBe(50)
-      expect(store.config.value.group2HourlyRate).toBe(30)
+      expect(store.config.group1HourlyRate).toBe(50)
+      expect(store.config.group2HourlyRate).toBe(30)
     })
 
     it('saves config to storage when updated', async () => {
@@ -404,93 +408,93 @@ describe('useMeetingStore', () => {
   describe('Calculations', () => {
     it('calculates total participants', () => {
       const store = useMeetingStore()
-      store.meetingData.value.group1Participants = 5
-      store.meetingData.value.group2Participants = 3
+      store.meetingData.group1Participants = 5
+      store.meetingData.group2Participants = 3
 
-      expect(store.calculations.value.totalParticipants).toBe(8)
+      expect(store.calculations.totalParticipants).toBe(8)
     })
 
     it('calculates people hours correctly', () => {
       const store = useMeetingStore()
-      store.meetingData.value.duration = 3600000 // 1 hour in ms
-      store.meetingData.value.group1Participants = 5
-      store.meetingData.value.group2Participants = 3
+      store.meetingData.duration = 3600000 // 1 hour in ms
+      store.meetingData.group1Participants = 5
+      store.meetingData.group2Participants = 3
 
-      expect(store.calculations.value.peopleHours).toBe(8)
+      expect(store.calculations.peopleHours).toBe(8)
     })
 
     it('calculates people days correctly', () => {
       const store = useMeetingStore()
-      store.config.value.workingHoursPerDay = 8
-      store.meetingData.value.duration = 3600000 // 1 hour
-      store.meetingData.value.group1Participants = 8
-      store.meetingData.value.group2Participants = 0
+      store.config.workingHoursPerDay = 8
+      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.group1Participants = 8
+      store.meetingData.group2Participants = 0
 
-      expect(store.calculations.value.peopleDays).toBe(1)
+      expect(store.calculations.peopleDays).toBe(1)
     })
 
     it('calculates total cost with hourly rates', () => {
       const store = useMeetingStore()
-      store.config.value.group1HourlyRate = 50
-      store.config.value.group2HourlyRate = 30
-      store.meetingData.value.duration = 3600000 // 1 hour
-      store.meetingData.value.group1Participants = 2
-      store.meetingData.value.group2Participants = 3
+      store.config.group1HourlyRate = 50
+      store.config.group2HourlyRate = 30
+      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.group1Participants = 2
+      store.meetingData.group2Participants = 3
 
       // 2 * 50 + 3 * 30 = 100 + 90 = 190
-      expect(store.calculations.value.totalCost).toBe(190)
+      expect(store.calculations.totalCost).toBe(190)
     })
 
     it('calculates group costs separately', () => {
       const store = useMeetingStore()
-      store.config.value.group1HourlyRate = 100
-      store.config.value.group2HourlyRate = 50
-      store.meetingData.value.duration = 1800000 // 0.5 hours
-      store.meetingData.value.group1Participants = 2
-      store.meetingData.value.group2Participants = 4
+      store.config.group1HourlyRate = 100
+      store.config.group2HourlyRate = 50
+      store.meetingData.duration = 1800000 // 0.5 hours
+      store.meetingData.group1Participants = 2
+      store.meetingData.group2Participants = 4
 
-      expect(store.calculations.value.group1Cost).toBe(100) // 0.5 * 2 * 100
-      expect(store.calculations.value.group2Cost).toBe(100) // 0.5 * 4 * 50
+      expect(store.calculations.group1Cost).toBe(100) // 0.5 * 2 * 100
+      expect(store.calculations.group2Cost).toBe(100) // 0.5 * 4 * 50
     })
 
     it('handles zero duration', () => {
       const store = useMeetingStore()
-      store.meetingData.value.duration = 0
-      store.meetingData.value.group1Participants = 5
+      store.meetingData.duration = 0
+      store.meetingData.group1Participants = 5
 
-      expect(store.calculations.value.peopleHours).toBe(0)
-      expect(store.calculations.value.totalCost).toBe(0)
+      expect(store.calculations.peopleHours).toBe(0)
+      expect(store.calculations.totalCost).toBe(0)
     })
 
     it('handles zero participants', () => {
       const store = useMeetingStore()
-      store.meetingData.value.duration = 3600000
-      store.meetingData.value.group1Participants = 0
-      store.meetingData.value.group2Participants = 0
+      store.meetingData.duration = 3600000
+      store.meetingData.group1Participants = 0
+      store.meetingData.group2Participants = 0
 
-      expect(store.calculations.value.totalParticipants).toBe(0)
-      expect(store.calculations.value.peopleHours).toBe(0)
-      expect(store.calculations.value.totalCost).toBe(0)
+      expect(store.calculations.totalParticipants).toBe(0)
+      expect(store.calculations.peopleHours).toBe(0)
+      expect(store.calculations.totalCost).toBe(0)
     })
 
     it('calculates correctly with only group1 participants', () => {
       const store = useMeetingStore()
-      store.config.value.group1HourlyRate = 75
-      store.meetingData.value.duration = 3600000 // 1 hour
-      store.meetingData.value.group1Participants = 4
-      store.meetingData.value.group2Participants = 0
+      store.config.group1HourlyRate = 75
+      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.group1Participants = 4
+      store.meetingData.group2Participants = 0
 
-      expect(store.calculations.value.totalCost).toBe(300)
+      expect(store.calculations.totalCost).toBe(300)
     })
 
     it('calculates correctly with only group2 participants', () => {
       const store = useMeetingStore()
-      store.config.value.group2HourlyRate = 45
-      store.meetingData.value.duration = 3600000 // 1 hour
-      store.meetingData.value.group1Participants = 0
-      store.meetingData.value.group2Participants = 6
+      store.config.group2HourlyRate = 45
+      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.group1Participants = 0
+      store.meetingData.group2Participants = 6
 
-      expect(store.calculations.value.totalCost).toBe(270)
+      expect(store.calculations.totalCost).toBe(270)
     })
   })
 
@@ -498,7 +502,7 @@ describe('useMeetingStore', () => {
     it('saves meeting data when participants change', async () => {
       const store = useMeetingStore()
 
-      store.meetingData.value.group1Participants = 10
+      store.meetingData.group1Participants = 10
       await nextTick()
       await nextTick()
 
@@ -532,7 +536,7 @@ describe('useMeetingStore', () => {
 
       // Should not throw
       expect(() => {
-        store.meetingData.value.group1Participants = 10
+        store.meetingData.group1Participants = 10
       }).not.toThrow()
     })
 
@@ -581,53 +585,53 @@ describe('useMeetingStore', () => {
       store.stopTimer()
       store.startTimer()
 
-      expect(store.meetingData.value.isRunning).toBe(true)
-      expect(store.meetingData.value.duration).toBe(0)
+      expect(store.meetingData.isRunning).toBe(true)
+      expect(store.meetingData.duration).toBe(0)
     })
 
     it('handles very long meeting durations', () => {
       const store = useMeetingStore()
-      store.meetingData.value.duration = 36000000 // 10 hours
+      store.meetingData.duration = 36000000 // 10 hours
 
-      expect(store.calculations.value.durationHours).toBe(10)
+      expect(store.calculations.durationHours).toBe(10)
     })
 
     it('handles fractional hourly rates', () => {
       const store = useMeetingStore()
-      store.config.value.group1HourlyRate = 50.5
-      store.meetingData.value.duration = 3600000
-      store.meetingData.value.group1Participants = 2
+      store.config.group1HourlyRate = 50.5
+      store.meetingData.duration = 3600000
+      store.meetingData.group1Participants = 2
 
-      expect(store.calculations.value.totalCost).toBe(101)
+      expect(store.calculations.totalCost).toBe(101)
     })
 
     it('handles non-standard working hours per day', () => {
       const store = useMeetingStore()
-      store.config.value.workingHoursPerDay = 6
-      store.meetingData.value.duration = 3600000 // 1 hour
-      store.meetingData.value.group1Participants = 6
+      store.config.workingHoursPerDay = 6
+      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.group1Participants = 6
 
-      expect(store.calculations.value.peopleDays).toBe(1)
+      expect(store.calculations.peopleDays).toBe(1)
     })
 
     it('prevents negative duration', () => {
       const store = useMeetingStore()
       const futureTime = new Date(Date.now() + 10000)
-      store.meetingData.value.startTime = futureTime
-      store.meetingData.value.isRunning = true
+      store.meetingData.startTime = futureTime
+      store.meetingData.isRunning = true
 
       // Duration should be clamped to 0
-      expect(store.calculations.value.durationHours).toBeGreaterThanOrEqual(0)
+      expect(store.calculations.durationHours).toBeGreaterThanOrEqual(0)
     })
 
     it('handles missing participant values', () => {
       const store = useMeetingStore()
       // @ts-expect-error Testing runtime behavior
-      store.meetingData.value.group1Participants = undefined
+      store.meetingData.group1Participants = undefined
       // @ts-expect-error Testing runtime behavior
-      store.meetingData.value.group2Participants = null
+      store.meetingData.group2Participants = null
 
-      expect(store.calculations.value.totalParticipants).toBe(0)
+      expect(store.calculations.totalParticipants).toBe(0)
     })
   })
 

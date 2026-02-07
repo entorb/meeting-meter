@@ -34,7 +34,7 @@ pnpm up
 - pnpm
 - [SonarQube](https://sonarcloud.io/summary/overall?id=entorb_meeting-meter&branch=main)
 - Vue.js
-- Vuetify
+- Quasar
 - Vitest
 - Cypress
 - ESLint
