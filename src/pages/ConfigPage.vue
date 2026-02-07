@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted } from 'vue'
-import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
 import { useRouter } from 'vue-router'
+
+import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
 import { useMeetingStore } from '@/composables/useMeetingStore'
 import { COLORS, LIMITS } from '@/utils/constants'
+import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
 import { customIcons } from '@/utils/icons'
-import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
 
 defineOptions({
   name: 'ConfigurationPage'
@@ -75,8 +76,8 @@ onUnmounted(() => {
       <v-btn
         icon
         variant="text"
-        @click="navigateBack"
         data-cy="back-btn"
+        @click="navigateBack"
       >
         <v-icon>{{ customIcons['arrow-left'] }}</v-icon>
       </v-btn>

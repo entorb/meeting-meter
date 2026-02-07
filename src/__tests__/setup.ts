@@ -40,7 +40,7 @@ global.ResizeObserver = class ResizeObserver {
 global.IntersectionObserver = class IntersectionObserver {
   readonly root: Element | null = null
   readonly rootMargin: string = ''
-  readonly thresholds: ReadonlyArray<number> = []
+  readonly thresholds: readonly number[] = []
 
   constructor() {}
   observe() {}
@@ -49,7 +49,7 @@ global.IntersectionObserver = class IntersectionObserver {
   takeRecords() {
     return []
   }
-} as any
+}
 
 // Mock requestAnimationFrame and cancelAnimationFrame
 global.requestAnimationFrame = vi.fn(cb => {

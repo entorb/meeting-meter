@@ -6,8 +6,9 @@
 
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '../pages/HomePage.vue'
+
 import ConfigPage from '../pages/ConfigPage.vue'
+import HomePage from '../pages/HomePage.vue'
 
 const routes = [
   {

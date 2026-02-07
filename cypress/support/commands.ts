@@ -51,7 +51,6 @@ Cypress.Commands.add('startTimerAndWait', () => {
 })
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       configureRates(group1Rate: number, group2Rate: number, workingHours?: number): Chainable<void>
