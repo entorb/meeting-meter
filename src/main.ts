@@ -5,6 +5,8 @@
  */
 
 // Plugins
+import { createApp } from 'vue'
+
 import { registerPlugins } from '@/plugins'
 import router from '@/router'
 
@@ -12,7 +14,6 @@ import router from '@/router'
 import App from './App.vue'
 
 // Composables
-import { createApp } from 'vue'
 
 // Styles
 import '@/styles/fonts.css'
