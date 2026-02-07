@@ -7,12 +7,12 @@ export const STORAGE_KEYS = {
 // name to be used in web-stats-json.php
 export const STATS_DB_COL = 'meeting-meter'
 
-// UI Colors
+// UI Colors - Using Quasar default theme colors
 export const COLORS = {
-  PRIMARY: '#0091e3', // blue of icon
-  SUCCESS: '#2e7d32', // deep green
-  WARNING: '#ff9800', // warm amber
-  ERROR: '#d32f2f' // strong red
+  PRIMARY: '#1976d2', // Quasar default primary (blue)
+  SUCCESS: '#21ba45', // Quasar default positive (green)
+  WARNING: '#f2c037', // Quasar default warning (yellow)
+  ERROR: '#c10015' // Quasar default negative (red)
 } as const
 
 // Validation limits
@@ -44,15 +44,16 @@ export const TIMER_SETTINGS = {
   SESSION_EXPIRY_HOURS: 24
 } as const
 
-// Time conversion constants
-export const TIME_CONSTANTS = {
-  HOURS_IN_DAY: 24,
-  MILLISECONDS_IN_HOUR: 3600000,
-  MILLISECONDS_IN_SECOND: 1000,
-  MINUTES_IN_HOUR: 60,
-  SECONDS_IN_HOUR: 3600,
-  SECONDS_IN_MINUTE: 60
-} as const
+// Time conversion constants (using numeric separators for readability)
+export const MS_PER_SECOND = 1_000
+export const MS_PER_HOUR = 3_600_000
+export const SECONDS_PER_MINUTE = 60
+export const SECONDS_PER_HOUR = 3_600
 
-// Constant for time formatting and validation
-export const TIME_FORMAT_REGEX = /^\d{1,2}:\d{2}$/
+// Legacy exports for backward compatibility
+export const TIME_CONSTANTS = {
+  MILLISECONDS_IN_HOUR: MS_PER_HOUR,
+  MILLISECONDS_IN_SECOND: MS_PER_SECOND,
+  SECONDS_IN_HOUR: SECONDS_PER_HOUR,
+  SECONDS_IN_MINUTE: SECONDS_PER_MINUTE
+} as const

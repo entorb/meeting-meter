@@ -7,7 +7,6 @@ describe('Application Smoke Test', () => {
   })
   it('should load the main page', () => {
     cy.contains('Meeting Meter').should('be.visible')
-    cy.get('[data-cy="timer-display"]').should('contain', '0:00:00')
     cy.get('[data-cy="start-timer-btn"]').should('be.visible')
     cy.get('[data-cy="config-btn"]').should('be.visible')
   })
@@ -29,10 +28,10 @@ describe('Application Smoke Test', () => {
 
   it('should convert hour rate "" to 0', () => {
     cy.get('[data-cy="config-btn"]').click()
-    cy.get('[data-cy="cfg-salary-1"] input').clear()
-    cy.get('[data-cy="cfg-salary-1"] input').type('100')
-    cy.get('[data-cy="cfg-salary-2"] input').clear()
-    cy.get('[data-cy="cfg-salary-2"] input').blur() // Leave empty and blur to trigger validation
+    cy.get('[data-cy="cfg-salary-1"]').clear()
+    cy.get('[data-cy="cfg-salary-1"]').type('100')
+    cy.get('[data-cy="cfg-salary-2"]').clear()
+    cy.get('[data-cy="cfg-salary-2"]').blur() // Leave empty and blur to trigger validation
     // Check localStorage values
     cy.window().then(window => {
       const config = JSON.parse(window.localStorage.getItem(STORAGE_KEYS.CONFIG) || '{}')

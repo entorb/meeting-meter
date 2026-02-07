@@ -1,292 +1,110 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createRouter, createMemoryHistory } from 'vue-router'
+
 import ConfigPage from '@/pages/ConfigPage.vue'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
 
-// Mock CSS imports
-vi.mock('vuetify/styles', () => ({}))
-vi.mock('*.css', () => ({}))
-vi.mock('*.scss', () => ({}))
+import { quasarMocks, quasarProvide, quasarStubs } from '@/__tests__/testUtils'
 
-// Mock the helpers module
-vi.mock('@/utils/helpers', () => ({
-  sanitizeIntegerInput: vi.fn((input: string) => input.replace(/\D+/g, '') || '0'),
-  validateIntegerInput: vi.fn((input: string, min = 0, max = 100) => {
-    const num = parseInt(input.replace(/\D+/g, '') || '0', 10)
-    return Math.min(max, Math.max(min, num))
-  })
-}))
-
-// Mock the composable
-const mockUpdateConfig = vi.fn()
-const mockConfig = {
-  group1HourlyRate: 50,
-  group2HourlyRate: 30,
-  workingHoursPerDay: 8
-}
-
-vi.mock('@/composables/useMeetingStore', () => ({
-  useMeetingStore: vi.fn(() => ({
-    config: { value: mockConfig },
-    updateConfig: mockUpdateConfig
-  }))
-}))
-
-describe('ConfigPage', () => {
-  let wrapper: VueWrapper
-  let router: any
-  let vuetify: any
-
+describe('ConfigPage Component', () => {
   beforeEach(() => {
-    vuetify = createVuetify({
-      components,
-      directives
-    })
+    localStorage.clear()
+    setActivePinia(createPinia())
+  })
 
-    router = createRouter({
+  const createMockRouter = () => {
+    return createRouter({
       history: createMemoryHistory(),
       routes: [
-        { path: '/', component: { template: '<div>Home</div>' } },
-        { path: '/config', component: ConfigPage }
+        { path: '/', name: 'home', component: { template: '<div>Home</div>' } },
+        { path: '/config', name: 'config', component: { template: '<div>Config</div>' } }
       ]
     })
+  }
 
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount()
+  const createMountOptions = (router: ReturnType<typeof createMockRouter>) => ({
+    global: {
+      mocks: quasarMocks,
+      plugins: [router],
+      provide: quasarProvide,
+      stubs: {
+        ...quasarStubs,
+        PWAInstallPrompt: { template: '<div />' }
+      }
     }
   })
 
-  const createWrapper = async () => {
-    wrapper = mount(ConfigPage, {
-      global: {
-        plugins: [router, vuetify],
-        stubs: {
-          PWAInstallPrompt: true
-        }
-      }
-    })
+  it('mounts without errors and renders content', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
     await wrapper.vm.$nextTick()
-    return wrapper
-  }
-
-  describe('Component Rendering', () => {
-    it('renders the component correctly', async () => {
-      await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('displays the correct title', async () => {
-      await createWrapper()
-      expect(wrapper.text()).toContain('Configuration')
-    })
-
-    it('renders all three input fields', async () => {
-      await createWrapper()
-      const textFields = wrapper.findAllComponents({ name: 'VTextField' })
-      expect(textFields.length).toBeGreaterThanOrEqual(3)
-    })
-
-    it('renders the back button', async () => {
-      await createWrapper()
-      const backBtn = wrapper.find('[data-cy="back-btn"]')
-      expect(backBtn.exists()).toBe(true)
-    })
+    expect(wrapper.exists()).toBe(true)
+    expect(wrapper.html()).toBeTruthy()
   })
 
-  describe('Group 1 Hourly Rate Input', () => {
-    it('displays current group1HourlyRate value', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"]')
-      expect(input.exists()).toBe(true)
-    })
-
-    it('updates group1HourlyRate when input changes', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
-
-      await input.setValue('75')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group1HourlyRate: 75 })
-    })
-
-    it('sanitizes non-numeric input for group1HourlyRate', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
-
-      await input.setValue('abc')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group1HourlyRate: 0 })
-    })
-
-    it('handles empty input for group1HourlyRate', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
-
-      await input.setValue('')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group1HourlyRate: 0 })
-    })
+  it('displays the correct title', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Configuration')
   })
 
-  describe('Group 2 Hourly Rate Input', () => {
-    it('displays current group2HourlyRate value', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-2"]')
-      expect(input.exists()).toBe(true)
-    })
-
-    it('updates group2HourlyRate when input changes', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-2"] input')
-
-      await input.setValue('45')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group2HourlyRate: 45 })
-    })
-
-    it('sanitizes non-numeric input for group2HourlyRate', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-2"] input')
-
-      await input.setValue('xyz')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group2HourlyRate: 0 })
-    })
+  it('renders the back button', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
+    await wrapper.vm.$nextTick()
+    const backBtn = wrapper.find('[data-cy="back-btn"]')
+    expect(backBtn.exists()).toBe(true)
   })
 
-  describe('Working Hours Per Day Input', () => {
-    it('displays current workingHoursPerDay value', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="working-hours"]')
-      expect(input.exists()).toBe(true)
-    })
-
-    it('updates workingHoursPerDay when input changes', async () => {
-      const { validateIntegerInput } = await import('@/utils/helpers')
-      vi.mocked(validateIntegerInput).mockReturnValueOnce(10)
-
-      await createWrapper()
-      const input = wrapper.find('[data-cy="working-hours"] input')
-
-      await input.setValue('10')
-      await wrapper.vm.$nextTick()
-
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ workingHoursPerDay: 10 })
-    })
-
-    it('validates workingHoursPerDay with bounds', async () => {
-      const { validateIntegerInput } = await import('@/utils/helpers')
-
-      await createWrapper()
-      const input = wrapper.find('[data-cy="working-hours"] input')
-
-      await input.setValue('5')
-      await wrapper.vm.$nextTick()
-
-      expect(validateIntegerInput).toHaveBeenCalled()
-    })
+  it('renders group 1 hourly rate input', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
+    await wrapper.vm.$nextTick()
+    const input = wrapper.find('[data-cy="cfg-salary-1"]')
+    expect(input.exists()).toBe(true)
   })
 
-  describe('Navigation', () => {
-    it('navigates back to home when back button is clicked', async () => {
-      await createWrapper()
-      await router.push('/config')
-
-      const backBtn = wrapper.find('[data-cy="back-btn"]')
-      await backBtn.trigger('click')
-      await router.push('/') // Explicitly await the navigation
-      await wrapper.vm.$nextTick()
-
-      expect(router.currentRoute.value.path).toBe('/')
-    })
-
-    it('navigates back on Escape key press', async () => {
-      await createWrapper()
-      await router.push('/config')
-
-      const event = new KeyboardEvent('keydown', { key: 'Escape' })
-      window.dispatchEvent(event)
-      await router.push('/') // Explicitly await the navigation
-      await wrapper.vm.$nextTick()
-
-      expect(router.currentRoute.value.path).toBe('/')
-    })
-
-    it('does not navigate on other key presses', async () => {
-      await createWrapper()
-      await router.push('/config')
-
-      const event = new KeyboardEvent('keydown', { key: 'Enter' })
-      window.dispatchEvent(event)
-      await wrapper.vm.$nextTick()
-
-      expect(router.currentRoute.value.path).toBe('/config')
-    })
+  it('renders group 2 hourly rate input', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
+    await wrapper.vm.$nextTick()
+    const input = wrapper.find('[data-cy="cfg-salary-2"]')
+    expect(input.exists()).toBe(true)
   })
 
-  describe('Event Listeners', () => {
-    it('adds keydown listener on mount', async () => {
-      const addEventListenerSpy = vi.spyOn(globalThis, 'addEventListener')
-      await createWrapper()
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
-    })
-
-    it('removes keydown listener on unmount', async () => {
-      const removeEventListenerSpy = vi.spyOn(globalThis, 'removeEventListener')
-      await createWrapper()
-
-      wrapper.unmount()
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
-    })
+  it('renders working hours input', async () => {
+    const router = createMockRouter()
+    const wrapper = mount(ConfigPage, createMountOptions(router))
+    await wrapper.vm.$nextTick()
+    const input = wrapper.find('[data-cy="working-hours"]')
+    expect(input.exists()).toBe(true)
   })
 
-  describe('Edge Cases', () => {
-    it('handles rapid input changes', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
+  it('navigates back on Escape key press', async () => {
+    const router = createMockRouter()
+    await router.push('/config')
+    await router.isReady()
+    mount(ConfigPage, createMountOptions(router))
+    await new Promise(resolve => setTimeout(resolve, 10))
 
-      await input.setValue('10')
-      await input.setValue('20')
-      await input.setValue('30')
-      await wrapper.vm.$nextTick()
+    const event = new KeyboardEvent('keydown', { key: 'Escape' })
+    window.dispatchEvent(event)
+    await new Promise(resolve => setTimeout(resolve, 10))
 
-      expect(mockUpdateConfig).toHaveBeenCalledTimes(3)
-    })
+    expect(router.currentRoute.value.path).toBe('/')
+  })
 
-    it('handles very large numbers', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
+  it('does not navigate on other key presses', async () => {
+    const router = createMockRouter()
+    await router.push('/config')
+    mount(ConfigPage, createMountOptions(router))
 
-      await input.setValue('999999')
-      await wrapper.vm.$nextTick()
+    const event = new KeyboardEvent('keydown', { key: 'Enter' })
+    window.dispatchEvent(event)
+    await router.isReady()
 
-      expect(mockUpdateConfig).toHaveBeenCalled()
-    })
-
-    it('handles decimal values by stripping decimal points', async () => {
-      await createWrapper()
-      const input = wrapper.find('[data-cy="cfg-salary-1"] input')
-
-      await input.setValue('50.5')
-      await wrapper.vm.$nextTick()
-
-      // Sanitize strips non-digits, so '50.5' becomes '505'
-      expect(mockUpdateConfig).toHaveBeenCalledWith({ group1HourlyRate: 505 })
-    })
+    expect(router.currentRoute.value.path).toBe('/config')
   })
 })

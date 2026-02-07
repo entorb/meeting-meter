@@ -24,17 +24,12 @@ export default defineConfig({
       ]
     },
     environment: 'jsdom',
-    exclude: [...configDefaults.exclude, 'e2e/**', 'node_modules/'],
+    exclude: [...configDefaults.exclude, 'e2e/**', 'node_modules/', 'template/**'],
     root: fileURLToPath(new URL('./', import.meta.url)),
     setupFiles: ['./src/__tests__/setup.ts'],
     css: {
       modules: {
         classNameStrategy: 'non-scoped'
-      }
-    },
-    server: {
-      deps: {
-        inline: ['vuetify']
       }
     }
   }
