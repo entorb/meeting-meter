@@ -1,7 +1,7 @@
 <template>
-  <v-app>
-    <v-main>
+  <q-layout view="hHh lpR fFf">
+    <q-page-container>
       <router-view />
-    </v-main>
-  </v-app>
+    </q-page-container>
+  </q-layout>
 </template>

@@ -1,40 +1,40 @@
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
-import { useMeetingStore } from '@/composables/useMeetingStore'
-import { COLORS, LIMITS } from '@/utils/constants'
+import { useMeetingStore } from '@/stores/meetingStore'
+import { LIMITS } from '@/utils/constants'
 import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
-import { customIcons } from '@/utils/icons'
 
 defineOptions({
   name: 'ConfigurationPage'
 })
 
 const router = useRouter()
-const { config, updateConfig } = useMeetingStore()
+const meetingStore = useMeetingStore()
 
 const group1HourlyRateInput = computed({
-  get: () => config.value.group1HourlyRate.toString(),
+  get: () => meetingStore.config.group1HourlyRate.toString(),
   set: (value: string) => {
     const sanitized = sanitizeIntegerInput(value)
     const numValue = Number.parseInt(sanitized, 10)
-    updateConfig({ group1HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
+    meetingStore.updateConfig({ group1HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
   }
 })
 
 const group2HourlyRateInput = computed({
-  get: () => config.value.group2HourlyRate.toString(),
+  get: () => meetingStore.config.group2HourlyRate.toString(),
   set: (value: string) => {
     const sanitized = sanitizeIntegerInput(value)
     const numValue = Number.parseInt(sanitized, 10)
-    updateConfig({ group2HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
+    meetingStore.updateConfig({ group2HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
   }
 })
 
 const workingHoursPerDayInput = computed({
-  get: () => config.value.workingHoursPerDay.toString(),
+  get: () => meetingStore.config.workingHoursPerDay.toString(),
   set: (value: string) => {
     const validatedValue = validateIntegerInput(
       value,
@@ -42,7 +42,7 @@ const workingHoursPerDayInput = computed({
       LIMITS.MAX_WORKING_HOURS,
       LIMITS.MIN_WORKING_HOURS
     )
-    updateConfig({ workingHoursPerDay: validatedValue })
+    meetingStore.updateConfig({ workingHoursPerDay: validatedValue })
   }
 })
 
@@ -50,118 +50,121 @@ function navigateBack(): void {
   router.push('/')
 }
 
-function handleEscape(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    navigateBack()
+// Validation handlers
+function handleRateValidation(event: Event): void {
+  const input = event.target as HTMLInputElement
+
+  if (input.validity.badInput) {
+    input.setCustomValidity('')
   }
 }
 
-onMounted(() => {
-  globalThis.addEventListener('keydown', handleEscape)
-})
+function handleWorkingHoursValidation(event: Event): void {
+  const input = event.target as HTMLInputElement
 
-onUnmounted(() => {
-  globalThis.removeEventListener('keydown', handleEscape)
+  if (input.validity.valueMissing) {
+    input.setCustomValidity('')
+  }
+}
+
+// Keyboard navigation - Escape key to home page
+useEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    navigateBack()
+  }
 })
 </script>
 
 <template>
-  <v-app>
-    <!-- App Bar -->
-    <v-app-bar
-      :color="COLORS.PRIMARY"
-      dark
-      elevation="2"
-    >
-      <v-btn
-        icon
-        variant="text"
+  <q-page padding>
+    <!-- Header -->
+    <div class="row items-center q-mb-lg bg-primary text-white q-pa-md">
+      <q-btn
+        type="button"
+        flat
+        round
+        size="lg"
+        icon="arrow_back"
+        text-color="white"
         data-cy="back-btn"
+        aria-label="Navigate back to home page"
         @click="navigateBack"
-      >
-        <v-icon>{{ customIcons['arrow-left'] }}</v-icon>
-      </v-btn>
-      <v-toolbar-title class="text-h5 font-weight-medium">
-        <v-icon
-          left
-          class="mr-2"
-          >{{ customIcons['cog'] }}</v-icon
-        >
-        Configuration
-      </v-toolbar-title>
-    </v-app-bar>
+      />
+      <div class="col">
+        <div class="text-h4">
+          <q-icon name="settings" />
+          Configuration
+        </div>
+      </div>
+    </div>
 
     <!-- Main Content -->
-    <v-main>
-      <v-container
-        class="py-8"
-        fluid
-      >
-        <v-card
-          class="mb-6"
-          elevation="3"
-        >
-          <v-card-text class="pa-6">
-            <v-row>
-              <v-col
-                cols="12"
-                md="4"
-              >
-                <v-text-field
-                  v-model="group1HourlyRateInput"
-                  label="Hourly Rate Manager (€)"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="cfg-salary-1"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['crown']"
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="4"
-              >
-                <v-text-field
-                  v-model="group2HourlyRateInput"
-                  label="Hourly Rate Worker (€)"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="cfg-salary-2"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['hard-hat']"
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="4"
-              >
-                <v-text-field
-                  v-model="workingHoursPerDayInput"
-                  label="Daily Working Hours"
-                  type="text"
-                  inputmode="decimal"
-                  variant="outlined"
-                  density="comfortable"
-                  persistent-hint
-                  class="flex-grow-1"
-                  data-cy="working-hours"
-                  style="font-size: 1.5rem; min-width: 70px; max-width: 200px"
-                  :prepend-icon="customIcons['clock-outline']"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-        <PWAInstallPrompt />
-      </v-container>
-    </v-main>
-  </v-app>
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="row q-col-gutter-md">
+          <div class="col-12">
+            <q-input
+              v-model="group1HourlyRateInput"
+              label="Hourly Rate Senior (€)"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="1"
+              filled
+              color="primary"
+              data-cy="cfg-salary-1"
+              aria-label="Hourly rate for managers in euros"
+              @invalid="handleRateValidation"
+            >
+              <template #prepend>
+                <q-icon name="school" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12">
+            <q-input
+              v-model="group2HourlyRateInput"
+              label="Hourly Rate Junior (€)"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="1"
+              filled
+              color="primary"
+              data-cy="cfg-salary-2"
+              aria-label="Hourly rate for workers in euros"
+              @invalid="handleRateValidation"
+            >
+              <template #prepend>
+                <q-icon name="engineering" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12">
+            <q-input
+              v-model="workingHoursPerDayInput"
+              label="Daily Working Hours"
+              type="number"
+              inputmode="numeric"
+              :min="LIMITS.MIN_WORKING_HOURS"
+              :max="LIMITS.MAX_WORKING_HOURS"
+              step="0.5"
+              required
+              filled
+              color="primary"
+              data-cy="working-hours"
+              aria-label="Daily working hours"
+              @invalid="handleWorkingHoursValidation"
+            >
+              <template #prepend>
+                <q-icon name="schedule" />
+              </template>
+            </q-input>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <PWAInstallPrompt />
+  </q-page>
 </template>
