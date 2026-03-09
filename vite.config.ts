@@ -4,10 +4,10 @@ import { fileURLToPath, URL } from 'node:url'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 import Vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
-import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import VueRouter from 'vue-router/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -24,11 +24,6 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    exclude: [
-      'unplugin-vue-router/runtime',
-      'unplugin-vue-router/data-loaders',
-      'unplugin-vue-router/data-loaders/basic'
-    ],
     include: ['vue', 'vue-router', 'quasar']
   },
   plugins: [
@@ -38,7 +33,7 @@ export default defineConfig({
     quasar({}),
     vueDevTools(),
     VueRouter({
-      dts: 'src/typed-router.d.ts'
+      dts: 'src/route-map.d.ts'
     }),
     Components({
       dts: 'src/components.d.ts'
