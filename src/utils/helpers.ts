@@ -68,9 +68,9 @@ export function sanitizeIntegerInput(input: string): string {
  */
 export function validateIntegerInput(
   input: string,
-  min: number = 0,
+  min = 0,
   max: number = Number.MAX_SAFE_INTEGER,
-  defaultValue: number = 0
+  defaultValue = 0
 ): number {
   const sanitized = sanitizeIntegerInput(input)
   const numValue = Number.parseInt(sanitized, 10)
@@ -120,7 +120,8 @@ const TIME_VALIDATION = {
  */
 export function parseTimeInput(value: string): { hours: number; minutes: number } | null {
   const trimmedValue = value.trim()
-  let hours: number, minutes: number
+  let hours: number
+  let minutes: number
 
   // Support both HH:MM and HHMM formats
   if (trimmedValue.includes(':')) {
@@ -135,14 +136,11 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
   ) {
     // HHMM format (e.g., 1234 -> 12:34)
     hours = Number.parseInt(
-      trimmedValue.substring(TIME_VALIDATION.HOURS_START_INDEX, TIME_VALIDATION.HOURS_END_INDEX),
+      trimmedValue.slice(TIME_VALIDATION.HOURS_START_INDEX, TIME_VALIDATION.HOURS_END_INDEX),
       10
     )
     minutes = Number.parseInt(
-      trimmedValue.substring(
-        TIME_VALIDATION.MINUTES_START_INDEX,
-        TIME_VALIDATION.MINUTES_END_INDEX
-      ),
+      trimmedValue.slice(TIME_VALIDATION.MINUTES_START_INDEX, TIME_VALIDATION.MINUTES_END_INDEX),
       10
     )
   } else {

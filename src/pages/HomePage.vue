@@ -4,15 +4,15 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useMeetingStore } from '@/stores/meetingStore'
-import { EFFICIENCY_THRESHOLDS, TIME_CONSTANTS, LIMITS } from '@/utils/constants'
+import { EFFICIENCY_THRESHOLDS, LIMITS, TIME_CONSTANTS } from '@/utils/constants'
 import {
   formatCurrency,
   formatStartTime,
-  sanitizeIntegerInput,
-  helperStatsDataWrite,
   helperStatsDataRead,
+  helperStatsDataWrite,
+  isTimeBeforeNow,
   parseTimeInput,
-  isTimeBeforeNow
+  sanitizeIntegerInput
 } from '@/utils/helpers'
 
 defineOptions({
@@ -191,7 +191,7 @@ const alternativePurchases = computed(() => {
 })
 
 onMounted(() => {
-  fetchMeetingsMetered()
+  void fetchMeetingsMetered()
 })
 </script>
 
@@ -200,7 +200,9 @@ onMounted(() => {
     <!-- Header -->
     <div class="row items-center q-mb-lg bg-primary text-white q-pa-md">
       <div class="col-auto">
-        <div class="text-h4">Meeting Meter</div>
+        <div class="text-h4">
+          Meeting Meter
+        </div>
       </div>
       <div class="col row justify-center">
         <q-btn
@@ -392,7 +394,9 @@ onMounted(() => {
                   {{ meetingStore.calculations.peopleHours.toFixed(1) }} /
                   {{ meetingStore.calculations.peopleDays.toFixed(1) }}
                 </div>
-                <div class="text-caption">People hours / days</div>
+                <div class="text-caption">
+                  People hours / days
+                </div>
               </q-card-section>
             </q-card>
           </div>
@@ -422,8 +426,12 @@ onMounted(() => {
                   <div class="text-h4">
                     {{ meetingStore.calculations.totalParticipants }}
                   </div>
-                  <div class="text-caption">Participants</div>
-                  <div class="text-caption q-mt-xs">(Click to configure costs)</div>
+                  <div class="text-caption">
+                    Participants
+                  </div>
+                  <div class="text-caption q-mt-xs">
+                    (Click to configure costs)
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
@@ -506,32 +514,27 @@ onMounted(() => {
           href="https://entorb.net/contact.php?origin=MeetingMeter"
           target="_blank"
           rel="noopener noreferrer"
-          >by Torben</a
-        >
+        >by Torben</a>
         <a
           href="https://entorb.net"
           target="_blank"
           rel="noopener noreferrer"
-          >Home</a
-        >
+        >Home</a>
         <a
           href="https://entorb.net/impressum.php"
           target="_blank"
           rel="noopener noreferrer"
-          >Disclaimer</a
-        >
+        >Disclaimer</a>
         <a
           href="https://github.com/entorb/meeting-meter"
           target="_blank"
           rel="noopener noreferrer"
-          >GitHub</a
-        >
+        >GitHub</a>
         <a
           href="https://www.linkedin.com/posts/menke_meeting-meter-app-mma-activity-7381266281557204993-_y1v"
           target="_blank"
           rel="noopener noreferrer"
-          >LinkedIn Post</a
-        >
+        >LinkedIn Post</a>
       </div>
     </div>
   </q-page>

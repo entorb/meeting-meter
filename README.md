@@ -38,6 +38,6 @@ pnpm up
 - Vitest
 - Cypress
 - ESLint
-- Prettier
+- Biome
 - CSpell
 - Matomo (self-hosted)

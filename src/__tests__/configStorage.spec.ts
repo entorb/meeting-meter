@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadConfig, saveConfig } from '@/services/configStorage'
-import * as localStorageHelper from '@/utils/localStorageHelper'
-import { STORAGE_KEYS } from '@/utils/constants'
 import type { Config } from '@/types'
+import { STORAGE_KEYS } from '@/utils/constants'
+import * as localStorageHelper from '@/utils/localStorageHelper'
 
 // Mock dependencies
 vi.mock('@/utils/localStorageHelper', () => ({
@@ -131,7 +131,7 @@ describe('configStorage', () => {
 
     it('returns null when any field is NaN', () => {
       const invalidConfig = {
-        group1HourlyRate: NaN,
+        group1HourlyRate: Number.NaN,
         group2HourlyRate: 45,
         workingHoursPerDay: 8
       }
