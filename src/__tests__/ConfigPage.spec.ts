@@ -1,11 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createRouter, createMemoryHistory } from 'vue-router'
-
-import ConfigPage from '@/pages/ConfigPage.vue'
-
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { quasarMocks, quasarProvide, quasarStubs } from '@/__tests__/testUtils'
+import ConfigPage from '@/pages/ConfigPage.vue'
 
 describe('ConfigPage Component', () => {
   beforeEach(() => {
@@ -90,7 +88,7 @@ describe('ConfigPage Component', () => {
     await new Promise(resolve => setTimeout(resolve, 10))
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' })
-    window.dispatchEvent(event)
+    globalThis.dispatchEvent(event)
     await new Promise(resolve => setTimeout(resolve, 10))
 
     expect(router.currentRoute.value.path).toBe('/')
@@ -102,7 +100,7 @@ describe('ConfigPage Component', () => {
     mount(ConfigPage, createMountOptions(router))
 
     const event = new KeyboardEvent('keydown', { key: 'Enter' })
-    window.dispatchEvent(event)
+    globalThis.dispatchEvent(event)
     await router.isReady()
 
     expect(router.currentRoute.value.path).toBe('/config')
