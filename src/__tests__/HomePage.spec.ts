@@ -1,11 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createRouter, createMemoryHistory } from 'vue-router'
-
-import HomePage from '@/pages/HomePage.vue'
-
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { quasarMocks, quasarProvide, quasarStubs } from '@/__tests__/testUtils'
+import HomePage from '@/pages/HomePage.vue'
 
 describe('HomePage Component', () => {
   beforeEach(() => {
@@ -103,7 +101,7 @@ describe('HomePage Component', () => {
     await new Promise(resolve => setTimeout(resolve, 10))
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' })
-    window.dispatchEvent(event)
+    globalThis.dispatchEvent(event)
     await new Promise(resolve => setTimeout(resolve, 10))
 
     expect(router.currentRoute.value.path).toBe('/config/')
@@ -115,7 +113,7 @@ describe('HomePage Component', () => {
     mount(HomePage, createMountOptions(router))
 
     const event = new KeyboardEvent('keydown', { key: 'Enter' })
-    window.dispatchEvent(event)
+    globalThis.dispatchEvent(event)
     await router.isReady()
 
     expect(router.currentRoute.value.path).toBe('/')
