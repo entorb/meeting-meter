@@ -10,6 +10,7 @@ set -e
 rm -rf node_modules
 
 pnpm up
+pnpm exec biome migrate --write
 pnpm run check
 echo "start 'pnpm run dev' and press Enter"
 read ok

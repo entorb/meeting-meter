@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -59,7 +59,7 @@ const installPWA = async () => {
   }
 
   // Show the install prompt
-  deferredPrompt.prompt()
+  await deferredPrompt.prompt()
 
   // Wait for the user to respond to the prompt
   await deferredPrompt.userChoice
@@ -83,7 +83,9 @@ const dismissPrompt = () => {
   >
     <q-card>
       <q-card-section>
-        <div class="text-h6">Install App</div>
+        <div class="text-h6">
+          Install App
+        </div>
       </q-card-section>
 
       <q-card-section>

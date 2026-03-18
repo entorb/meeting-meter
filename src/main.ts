@@ -5,7 +5,7 @@
  */
 
 import { createPinia } from 'pinia'
-import { Quasar, Notify, Dialog, Loading, Dark } from 'quasar'
+import { Dark, Dialog, Loading, Notify, Quasar } from 'quasar'
 import { createApp } from 'vue'
 
 import App from './App.vue'

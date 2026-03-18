@@ -1,16 +1,16 @@
-﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   formatCurrency,
-  toNumber,
-  parseTimeInput,
-  isTimeBeforeNow,
-  validateIntegerInput,
-  sanitizeIntegerInput,
+  formatDuration,
   formatStartTime,
   getConfigFromForm,
-  formatDuration,
   helperStatsDataRead,
-  helperStatsDataWrite
+  helperStatsDataWrite,
+  isTimeBeforeNow,
+  parseTimeInput,
+  sanitizeIntegerInput,
+  toNumber,
+  validateIntegerInput
 } from '@/utils/helpers'
 
 describe('Helper Functions', () => {
@@ -24,7 +24,7 @@ describe('Helper Functions', () => {
     })
 
     it('returns accesscounts on successful fetch', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ accesscounts: 42 })
       })
@@ -35,7 +35,7 @@ describe('Helper Functions', () => {
     })
 
     it('returns 0 when response is not ok', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false
       })
 
@@ -44,7 +44,7 @@ describe('Helper Functions', () => {
     })
 
     it('returns 0 when accesscounts is not a number', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ accesscounts: 'invalid' })
       })
@@ -54,7 +54,7 @@ describe('Helper Functions', () => {
     })
 
     it('returns 0 when accesscounts is negative', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ accesscounts: -5 })
       })
@@ -64,7 +64,7 @@ describe('Helper Functions', () => {
     })
 
     it('returns 0 when accesscounts is missing', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({})
       })
@@ -74,14 +74,14 @@ describe('Helper Functions', () => {
     })
 
     it('returns 0 on fetch error', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
       const result = await helperStatsDataRead()
       expect(result).toBe(0)
     })
 
     it('returns 0 when accesscounts is 0', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ accesscounts: 0 })
       })
@@ -101,20 +101,20 @@ describe('Helper Functions', () => {
     })
 
     it('calls fetch with correct URL', async () => {
-      global.fetch = vi.fn().mockResolvedValue({})
+      globalThis.fetch = vi.fn().mockResolvedValue({})
 
       await helperStatsDataWrite()
       expect(fetch).toHaveBeenCalledWith(expect.stringContaining('action=write'))
     })
 
     it('silently handles fetch errors', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
       await expect(helperStatsDataWrite()).resolves.toBeUndefined()
     })
 
     it('completes successfully on successful fetch', async () => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true })
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true })
 
       await expect(helperStatsDataWrite()).resolves.toBeUndefined()
     })
@@ -124,25 +124,25 @@ describe('Helper Functions', () => {
     it('formats milliseconds into HH:MM:SS', () => {
       expect(formatDuration(0)).toBe('0:00:00')
       expect(formatDuration(1000)).toBe('0:00:01') // 1 second
-      expect(formatDuration(60000)).toBe('0:01:00') // 1 minute
-      expect(formatDuration(3600000)).toBe('1:00:00') // 1 hour
+      expect(formatDuration(60_000)).toBe('0:01:00') // 1 minute
+      expect(formatDuration(3_600_000)).toBe('1:00:00') // 1 hour
     })
 
     it('handles complex durations', () => {
       // 1 hour, 23 minutes, 45 seconds
-      const ms = 1 * 3600000 + 23 * 60000 + 45 * 1000
+      const ms = 1 * 3_600_000 + 23 * 60_000 + 45 * 1000
       expect(formatDuration(ms)).toBe('1:23:45')
     })
 
     it('pads numbers correctly', () => {
       // 1 hour, 2 minutes, 3 seconds
-      const ms = 1 * 3600000 + 2 * 60000 + 3 * 1000
+      const ms = 1 * 3_600_000 + 2 * 60_000 + 3 * 1000
       expect(formatDuration(ms)).toBe('1:02:03')
     })
 
     it('handles multi-hour durations', () => {
       // 10 hours, 5 minutes, 9 seconds
-      const ms = 10 * 3600000 + 5 * 60000 + 9 * 1000
+      const ms = 10 * 3_600_000 + 5 * 60_000 + 9 * 1000
       expect(formatDuration(ms)).toBe('10:05:09')
     })
   })
@@ -166,7 +166,7 @@ describe('Helper Functions', () => {
     })
 
     it('handles large numbers', () => {
-      expect(formatCurrency(999999.99)).toBe('1000000 €')
+      expect(formatCurrency(999_999.99)).toBe('1000000 €')
     })
   })
 
