@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   isLocalStorageAvailable,
   safeGetItem,
-  safeSetItem,
-  safeRemoveItem
+  safeRemoveItem,
+  safeSetItem
 } from '@/utils/localStorageHelper'
 
 describe('localStorageHelper', () => {

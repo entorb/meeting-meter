@@ -41,6 +41,7 @@ Cypress.Commands.add('startTimerAndWait', () => {
 })
 
 declare global {
+  // biome-ignore lint/style/noNamespace: Cypress requires namespace augmentation for custom commands
   namespace Cypress {
     interface Chainable {
       configureRates(group1Rate: number, group2Rate: number, workingHours?: number): Chainable<void>

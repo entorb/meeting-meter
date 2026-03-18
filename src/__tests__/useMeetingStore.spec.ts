@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
-import { useMeetingStore } from '@/stores/meetingStore'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import * as configStorage from '@/services/configStorage'
-import * as localStorageHelper from '@/utils/localStorageHelper'
-import * as helpers from '@/utils/helpers'
+import { useMeetingStore } from '@/stores/meetingStore'
 import { STORAGE_KEYS } from '@/utils/constants'
+import * as helpers from '@/utils/helpers'
+import * as localStorageHelper from '@/utils/localStorageHelper'
 
 // Mock dependencies
 vi.mock('@/services/configStorage', () => ({
@@ -29,8 +29,8 @@ vi.mock('@/utils/helpers', () => ({
   parseTimeInput: vi.fn((timeString: string) => {
     const match = timeString.match(/^(\d{1,2}):?(\d{2})$/)
     if (!match) return null
-    const hours = parseInt(match[1] || '0', 10)
-    const minutes = parseInt(match[2] || '0', 10)
+    const hours = Number.parseInt(match[1] || '0', 10)
+    const minutes = Number.parseInt(match[2] || '0', 10)
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null
     return { hours, minutes }
   }),
@@ -281,7 +281,7 @@ describe('useMeetingStore', () => {
     })
 
     it('clears interval on stop', () => {
-      const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
+      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
       const store = useMeetingStore()
 
       store.startTimer()
@@ -291,7 +291,7 @@ describe('useMeetingStore', () => {
     })
 
     it('clears interval on pause', () => {
-      const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
+      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
       const store = useMeetingStore()
 
       store.startTimer()
@@ -416,7 +416,7 @@ describe('useMeetingStore', () => {
 
     it('calculates people hours correctly', () => {
       const store = useMeetingStore()
-      store.meetingData.duration = 3600000 // 1 hour in ms
+      store.meetingData.duration = 3_600_000 // 1 hour in ms
       store.meetingData.group1Participants = 5
       store.meetingData.group2Participants = 3
 
@@ -426,7 +426,7 @@ describe('useMeetingStore', () => {
     it('calculates people days correctly', () => {
       const store = useMeetingStore()
       store.config.workingHoursPerDay = 8
-      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.duration = 3_600_000 // 1 hour
       store.meetingData.group1Participants = 8
       store.meetingData.group2Participants = 0
 
@@ -437,7 +437,7 @@ describe('useMeetingStore', () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 50
       store.config.group2HourlyRate = 30
-      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.duration = 3_600_000 // 1 hour
       store.meetingData.group1Participants = 2
       store.meetingData.group2Participants = 3
 
@@ -449,7 +449,7 @@ describe('useMeetingStore', () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 100
       store.config.group2HourlyRate = 50
-      store.meetingData.duration = 1800000 // 0.5 hours
+      store.meetingData.duration = 1_800_000 // 0.5 hours
       store.meetingData.group1Participants = 2
       store.meetingData.group2Participants = 4
 
@@ -468,7 +468,7 @@ describe('useMeetingStore', () => {
 
     it('handles zero participants', () => {
       const store = useMeetingStore()
-      store.meetingData.duration = 3600000
+      store.meetingData.duration = 3_600_000
       store.meetingData.group1Participants = 0
       store.meetingData.group2Participants = 0
 
@@ -480,7 +480,7 @@ describe('useMeetingStore', () => {
     it('calculates correctly with only group1 participants', () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 75
-      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.duration = 3_600_000 // 1 hour
       store.meetingData.group1Participants = 4
       store.meetingData.group2Participants = 0
 
@@ -490,7 +490,7 @@ describe('useMeetingStore', () => {
     it('calculates correctly with only group2 participants', () => {
       const store = useMeetingStore()
       store.config.group2HourlyRate = 45
-      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.duration = 3_600_000 // 1 hour
       store.meetingData.group1Participants = 0
       store.meetingData.group2Participants = 6
 
@@ -527,7 +527,7 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"isRunning":true')
     })
 
-    it('handles localStorage errors gracefully when saving', async () => {
+    it('handles localStorage errors gracefully when saving', () => {
       vi.mocked(localStorageHelper.safeSetItem).mockImplementation(() => {
         throw new Error('Storage full')
       })
@@ -591,7 +591,7 @@ describe('useMeetingStore', () => {
 
     it('handles very long meeting durations', () => {
       const store = useMeetingStore()
-      store.meetingData.duration = 36000000 // 10 hours
+      store.meetingData.duration = 36_000_000 // 10 hours
 
       expect(store.calculations.durationHours).toBe(10)
     })
@@ -599,7 +599,7 @@ describe('useMeetingStore', () => {
     it('handles fractional hourly rates', () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 50.5
-      store.meetingData.duration = 3600000
+      store.meetingData.duration = 3_600_000
       store.meetingData.group1Participants = 2
 
       expect(store.calculations.totalCost).toBe(101)
@@ -608,7 +608,7 @@ describe('useMeetingStore', () => {
     it('handles non-standard working hours per day', () => {
       const store = useMeetingStore()
       store.config.workingHoursPerDay = 6
-      store.meetingData.duration = 3600000 // 1 hour
+      store.meetingData.duration = 3_600_000 // 1 hour
       store.meetingData.group1Participants = 6
 
       expect(store.calculations.peopleDays).toBe(1)
@@ -616,7 +616,7 @@ describe('useMeetingStore', () => {
 
     it('prevents negative duration', () => {
       const store = useMeetingStore()
-      const futureTime = new Date(Date.now() + 10000)
+      const futureTime = new Date(Date.now() + 10_000)
       store.meetingData.startTime = futureTime
       store.meetingData.isRunning = true
 
@@ -646,9 +646,9 @@ describe('useMeetingStore', () => {
     it('formatDuration works correctly', () => {
       const store = useMeetingStore()
 
-      const result = store.formatDuration(3665000) // 1h 1m 5s
+      const result = store.formatDuration(3_665_000) // 1h 1m 5s
 
-      expect(helpers.formatDuration).toHaveBeenCalledWith(3665000)
+      expect(helpers.formatDuration).toHaveBeenCalledWith(3_665_000)
       expect(result).toBe('1:01:05')
     })
   })

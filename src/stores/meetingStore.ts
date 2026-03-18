@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref, watch, computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { loadConfig, saveConfig } from '@/services/configStorage'
-import type { Config, MeetingData, Calculations } from '@/types'
-import { STORAGE_KEYS, DEFAULTS, TIMER_SETTINGS, TIME_CONSTANTS } from '@/utils/constants'
-import { formatDuration, parseTimeInput, isTimeBeforeNow } from '@/utils/helpers'
+import type { Calculations, Config, MeetingData } from '@/types'
+import { DEFAULTS, STORAGE_KEYS, TIME_CONSTANTS, TIMER_SETTINGS } from '@/utils/constants'
+import { formatDuration, isTimeBeforeNow, parseTimeInput } from '@/utils/helpers'
 import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
 
 // Type for serialized meeting data in localStorage
@@ -50,6 +50,16 @@ export const useMeetingStore = defineStore('meeting', () => {
     }
   }
 
+  function clampParticipants(value: number | undefined): number {
+    return Math.max(0, value || 0)
+  }
+
+  function isSessionExpired(startTime: Date): boolean {
+    const msInExpiryPeriod =
+      TIMER_SETTINGS.SESSION_EXPIRY_HOURS * TIME_CONSTANTS.MILLISECONDS_IN_HOUR
+    return Date.now() - startTime.getTime() > msInExpiryPeriod
+  }
+
   function loadMeetingData(): MeetingData | null {
     try {
       const saved = safeGetItem(STORAGE_KEYS.MEETING)
@@ -63,25 +73,18 @@ export const useMeetingStore = defineStore('meeting', () => {
         return null
       }
 
-      // If startTime exists, check if it's older than SESSION_EXPIRY_HOURS. If so, clear it and persist the cleared state.
-      const MS_IN_EXPIRY_PERIOD =
-        TIMER_SETTINGS.SESSION_EXPIRY_HOURS * TIME_CONSTANTS.MILLISECONDS_IN_HOUR
-      if (startTime) {
-        const elapsed = Date.now() - startTime.getTime()
-        if (elapsed > MS_IN_EXPIRY_PERIOD) {
-          // Clear the in-memory values
-          startTime = null
-          parsed.isRunning = false
+      // Clear expired sessions
+      if (startTime && isSessionExpired(startTime)) {
+        startTime = null
+        parsed.isRunning = false
 
-          // Persist the cleared timer state back to localStorage
-          saveMeetingData({
-            startTime: null,
-            duration: 0,
-            isRunning: false,
-            group1Participants: Math.max(0, parsed.group1Participants || 0),
-            group2Participants: Math.max(0, parsed.group2Participants || 0)
-          })
-        }
+        saveMeetingData({
+          startTime: null,
+          duration: 0,
+          isRunning: false,
+          group1Participants: clampParticipants(parsed.group1Participants),
+          group2Participants: clampParticipants(parsed.group2Participants)
+        })
       }
 
       // Recalculate duration from start time if timer is running
@@ -93,9 +96,9 @@ export const useMeetingStore = defineStore('meeting', () => {
       return {
         startTime,
         duration,
-        isRunning: parsed.isRunning || false,
-        group1Participants: Math.max(0, parsed.group1Participants || 0),
-        group2Participants: Math.max(0, parsed.group2Participants || 0)
+        isRunning: parsed.isRunning,
+        group1Participants: clampParticipants(parsed.group1Participants),
+        group2Participants: clampParticipants(parsed.group2Participants)
       }
     } catch {
       // Return null on any error - app will start fresh
