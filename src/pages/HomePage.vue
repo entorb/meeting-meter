@@ -19,6 +19,8 @@ defineOptions({
   name: 'HomePage'
 })
 
+const PROD_HOSTNAME = 'entorb.net'
+
 const router = useRouter()
 const isEditingStartTime = ref(false)
 const editStartTimeValue = ref('')
@@ -34,6 +36,12 @@ function startEditingStartTime() {
 
 async function startTimerWithStats() {
   meetingStore.startTimer()
+  // Skip stats writes outside production to prevent dev/Cypress from spoiling stats
+  try {
+    if (globalThis.location.hostname !== PROD_HOSTNAME) return
+  } catch {
+    return
+  }
   await helperStatsDataWrite()
 }
 

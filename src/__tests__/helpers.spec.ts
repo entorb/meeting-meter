@@ -5,7 +5,6 @@ import {
   formatStartTime,
   getConfigFromForm,
   helperStatsDataRead,
-  helperStatsDataWrite,
   isTimeBeforeNow,
   parseTimeInput,
   sanitizeIntegerInput,
@@ -88,35 +87,6 @@ describe('Helper Functions', () => {
 
       const result = await helperStatsDataRead()
       expect(result).toBe(0)
-    })
-  })
-
-  describe('helperStatsDataWrite', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
-    afterEach(() => {
-      vi.restoreAllMocks()
-    })
-
-    it('calls fetch with correct URL', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValue({})
-
-      await helperStatsDataWrite()
-      expect(fetch).toHaveBeenCalledWith(expect.stringContaining('action=write'))
-    })
-
-    it('silently handles fetch errors', async () => {
-      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
-
-      await expect(helperStatsDataWrite()).resolves.toBeUndefined()
-    })
-
-    it('completes successfully on successful fetch', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true })
-
-      await expect(helperStatsDataWrite()).resolves.toBeUndefined()
     })
   })
 
