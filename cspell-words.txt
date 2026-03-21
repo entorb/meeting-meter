@@ -1,6 +1,7 @@
 accesscounts
 appinstalled
 beforeinstallprompt
+entorb
 firstaccess
 iconsets
 infobar
