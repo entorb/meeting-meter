@@ -1,0 +1,78 @@
+name: Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set timezone to DE
+        run: sudo timedatectl set-timezone Europe/Berlin
+
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # for SonarQube
+
+      - uses: gitleaks/gitleaks-action@v2
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: latest
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run type check
+        run: pnpm run type-check
+
+      # - name: Run formatter
+      #   run: pnpm run format
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      - name: Run Biome
+        run: biome ci .
+
+      - name: Run linter
+        run: pnpm run lint
+
+      - name: Run spell checker
+        run: pnpm run spell
+
+      - name: Run unit tests
+        run: pnpm run test-cov
+
+      - name: Run Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          # build: pnpx vite build
+          # start: pnpx vite preview
+          start: pnpm run dev
+
+      # manual run SonarQube to obtain coverage report
+      # requires https://sonarcloud.io/project/analysis_method?id=entorb_meeting-meter -> False
+      - uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

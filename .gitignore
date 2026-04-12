@@ -1,0 +1,12 @@
+coverage/
+cypress/screenshots/
+dist/
+example/
+node_modules/
+
+.cspellcache
+.DS_Store
+.eslintcache
+CLAUDE.md
+GEMINI.md
+sonar-report.xml
