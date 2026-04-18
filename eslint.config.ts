@@ -2,7 +2,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import pluginCypress from 'eslint-plugin-cypress'
 import pluginImport from 'eslint-plugin-import'
-import sonarjs from 'eslint-plugin-sonarjs'
+import sonarjs, { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 import pluginVitest from 'eslint-plugin-vitest'
 import pluginVue from 'eslint-plugin-vue'
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility'
@@ -58,7 +58,7 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      ...(sonarjs.configs.recommended.rules ?? {}),
+      ...(sonarjsConfigs.recommended.rules ?? {}),
       // Type safety
       // '@typescript-eslint/consistent-type-imports' — covered by Biome useImportType
       '@typescript-eslint/explicit-function-return-type': 'off',
