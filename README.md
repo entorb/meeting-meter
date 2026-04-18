@@ -10,7 +10,7 @@ Deployed to <https://entorb.net/meeting-meter/>
 ```sh
 # install packages
 pnpm install
-# format, lint, spell-checker, type-check, vitest
+# format, lint, spell-checker, types, vitest
 pnpm run check
 # run locally in dev mode
 pnpm run dev
