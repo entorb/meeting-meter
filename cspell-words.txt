@@ -12,6 +12,7 @@ oxfmt
 oxlint
 roboto
 SonarCloud
+sonarjs
 SonarQube
 Torben
 unplugin
