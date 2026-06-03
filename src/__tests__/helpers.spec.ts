@@ -213,55 +213,42 @@ describe('Helper Functions', () => {
   })
 
   describe('isTimeBeforeNow', () => {
-    it('correctly identifies past times', () => {
-      const now = new Date()
-      const pastHour = now.getHours() - 1
-      const currentMinute = now.getMinutes()
+    // Fix the reference point so all assertions are unconditional.
+    // We mock "now" to 10:30, well away from midnight and end-of-day edges.
+    const MOCK_HOUR = 10
+    const MOCK_MINUTE = 30
 
-      if (pastHour >= 0) {
-        expect(isTimeBeforeNow(pastHour, currentMinute)).toBe(true)
-      }
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(2024, 0, 1, MOCK_HOUR, MOCK_MINUTE, 0))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('correctly identifies past times', () => {
+      expect(isTimeBeforeNow(MOCK_HOUR - 1, MOCK_MINUTE)).toBe(true)
     })
 
     it('correctly identifies future times', () => {
-      const now = new Date()
-      const futureHour = (now.getHours() + 1) % 24
-      const currentMinute = now.getMinutes()
-
-      // Only test if we're not crossing midnight
-      if (futureHour > now.getHours()) {
-        expect(isTimeBeforeNow(futureHour, currentMinute)).toBe(false)
-      }
+      expect(isTimeBeforeNow(MOCK_HOUR + 1, MOCK_MINUTE)).toBe(false)
     })
 
     it('handles edge cases', () => {
-      // Test with a time that's definitely in the past - early morning hours
-      const now = new Date()
-      const currentHour = now.getHours()
+      // Early morning is clearly before 10:30
+      expect(isTimeBeforeNow(6, 0)).toBe(true)
 
-      // Test a time that's clearly before now (only if it's after 6 AM)
-      if (currentHour > 6) {
-        expect(isTimeBeforeNow(6, 0)).toBe(true) // 6 AM is before current time
-      }
-
-      // Test midnight - this should always be considered "yesterday" so before now
-      expect(isTimeBeforeNow(0, 0)).toBe(true) // midnight is before current time
+      // Midnight is before 10:30
+      expect(isTimeBeforeNow(0, 0)).toBe(true)
     })
 
     it('handles boundary times', () => {
-      const now = new Date()
-      const currentHour = now.getHours()
-      const currentMinute = now.getMinutes()
+      // Same hour, one minute ahead → future
+      expect(isTimeBeforeNow(MOCK_HOUR, MOCK_MINUTE + 1)).toBe(false)
 
-      // Test same hour, future minute
-      if (currentMinute < 59) {
-        expect(isTimeBeforeNow(currentHour, currentMinute + 1)).toBe(false)
-      }
-
-      // Test same hour, past minute
-      if (currentMinute > 0) {
-        expect(isTimeBeforeNow(currentHour, currentMinute - 1)).toBe(true)
-      }
+      // Same hour, one minute behind → past
+      expect(isTimeBeforeNow(MOCK_HOUR, MOCK_MINUTE - 1)).toBe(true)
     })
   })
 
