@@ -64,6 +64,9 @@ jobs:
       - name: Run unit tests
         run: pnpm run test-cov
 
+      - name: Run dead code
+        run: pnpm knip
+
       - name: Run Cypress
         uses: cypress-io/github-action@v6
         with:
