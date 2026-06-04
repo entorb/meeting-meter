@@ -1,20 +1,3 @@
-import { config } from '@vue/test-utils'
-import { Quasar } from 'quasar'
-
-// Configure Quasar for tests
-export function installQuasarPlugin() {
-  config.global.plugins.unshift([
-    Quasar,
-    {
-      // Provide minimal config needed for SSR/testing
-      config: {},
-      components: {},
-      directives: {},
-      plugins: {}
-    }
-  ])
-}
-
 // Stub Quasar components for faster tests
 const DIV_SLOT_TEMPLATE = '<div><slot /></div>'
 const SPAN_SLOT_TEMPLATE = '<span><slot /></span>'
@@ -50,13 +33,6 @@ export const quasarStubs = {
   QChip: { template: SPAN_SLOT_TEMPLATE },
   QTooltip: { template: DIV_SLOT_TEMPLATE },
   QAvatar: { template: DIV_SLOT_TEMPLATE }
-}
-
-// Mock Quasar directives
-export const quasarDirectives = {
-  ripple: () => ({
-    // Stub ripple directive
-  })
 }
 
 // Mock Quasar globals for components that use $q

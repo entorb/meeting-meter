@@ -7,14 +7,6 @@ export const STORAGE_KEYS = {
 // name to be used in web-stats-json.php
 export const STATS_DB_COL = 'meeting-meter'
 
-// UI Colors - Using Quasar default theme colors
-export const COLORS = {
-  PRIMARY: '#1976d2', // Quasar default primary (blue)
-  SUCCESS: '#21ba45', // Quasar default positive (green)
-  WARNING: '#f2c037', // Quasar default warning (yellow)
-  ERROR: '#c10015' // Quasar default negative (red)
-} as const
-
 // Validation limits
 export const LIMITS = {
   MAX_WORKING_HOURS: 12,
@@ -45,10 +37,10 @@ export const TIMER_SETTINGS = {
 } as const
 
 // Time conversion constants (using numeric separators for readability)
-export const MS_PER_SECOND = 1000
-export const MS_PER_HOUR = 3_600_000
-export const SECONDS_PER_MINUTE = 60
-export const SECONDS_PER_HOUR = 3600
+const MS_PER_SECOND = 1000
+const MS_PER_HOUR = 3_600_000
+const SECONDS_PER_MINUTE = 60
+const SECONDS_PER_HOUR = 3600
 
 // Legacy exports for backward compatibility
 export const TIME_CONSTANTS = {
