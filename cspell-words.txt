@@ -5,6 +5,7 @@ entorb
 firstaccess
 iconsets
 infobar
+lintignore
 Matomo
 Menke
 navigatable
