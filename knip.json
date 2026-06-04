@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "tags": ["-lintignore"],
+  "entry": ["scripts/*.sh"],
+  "project": ["src/**/*.ts", "src/**/*.vue"],
+  "ignore": ["src/components.d.ts", "src/route-map.d.ts"]
+}
