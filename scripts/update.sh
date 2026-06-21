@@ -6,13 +6,24 @@ cd $(dirname $0)/..
 # exit upon error
 set -e
 
-# remove old node_modules
-rm -rf node_modules
+echo === delete old node_modules and lock ===
+rm -rf node_modules pnpm-lock.yaml
 
-pnpm up
+echo === update packages ===
+pnpm up -L
 pnpm exec biome migrate --write
+
+# fit audit findings
+if ! pnpm audit; then
+  echo === fix audit findings ===
+  pnpm audit --fix update
+  pnpm audit --fix override
+fi
+
+echo === check ===
 pnpm run check
 
+echo === Cypress ===
 # start dev server in background, bypassing pnpm wrapper to remove warning upon killing process
 # pnpm run dev
 ./node_modules/.bin/vite > /dev/null 2>&1 &
@@ -32,5 +43,15 @@ EXIT_CODE=${EXIT_CODE:-0}
 kill $DEV_PID
 wait $DEV_PID 2>/dev/null || true
 
-echo "DONE"
+if [ -n "$(git status --porcelain)" ]; then
+  echo === git push ===
+  git add pnpm-lock.yaml
+  git diff --staged --quiet -- pnpm-lock.yaml || git commit -m "Update Lock"
+
+  git add package.json pnpm-workspace.yaml biome.json
+  git commit -m "package update and pnpm audit findings"
+  git push
+fi
+
+echo "update DONE, not yet deployed"
 exit $EXIT_CODE
