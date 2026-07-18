@@ -5,7 +5,7 @@ describe('Detailed Tests', () => {
   })
 
   describe('Timer Operations', () => {
-    it('should start and stop timer', () => {
+    it('should start, pause, resume, and stop timer', () => {
       // Start timer
       cy.get('[data-cy="start-timer-btn"]').click()
       cy.get('[data-cy="pause-timer-btn"]').should('be.visible')
@@ -14,8 +14,15 @@ describe('Detailed Tests', () => {
       // Pause timer
       cy.get('[data-cy="pause-timer-btn"]').click()
       cy.get('[data-cy="stop-timer-btn"]').should('be.visible')
+      cy.get('[data-cy="resume-timer-btn"]').should('be.visible')
 
-      // Stop timer
+      // Resume timer
+      cy.get('[data-cy="resume-timer-btn"]').click()
+      cy.get('[data-cy="pause-timer-btn"]').should('be.visible')
+      cy.get('[data-cy="stop-timer-btn"]').should('not.exist')
+
+      // Pause again, then stop
+      cy.get('[data-cy="pause-timer-btn"]').click()
       cy.get('[data-cy="stop-timer-btn"]').click()
       cy.get('[data-cy="start-timer-btn"]').should('be.visible')
     })

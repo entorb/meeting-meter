@@ -36,16 +36,11 @@ export const TIMER_SETTINGS = {
   SESSION_EXPIRY_HOURS: 24
 } as const
 
-// Time conversion constants (using numeric separators for readability)
-const MS_PER_SECOND = 1000
-const MS_PER_HOUR = 3_600_000
-const SECONDS_PER_MINUTE = 60
-const SECONDS_PER_HOUR = 3600
-
 // Legacy exports for backward compatibility
 export const TIME_CONSTANTS = {
-  MILLISECONDS_IN_HOUR: MS_PER_HOUR,
-  MILLISECONDS_IN_SECOND: MS_PER_SECOND,
-  SECONDS_IN_HOUR: SECONDS_PER_HOUR,
-  SECONDS_IN_MINUTE: SECONDS_PER_MINUTE
+  SECONDS_IN_MINUTE: 60,
+  SECONDS_IN_HOUR: 3600,
+  MILLISECONDS_IN_SECOND: 1000,
+  MILLISECONDS_IN_MINUTE: 60_000,
+  MILLISECONDS_IN_HOUR: 3_600_000
 } as const
