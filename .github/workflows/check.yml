@@ -68,7 +68,7 @@ jobs:
         run: pnpm knip
 
       - name: Run Cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           # build: pnpx vite build
           # start: pnpx vite preview
