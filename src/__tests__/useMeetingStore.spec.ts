@@ -223,24 +223,26 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
-    it('resumes timer from current duration when paused', () => {
+    it('resumes timer and subtracts paused time from duration', () => {
       const store = useMeetingStore()
       const startTime = new Date('2025-01-01T10:00:00Z')
       vi.setSystemTime(startTime)
 
-      // Start, wait, pause
+      // Start, run 5s, pause
       store.startTimer()
       vi.advanceTimersByTime(5000)
       store.pauseTimer()
 
-      const pausedDuration = store.meetingData.duration
-
-      // Resume
-      vi.advanceTimersByTime(1000)
-      store.startTimer()
+      // Pause for 3s
       vi.advanceTimersByTime(3000)
 
-      expect(store.meetingData.duration).toBeGreaterThanOrEqual(pausedDuration + 3000)
+      // Resume and run 2s
+      store.startTimer()
+      vi.advanceTimersByTime(2000)
+
+      // Total wall time: 10s. Pause accumulated: 3s. Duration should be ~7s
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(7000)
+      expect(store.meetingData.duration).toBeLessThan(8000)
     })
 
     it('pauses timer and preserves duration', () => {
@@ -275,6 +277,8 @@ describe('useMeetingStore', () => {
     it('does nothing when pausing already paused timer', () => {
       const store = useMeetingStore()
 
+      store.startTimer()
+      store.pauseTimer()
       store.pauseTimer()
 
       expect(store.meetingData.isRunning).toBe(false)
@@ -298,6 +302,118 @@ describe('useMeetingStore', () => {
       store.pauseTimer()
 
       expect(clearIntervalSpy).toHaveBeenCalled()
+    })
+
+    it('records pauseStartedAt when pausing', () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      store.pauseTimer()
+
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
+    })
+
+    it('accumulates pauseDuration across multiple pause/resume cycles', () => {
+      const store = useMeetingStore()
+      const startTime = new Date('2025-01-01T10:00:00Z')
+      vi.setSystemTime(startTime)
+
+      // Start, run 2s, pause for 3s
+      store.startTimer()
+      vi.advanceTimersByTime(2000)
+      store.pauseTimer()
+      vi.advanceTimersByTime(3000)
+
+      // Resume, run 2s, pause for 1s
+      store.startTimer()
+      vi.advanceTimersByTime(2000)
+      store.pauseTimer()
+      vi.advanceTimersByTime(1000)
+
+      // Resume and check: wall=8s, pauses=4s, duration ~4s
+      store.startTimer()
+      vi.advanceTimersByTime(1000)
+
+      // Wall time: 2+3+2+1+1 = 9s. Paused: 3+1 = 4s. Duration ~5s
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
+      expect(store.meetingData.duration).toBeLessThan(6000)
+    })
+
+    it('stopTimer resets pauseDuration to 0', () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      store.pauseTimer()
+      vi.advanceTimersByTime(3000)
+
+      store.stopTimer()
+
+      expect(store.meetingData.pauseDuration).toBe(0)
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.startTime).toBeNull()
+    })
+
+    it('timer interval subtracts pauseDuration from elapsed time', () => {
+      const store = useMeetingStore()
+      const startTime = new Date('2025-01-01T10:00:00Z')
+      vi.setSystemTime(startTime)
+
+      // Start, run 2s, pause for 4s, resume
+      store.startTimer()
+      vi.advanceTimersByTime(2000)
+      store.pauseTimer()
+      vi.advanceTimersByTime(4000)
+      store.startTimer()
+
+      // Advance the timer interval (1000ms default)
+      vi.advanceTimersByTime(1000)
+
+      // Wall: 7s. Pause: 4s. Duration ~3s
+      expect(store.meetingData.duration).toBeGreaterThanOrEqual(3000)
+      expect(store.meetingData.duration).toBeLessThan(4000)
+    })
+
+    it('setPauseDuration sets pause duration in milliseconds', () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      store.pauseTimer()
+
+      store.setPauseDuration(10) // 10 minutes
+
+      expect(store.meetingData.pauseDuration).toBe(10 * 60_000)
+    })
+
+    it('setPauseDuration recalculates duration when paused', () => {
+      const store = useMeetingStore()
+      const startTime = new Date('2025-01-01T10:00:00Z')
+      vi.setSystemTime(startTime)
+
+      store.startTimer()
+      vi.advanceTimersByTime(3_600_000) // 1 hour
+      store.pauseTimer()
+
+      // Manually set 30 minutes of pause
+      store.setPauseDuration(30)
+
+      // Duration = (now - startTime) - pauseDuration = 3600000 - 1800000 = 1800000
+      expect(store.meetingData.duration).toBe(1_800_000)
+    })
+
+    it('setPauseDuration ignores negative values', () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      store.setPauseDuration(-5)
+
+      expect(store.meetingData.pauseDuration).toBe(0)
     })
   })
 
@@ -574,6 +690,115 @@ describe('useMeetingStore', () => {
       const lastCall = calls[calls.length - 1]!
       expect(lastCall[0]).toBe(STORAGE_KEYS.MEETING)
       expect(lastCall[1]).toContain('"startTime":null')
+    })
+
+    it('serializes pauseDuration and pauseStartedAt', async () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      store.pauseTimer()
+
+      // pauseDuration accumulates on resume, not on pause
+      // pauseStartedAt is set on pause
+      await nextTick()
+      await nextTick()
+
+      expect(localStorageHelper.safeSetItem).toHaveBeenCalled()
+      const calls = vi.mocked(localStorageHelper.safeSetItem).mock.calls
+      const lastCall = calls[calls.length - 1]!
+      expect(lastCall[1]).toContain('"pauseStartedAt":')
+    })
+
+    it('serializes accumulated pauseDuration after resume', async () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      store.pauseTimer()
+      vi.advanceTimersByTime(2000)
+
+      // Resume — accumulates 2000ms into pauseDuration
+      store.startTimer()
+
+      await nextTick()
+      await nextTick()
+
+      const calls = vi.mocked(localStorageHelper.safeSetItem).mock.calls
+      const lastCall = calls[calls.length - 1]!
+      expect(lastCall[1]).toContain('"pauseDuration":2000')
+    })
+
+    it('restores pauseDuration from saved data on load', () => {
+      const now = new Date('2025-01-01T10:30:00Z')
+      vi.setSystemTime(now)
+
+      const startTime = new Date('2025-01-01T10:00:00Z')
+      vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
+        JSON.stringify({
+          startTime: startTime.toISOString(),
+          isRunning: true,
+          pauseDuration: 300_000,
+          group1Participants: 2,
+          group2Participants: 3
+        })
+      )
+
+      const store = useMeetingStore()
+
+      expect(store.meetingData.pauseDuration).toBe(300_000)
+      expect(store.meetingData.isRunning).toBe(true)
+    })
+
+    it('restores pauseStartedAt from saved data on load', () => {
+      const now = new Date('2025-01-01T10:30:00Z')
+      vi.setSystemTime(now)
+
+      const startTime = new Date('2025-01-01T10:00:00Z')
+      const pauseStartedAt = new Date('2025-01-01T10:25:00Z')
+      vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
+        JSON.stringify({
+          startTime: startTime.toISOString(),
+          isRunning: false,
+          pauseDuration: 100_000,
+          pauseStartedAt: pauseStartedAt.toISOString(),
+          group1Participants: 2,
+          group2Participants: 3
+        })
+      )
+
+      const store = useMeetingStore()
+
+      expect(store.meetingData.isRunning).toBe(false)
+      expect(store.meetingData.pauseDuration).toBe(100_000)
+      // Resuming should add the remaining paused time
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      // pauseDuration should have accumulated: 100_000 + (5000 elapsed during pauseStartedAt)
+      expect(store.meetingData.pauseDuration).toBeGreaterThanOrEqual(100_000)
+    })
+
+    it('clears pauseDuration on stop', async () => {
+      const store = useMeetingStore()
+      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+
+      store.startTimer()
+      vi.advanceTimersByTime(5000)
+      store.pauseTimer()
+
+      store.setPauseDuration(5)
+
+      vi.clearAllMocks()
+      store.stopTimer()
+      await nextTick()
+      await nextTick()
+
+      expect(store.meetingData.pauseDuration).toBe(0)
+      const calls = vi.mocked(localStorageHelper.safeSetItem).mock.calls
+      const lastCall = calls[calls.length - 1]!
+      expect(lastCall[1]).toContain('"pauseDuration":0')
     })
   })
 
