@@ -8,6 +8,7 @@ export interface MeetingData {
   startTime: Date | null
   duration: number
   isRunning: boolean
+  pauseDuration: number
   group1Participants: number
   group2Participants: number
 }

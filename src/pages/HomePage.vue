@@ -24,6 +24,8 @@ const PROD_HOSTNAME = 'entorb.net'
 const router = useRouter()
 const isEditingStartTime = ref(false)
 const editStartTimeValue = ref('')
+const isEditingPauseDuration = ref(false)
+const editPauseDurationValue = ref('')
 
 const meetingStore = useMeetingStore()
 
@@ -54,6 +56,27 @@ function saveStartTime() {
 function cancelEditStartTime() {
   isEditingStartTime.value = false
   editStartTimeValue.value = ''
+}
+
+function startEditingPauseDuration() {
+  editPauseDurationValue.value = String(
+    Math.round(meetingStore.meetingData.pauseDuration / TIME_CONSTANTS.MILLISECONDS_IN_MINUTE)
+  )
+  isEditingPauseDuration.value = true
+}
+
+function savePauseDuration() {
+  const minutes = Number.parseInt(editPauseDurationValue.value, 10)
+  if (!Number.isNaN(minutes) && minutes >= 0) {
+    meetingStore.setPauseDuration(minutes)
+  }
+  isEditingPauseDuration.value = false
+  editPauseDurationValue.value = ''
+}
+
+function cancelEditPauseDuration() {
+  isEditingPauseDuration.value = false
+  editPauseDurationValue.value = ''
 }
 
 // Create reusable participant input computed
@@ -234,7 +257,17 @@ onMounted(() => {
           @click="meetingStore.pauseTimer"
         />
         <q-btn
-          v-else
+          v-else-if="meetingStore.meetingData.startTime && !meetingStore.meetingData.isRunning"
+          type="button"
+          color="positive"
+          round
+          icon="play_arrow"
+          data-cy="resume-timer-btn"
+          aria-label="Resume meeting timer"
+          @click="meetingStore.startTimer"
+        />
+        <q-btn
+          v-if="meetingStore.meetingData.startTime && !meetingStore.meetingData.isRunning"
           type="button"
           color="negative"
           round
@@ -376,6 +409,58 @@ onMounted(() => {
                   data-cy="start-time-confirm-btn"
                   aria-label="Confirm start time"
                   @click="saveStartTime"
+                />
+              </template>
+            </q-input>
+          </div>
+
+          <!-- Pause Duration -->
+          <div
+            v-if="meetingStore.meetingData.startTime"
+            class="timer-start-time"
+          >
+            <q-chip
+              v-if="!isEditingPauseDuration"
+              clickable
+              outline
+              icon="pause_circle"
+              size="md"
+              data-cy="pause-duration-chip"
+              aria-label="Edit pause duration"
+              @click="startEditingPauseDuration"
+            >
+              {{ Math.round(meetingStore.meetingData.pauseDuration / TIME_CONSTANTS.MILLISECONDS_IN_MINUTE) }} min
+            </q-chip>
+            <q-input
+              v-else
+              v-model="editPauseDurationValue"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              outlined
+              dense
+              color="primary"
+              placeholder="0"
+              hint="Minutes"
+              class="start-time-input"
+              aria-label="Edit pause duration in minutes"
+              data-cy="pause-duration-input"
+              @keyup.enter="savePauseDuration"
+              @blur="cancelEditPauseDuration"
+            >
+              <template #prepend>
+                <q-icon name="pause_circle" />
+              </template>
+              <template #append>
+                <q-btn
+                  type="button"
+                  icon="check"
+                  flat
+                  dense
+                  data-cy="pause-duration-confirm-btn"
+                  aria-label="Confirm pause duration"
+                  @click="savePauseDuration"
                 />
               </template>
             </q-input>
