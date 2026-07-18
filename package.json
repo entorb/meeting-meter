@@ -17,7 +17,7 @@
     "cy:open": "cypress open --e2e",
     "types": "vue-tsc --build",
     "lint": "eslint . --cache --fix --ignore-pattern .gitignore",
-    "format": "biome format --write .",
+    "format": "biome check --write .",
     "spell": "cspell --cache --quiet \"src/**/*.{txt,md,html,js,ts,vue,json,yml,py}\"",
     "spell-store": "cspell --cache --quiet --words-only --unique \"src/**/*.{txt,md,html,js,ts,vue,json,yml,py}\" > cspell-unknown-words.txt",
     "check": "run-p format lint types spell test knip",
