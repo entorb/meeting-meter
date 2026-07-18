@@ -11,6 +11,8 @@ import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
 interface SerializedMeetingData {
   startTime: string | null
   isRunning: boolean
+  pauseDuration: number
+  pauseStartedAt: string | null
   group1Participants: number
   group2Participants: number
 }
@@ -28,12 +30,14 @@ export const useMeetingStore = defineStore('meeting', () => {
     startTime: null,
     duration: 0,
     isRunning: false,
+    pauseDuration: 0,
     group1Participants: 0,
     group2Participants: 0
   })
 
   // Timer interval reference (used in timer control actions)
   let timerInterval: ReturnType<typeof setInterval> | null = null
+  let pauseStartedAt: number | null = null
 
   // Meeting data persistence functions
   function saveMeetingData(data: MeetingData): void {
@@ -41,6 +45,8 @@ export const useMeetingStore = defineStore('meeting', () => {
       const serializedData: SerializedMeetingData = {
         startTime: data.startTime ? data.startTime.toISOString() : null,
         isRunning: data.isRunning,
+        pauseDuration: data.pauseDuration,
+        pauseStartedAt: pauseStartedAt ? new Date(pauseStartedAt).toISOString() : null,
         group1Participants: data.group1Participants,
         group2Participants: data.group2Participants
       }
@@ -60,36 +66,43 @@ export const useMeetingStore = defineStore('meeting', () => {
     return Date.now() - startTime.getTime() > msInExpiryPeriod
   }
 
+  function clearExpiredSession(parsed: SerializedMeetingData): Date | null {
+    const startTime = parsed.startTime ? new Date(parsed.startTime) : null
+    if (startTime && Number.isNaN(startTime.getTime())) return null
+    if (startTime && isSessionExpired(startTime)) {
+      parsed.isRunning = false
+      saveMeetingData({
+        startTime: null,
+        duration: 0,
+        isRunning: false,
+        pauseDuration: 0,
+        group1Participants: clampParticipants(parsed.group1Participants),
+        group2Participants: clampParticipants(parsed.group2Participants)
+      })
+      return null
+    }
+    return startTime
+  }
+
+  function restorePauseState(parsed: SerializedMeetingData): void {
+    if (!parsed.pauseStartedAt) return
+    const parsedPauseStart = new Date(parsed.pauseStartedAt)
+    if (!Number.isNaN(parsedPauseStart.getTime())) {
+      pauseStartedAt = parsedPauseStart.getTime()
+    }
+  }
+
   function loadMeetingData(): MeetingData | null {
     try {
       const saved = safeGetItem(STORAGE_KEYS.MEETING)
       if (!saved) return null
 
       const parsed: SerializedMeetingData = JSON.parse(saved)
-      let startTime = parsed.startTime ? new Date(parsed.startTime) : null
+      const startTime = clearExpiredSession(parsed)
+      restorePauseState(parsed)
 
-      // Validate startTime if it exists
-      if (startTime && Number.isNaN(startTime.getTime())) {
-        return null
-      }
-
-      // Clear expired sessions
-      if (startTime && isSessionExpired(startTime)) {
-        startTime = null
-        parsed.isRunning = false
-
-        saveMeetingData({
-          startTime: null,
-          duration: 0,
-          isRunning: false,
-          group1Participants: clampParticipants(parsed.group1Participants),
-          group2Participants: clampParticipants(parsed.group2Participants)
-        })
-      }
-
-      // Recalculate duration from start time if timer is running
       let duration = 0
-      if (startTime && parsed.isRunning) {
+      if (startTime) {
         duration = Math.max(0, Date.now() - startTime.getTime())
       }
 
@@ -97,11 +110,11 @@ export const useMeetingStore = defineStore('meeting', () => {
         startTime,
         duration,
         isRunning: parsed.isRunning,
+        pauseDuration: parsed.pauseDuration || 0,
         group1Participants: clampParticipants(parsed.group1Participants),
         group2Participants: clampParticipants(parsed.group2Participants)
       }
     } catch {
-      // Return null on any error - app will start fresh
       return null
     }
   }
@@ -127,10 +140,9 @@ export const useMeetingStore = defineStore('meeting', () => {
       if (savedMeetingData.isRunning && savedMeetingData.startTime) {
         timerInterval = setInterval(() => {
           if (meetingData.value.startTime) {
-            meetingData.value.duration = Math.max(
-              0,
-              Date.now() - meetingData.value.startTime.getTime()
-            )
+            meetingData.value.duration =
+              Math.max(0, Date.now() - meetingData.value.startTime.getTime()) -
+              meetingData.value.pauseDuration
           }
         }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
       }
@@ -184,18 +196,25 @@ export const useMeetingStore = defineStore('meeting', () => {
       // Starting fresh - set start time and reset duration
       meetingData.value.startTime = now
       meetingData.value.duration = 0
-    } else if (!meetingData.value.isRunning) {
-      // Resuming after pause - adjust start time based on current duration
-      const adjustedStartTime = new Date(now.getTime() - meetingData.value.duration)
-      meetingData.value.startTime = adjustedStartTime
+    } else if (!meetingData.value.isRunning && pauseStartedAt) {
+      // Resuming after pause - accumulate paused time
+      meetingData.value.pauseDuration += Date.now() - pauseStartedAt
+      pauseStartedAt = null
     }
 
     meetingData.value.isRunning = true
 
+    // Clear any existing interval before creating a new one
+    if (timerInterval) {
+      clearInterval(timerInterval)
+    }
+
     // Update timer every second
     timerInterval = setInterval(() => {
       if (meetingData.value.startTime) {
-        meetingData.value.duration = Date.now() - meetingData.value.startTime.getTime()
+        meetingData.value.duration =
+          Math.max(0, Date.now() - meetingData.value.startTime.getTime()) -
+          meetingData.value.pauseDuration
       }
     }, TIMER_SETTINGS.UPDATE_INTERVAL_MS)
   }
@@ -208,6 +227,8 @@ export const useMeetingStore = defineStore('meeting', () => {
     meetingData.value.isRunning = false
     meetingData.value.startTime = null
     meetingData.value.duration = 0
+    meetingData.value.pauseDuration = 0
+    pauseStartedAt = null
 
     if (timerInterval) {
       clearInterval(timerInterval)
@@ -219,15 +240,10 @@ export const useMeetingStore = defineStore('meeting', () => {
    * Pauses the meeting timer, preserving the current duration.
    */
   function pauseTimer() {
-    // Pause the timer - stop updates but keep state
     if (!meetingData.value.isRunning) return
 
     meetingData.value.isRunning = false
-
-    // Update duration one final time before stopping
-    if (meetingData.value.startTime) {
-      meetingData.value.duration = Date.now() - meetingData.value.startTime.getTime()
-    }
+    pauseStartedAt = Date.now()
 
     if (timerInterval) {
       clearInterval(timerInterval)
@@ -261,7 +277,21 @@ export const useMeetingStore = defineStore('meeting', () => {
 
     // Recalculate duration if timer is running
     if (meetingData.value.isRunning) {
-      meetingData.value.duration = Date.now() - newStartTime.getTime()
+      meetingData.value.duration =
+        Date.now() - newStartTime.getTime() - meetingData.value.pauseDuration
+    }
+  }
+
+  /**
+   * Manually sets the pause duration in minutes.
+   * @param minutes - Pause duration in minutes.
+   */
+  function setPauseDuration(minutes: number) {
+    meetingData.value.pauseDuration = Math.max(0, minutes * TIME_CONSTANTS.MILLISECONDS_IN_MINUTE)
+    if (!meetingData.value.isRunning && meetingData.value.startTime) {
+      meetingData.value.duration =
+        Math.max(0, Date.now() - meetingData.value.startTime.getTime()) -
+        meetingData.value.pauseDuration
     }
   }
 
@@ -281,6 +311,7 @@ export const useMeetingStore = defineStore('meeting', () => {
     stopTimer,
     pauseTimer,
     setManualStartTime,
+    setPauseDuration,
     updateConfig,
     formatDuration
   }
