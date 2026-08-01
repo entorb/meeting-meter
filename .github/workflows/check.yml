@@ -81,4 +81,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Run package audit
-        run: pnpm audit
+        run: pnpm audit --prod
