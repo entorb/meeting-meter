@@ -21,3 +21,6 @@ ignorePaths:
   - 'package*.json'
   - 'scripts/**'
   - 'src/assets/'
+  - 'biome.json'
+  - 'pnpm-lock.yaml'
+  - 'pnpm-workspace.yaml'
