@@ -1,7 +1,9 @@
 accesscounts
 appinstalled
 beforeinstallprompt
+biomejs
 entorb
+esbuild
 firstaccess
 iconsets
 infobar
@@ -11,6 +13,7 @@ Menke
 navigatable
 oxfmt
 oxlint
+prek
 roboto
 SonarCloud
 sonarjs
