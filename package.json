@@ -27,7 +27,7 @@
     "@quasar/extras": "^2.0.0",
     "@vueuse/core": "^14.3.0",
     "pinia": "^3.0.4",
-    "quasar": "^2.19.3",
+    "quasar": "^2.23.3",
     "vue": "^3.5.35",
     "vue-router": "^5.1.0",
     "workbox-window": "^7.4.1"
@@ -50,7 +50,6 @@
     "esbuild": "^0.28.1",
     "eslint": "^10.7.0",
     "eslint-plugin-cypress": "^6.4.1",
-    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-sonarjs": "^4.0.3",
     "eslint-plugin-vue": "~10.9.2",
     "eslint-plugin-vuejs-accessibility": "^2.5.0",
