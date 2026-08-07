@@ -10,14 +10,15 @@ echo === delete old node_modules and lock ===
 rm -rf node_modules pnpm-lock.yaml
 
 echo === update packages ===
-pnpm up -L
+pnpm self-update
+pnpm up --latest
 pnpm exec biome migrate --write
 
 # fit audit findings
 if ! pnpm audit; then
   echo === fix audit findings ===
-  pnpm audit --fix update
   pnpm audit --fix override
+  pnpm audit --fix update
 fi
 
 echo === check ===
