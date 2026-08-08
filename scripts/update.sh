@@ -17,8 +17,8 @@ pnpm exec biome migrate --write
 # fit audit findings
 if ! pnpm audit; then
   echo === fix audit findings ===
-  pnpm audit --fix override
   pnpm audit --fix update
+  pnpm audit --fix override
 fi
 
 echo === check ===
