@@ -1,7 +1,6 @@
 # Meeting Meter App (MMA): The "Taxi Meter" for Meetings
 
 Calculate the cost of meetings based on the number of attendees and their hourly rates.
-(todo: sync this text to [GitHub.com](https://github.com/entorb/meeting-meter), [PWA-Manifest](public/site.webmanifest), [index.html](index.html))
 
 Deployed to <https://entorb.net/meeting-meter/>
 
