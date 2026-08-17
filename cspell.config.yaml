@@ -1,24 +1,25 @@
----
 $schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
 version: '0.2'
 useCache: true
 useGitignore: true
 dictionaryDefinitions:
-  - name: cspell-words
-    path: cspell-words.txt
-    addWords: true
+- name: cspell-words
+  path: cspell-words.txt
+  addWords: true
 dictionaries:
-  - cspell-words
+- cspell-words
 language: en-US
 ignorePaths:
-  - '.*'
-  - 'biome.json'
-  - 'build'
-  - 'cspell-words.txt'
-  - 'cspell.config.yaml'
-  - 'dist'
-  - 'package*.json'
-  - 'pnpm-lock.yaml'
-  - 'pnpm-workspace.yaml'
-  - 'scripts/**'
-  - 'src/assets/'
+- '/.vscode/'
+- 'cspell-words.txt'
+- 'cspell.config.yaml'
+- '/LICENSE'
+- '.*'
+- 'biome.json'
+- 'build'
+- 'dist'
+- 'package*.json'
+- 'pnpm-lock.yaml'
+- 'pnpm-workspace.yaml'
+- 'scripts/**'
+- 'src/assets/'
