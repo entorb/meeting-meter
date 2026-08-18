@@ -1,0 +1,10 @@
+.cspellcache
+.DS_Store
+.eslintcache
+/coverage/
+/cypress/screenshots/
+/dist/
+/example/
+/node_modules/
+cspell-words-missing.txt
+sonar-report.xml
