@@ -27,7 +27,7 @@ pnpm run check
 echo === Cypress ===
 # start dev server in background, bypassing pnpm wrapper to remove warning upon killing process
 # pnpm run dev
-./node_modules/.bin/vite > /dev/null 2>&1 &
+./node_modules/.bin/vite >/dev/null 2>&1 &
 DEV_PID=$!
 
 # wait for dev server to be ready (port 5173 is Vite's default)
