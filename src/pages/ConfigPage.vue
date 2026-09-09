@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { useEventListener } from '@vueuse/core'
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useEventListener } from "@vueuse/core"
+import { computed } from "vue"
+import { useRouter } from "vue-router"
 
-import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue'
-import { useMeetingStore } from '@/stores/meetingStore'
-import { LIMITS } from '@/utils/constants'
-import { sanitizeIntegerInput, validateIntegerInput } from '@/utils/helpers'
+import PWAInstallPrompt from "@/components/PWAInstallPrompt.vue"
+import { useMeetingStore } from "@/stores/meetingStore"
+import { LIMITS } from "@/utils/constants"
+import { sanitizeIntegerInput, validateIntegerInput } from "@/utils/helpers"
 
 defineOptions({
-  name: 'ConfigurationPage'
+  name: "ConfigurationPage",
 })
 
 const router = useRouter()
@@ -21,7 +21,7 @@ const group1HourlyRateInput = computed({
     const sanitized = sanitizeIntegerInput(value)
     const numValue = Number.parseInt(sanitized, 10)
     meetingStore.updateConfig({ group1HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
-  }
+  },
 })
 
 const group2HourlyRateInput = computed({
@@ -30,7 +30,7 @@ const group2HourlyRateInput = computed({
     const sanitized = sanitizeIntegerInput(value)
     const numValue = Number.parseInt(sanitized, 10)
     meetingStore.updateConfig({ group2HourlyRate: Number.isNaN(numValue) ? 0 : numValue })
-  }
+  },
 })
 
 const workingHoursPerDayInput = computed({
@@ -40,14 +40,14 @@ const workingHoursPerDayInput = computed({
       value,
       LIMITS.MIN_WORKING_HOURS,
       LIMITS.MAX_WORKING_HOURS,
-      LIMITS.MIN_WORKING_HOURS
+      LIMITS.MIN_WORKING_HOURS,
     )
     meetingStore.updateConfig({ workingHoursPerDay: validatedValue })
-  }
+  },
 })
 
 function navigateBack(): void {
-  router.push('/')
+  router.push("/")
 }
 
 // Validation handlers
@@ -55,7 +55,7 @@ function handleRateValidation(event: Event): void {
   const input = event.target as HTMLInputElement
 
   if (input.validity.badInput) {
-    input.setCustomValidity('')
+    input.setCustomValidity("")
   }
 }
 
@@ -63,13 +63,13 @@ function handleWorkingHoursValidation(event: Event): void {
   const input = event.target as HTMLInputElement
 
   if (input.validity.valueMissing) {
-    input.setCustomValidity('')
+    input.setCustomValidity("")
   }
 }
 
 // Keyboard navigation - Escape key to home page
-useEventListener('keydown', (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
+useEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
     navigateBack()
   }
 })

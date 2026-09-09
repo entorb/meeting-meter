@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from "vue"
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>
 }
 
 const showInstallPrompt = ref(false)
@@ -12,18 +12,18 @@ let deferredPrompt: BeforeInstallPromptEvent | null = null
 // Simplified platform detection
 const platform = computed(() => {
   const ua = navigator.userAgent.toLowerCase()
-  if (/iphone|ipad|ipod/.test(ua)) return 'ios'
-  if (ua.includes('mac') && /safari/.test(ua) && !/chrome/.test(ua)) return 'macos'
-  return 'other'
+  if (/iphone|ipad|ipod/.test(ua)) return "ios"
+  if (ua.includes("mac") && /safari/.test(ua) && !/chrome/.test(ua)) return "macos"
+  return "other"
 })
 
-const isSafari = computed(() => platform.value !== 'other')
-const isIOS = computed(() => platform.value === 'ios')
-const isMacOS = computed(() => platform.value === 'macos')
+const isSafari = computed(() => platform.value !== "other")
+const isIOS = computed(() => platform.value === "ios")
+const isMacOS = computed(() => platform.value === "macos")
 
 onMounted(() => {
   // Check if PWA is already installed
-  if (globalThis.matchMedia('(display-mode: standalone)').matches) {
+  if (globalThis.matchMedia("(display-mode: standalone)").matches) {
     return // Already installed
   }
 
@@ -37,7 +37,7 @@ onMounted(() => {
   }
 
   // Listen for the beforeinstallprompt event (Chrome/Edge)
-  globalThis.addEventListener('beforeinstallprompt', (e: Event) => {
+  globalThis.addEventListener("beforeinstallprompt", (e: Event) => {
     // Prevent the mini-infobar from appearing on mobile
     e.preventDefault()
     // Save the event so it can be triggered later
@@ -47,7 +47,7 @@ onMounted(() => {
   })
 
   // Listen for the appinstalled event
-  globalThis.addEventListener('appinstalled', () => {
+  globalThis.addEventListener("appinstalled", () => {
     showInstallPrompt.value = false
     deferredPrompt = null
   })

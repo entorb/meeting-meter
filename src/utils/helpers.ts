@@ -6,9 +6,9 @@
  * @returns number of meetings metered, or 0 on error
  */
 
-import type { Config } from '@/types'
+import type { Config } from "@/types"
 
-import { STATS_DB_COL, TIME_CONSTANTS } from './constants'
+import { STATS_DB_COL, TIME_CONSTANTS } from "./constants"
 
 /**
  * Utility functions for formatting and common operations
@@ -24,7 +24,7 @@ export const helperStatsDataRead = async (): Promise<number> => {
     }
 
     const respData = await response.json()
-    if (typeof respData.accesscounts === 'number' && respData.accesscounts >= 0) {
+    if (typeof respData.accesscounts === "number" && respData.accesscounts >= 0) {
       return respData.accesscounts
     }
 
@@ -52,10 +52,10 @@ export const helperStatsDataWrite = async (): Promise<void> => {
  */
 export function sanitizeIntegerInput(input: string): string {
   // Strip any non-digit characters
-  const digits = input.replace(/\D+/g, '')
+  const digits = input.replace(/\D+/g, "")
   // Remove leading zeros, but keep single "0"
-  const normalized = digits.replace(/^0+(?=\d)/, '')
-  return normalized === '' ? '0' : normalized
+  const normalized = digits.replace(/^0+(?=\d)/, "")
+  return normalized === "" ? "0" : normalized
 }
 
 /**
@@ -70,7 +70,7 @@ export function validateIntegerInput(
   input: string,
   min = 0,
   max: number = Number.MAX_SAFE_INTEGER,
-  defaultValue = 0
+  defaultValue = 0,
 ): number {
   const sanitized = sanitizeIntegerInput(input)
   const numValue = Number.parseInt(sanitized, 10)
@@ -92,10 +92,10 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatStartTime(startTime: Date): string {
-  return startTime.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+  return startTime.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   })
 }
 
@@ -110,7 +110,7 @@ const TIME_VALIDATION = {
   HOURS_START_INDEX: 0,
   HOURS_END_INDEX: 2,
   MINUTES_START_INDEX: 2,
-  MINUTES_END_INDEX: 4
+  MINUTES_END_INDEX: 4,
 } as const
 
 /**
@@ -124,12 +124,12 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
   let minutes: number
 
   // Support both HH:MM and HHMM formats
-  if (trimmedValue.includes(':')) {
+  if (trimmedValue.includes(":")) {
     // HH:MM format
-    const parts = trimmedValue.split(':')
+    const parts = trimmedValue.split(":")
     if (parts.length !== TIME_VALIDATION.TIME_PARTS_COUNT) return null
-    hours = Number.parseInt(parts[0] || '0', 10)
-    minutes = Number.parseInt(parts[1] || '0', 10)
+    hours = Number.parseInt(parts[0] || "0", 10)
+    minutes = Number.parseInt(parts[1] || "0", 10)
   } else if (
     trimmedValue.length === TIME_VALIDATION.HHMM_FORMAT_LENGTH &&
     /^\d{4}$/.test(trimmedValue)
@@ -137,11 +137,11 @@ export function parseTimeInput(value: string): { hours: number; minutes: number 
     // HHMM format (e.g., 1234 -> 12:34)
     hours = Number.parseInt(
       trimmedValue.slice(TIME_VALIDATION.HOURS_START_INDEX, TIME_VALIDATION.HOURS_END_INDEX),
-      10
+      10,
     )
     minutes = Number.parseInt(
       trimmedValue.slice(TIME_VALIDATION.MINUTES_START_INDEX, TIME_VALIDATION.MINUTES_END_INDEX),
-      10
+      10,
     )
   } else {
     return null
@@ -177,7 +177,7 @@ export function isTimeBeforeNow(hours: number, minutes: number): boolean {
     hours,
     minutes,
     0,
-    0
+    0,
   )
   return proposedTime < now
 }
@@ -189,8 +189,8 @@ export function isTimeBeforeNow(hours: number, minutes: number): boolean {
  * @returns The numeric value or default value
  */
 export function toNumber(value: string | number | null | undefined, defaultValue: number): number {
-  if (typeof value === 'number') return value
-  if (value === '' || value === null || value === undefined) return defaultValue
+  if (typeof value === "number") return value
+  if (value === "" || value === null || value === undefined) return defaultValue
   const num = Number.parseFloat(value)
   return Number.isNaN(num) ? defaultValue : num
 }
@@ -198,7 +198,7 @@ export function toNumber(value: string | number | null | undefined, defaultValue
 // Default configuration values
 const CONFIG_DEFAULTS = {
   HOURLY_RATE: 0,
-  WORKING_HOURS: 8
+  WORKING_HOURS: 8,
 } as const
 
 /**
@@ -210,19 +210,19 @@ export function getConfigFromForm(formData: Record<string, string | undefined>):
   return {
     group1HourlyRate: toNumber(formData.group1HourlyRate, CONFIG_DEFAULTS.HOURLY_RATE),
     group2HourlyRate: toNumber(formData.group2HourlyRate, CONFIG_DEFAULTS.HOURLY_RATE),
-    workingHoursPerDay: toNumber(formData.workingHoursPerDay, CONFIG_DEFAULTS.WORKING_HOURS)
+    workingHoursPerDay: toNumber(formData.workingHoursPerDay, CONFIG_DEFAULTS.WORKING_HOURS),
   }
 }
 
 function padNumber(num: number): string {
-  return (num < 10 ? '0' : '') + num
+  return (num < 10 ? "0" : "") + num
 }
 
 export function formatDuration(milliseconds: number): string {
   const totalSeconds = Math.floor(milliseconds / TIME_CONSTANTS.MILLISECONDS_IN_SECOND)
   const hours = Math.floor(totalSeconds / TIME_CONSTANTS.SECONDS_IN_HOUR)
   const minutes = Math.floor(
-    (totalSeconds % TIME_CONSTANTS.SECONDS_IN_HOUR) / TIME_CONSTANTS.SECONDS_IN_MINUTE
+    (totalSeconds % TIME_CONSTANTS.SECONDS_IN_HOUR) / TIME_CONSTANTS.SECONDS_IN_MINUTE,
   )
   const seconds = totalSeconds % TIME_CONSTANTS.SECONDS_IN_MINUTE
 

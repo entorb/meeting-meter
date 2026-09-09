@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { useEventListener } from '@vueuse/core'
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useEventListener } from "@vueuse/core"
+import { computed, onMounted, ref } from "vue"
+import { useRouter } from "vue-router"
 
-import { useMeetingStore } from '@/stores/meetingStore'
-import { EFFICIENCY_THRESHOLDS, LIMITS, TIME_CONSTANTS } from '@/utils/constants'
+import { useMeetingStore } from "@/stores/meetingStore"
+import { EFFICIENCY_THRESHOLDS, LIMITS, TIME_CONSTANTS } from "@/utils/constants"
 import {
   formatCurrency,
   formatStartTime,
@@ -12,20 +12,20 @@ import {
   helperStatsDataWrite,
   isTimeBeforeNow,
   parseTimeInput,
-  sanitizeIntegerInput
-} from '@/utils/helpers'
+  sanitizeIntegerInput,
+} from "@/utils/helpers"
 
 defineOptions({
-  name: 'HomePage'
+  name: "HomePage",
 })
 
-const PROD_HOSTNAME = 'entorb.net'
+const PROD_HOSTNAME = "entorb.net"
 
 const router = useRouter()
 const isEditingStartTime = ref(false)
-const editStartTimeValue = ref('')
+const editStartTimeValue = ref("")
 const isEditingPauseDuration = ref(false)
-const editPauseDurationValue = ref('')
+const editPauseDurationValue = ref("")
 
 const meetingStore = useMeetingStore()
 
@@ -50,17 +50,17 @@ async function startTimerWithStats() {
 function saveStartTime() {
   meetingStore.setManualStartTime(editStartTimeValue.value)
   isEditingStartTime.value = false
-  editStartTimeValue.value = ''
+  editStartTimeValue.value = ""
 }
 
 function cancelEditStartTime() {
   isEditingStartTime.value = false
-  editStartTimeValue.value = ''
+  editStartTimeValue.value = ""
 }
 
 function startEditingPauseDuration() {
   editPauseDurationValue.value = String(
-    Math.round(meetingStore.meetingData.pauseDuration / TIME_CONSTANTS.MILLISECONDS_IN_MINUTE)
+    Math.round(meetingStore.meetingData.pauseDuration / TIME_CONSTANTS.MILLISECONDS_IN_MINUTE),
   )
   isEditingPauseDuration.value = true
 }
@@ -71,16 +71,16 @@ function savePauseDuration() {
     meetingStore.setPauseDuration(minutes)
   }
   isEditingPauseDuration.value = false
-  editPauseDurationValue.value = ''
+  editPauseDurationValue.value = ""
 }
 
 function cancelEditPauseDuration() {
   isEditingPauseDuration.value = false
-  editPauseDurationValue.value = ''
+  editPauseDurationValue.value = ""
 }
 
 // Create reusable participant input computed
-function createParticipantInput(key: 'group1Participants' | 'group2Participants') {
+function createParticipantInput(key: "group1Participants" | "group2Participants") {
   return computed({
     get: () => meetingStore.meetingData[key].toString(),
     set: (value: string) => {
@@ -88,12 +88,12 @@ function createParticipantInput(key: 'group1Participants' | 'group2Participants'
       meetingStore.meetingData[key] = Number.isNaN(num)
         ? LIMITS.MIN_PARTICIPANTS
         : Math.max(LIMITS.MIN_PARTICIPANTS, Math.min(LIMITS.MAX_PARTICIPANTS, num))
-    }
+    },
   })
 }
 
-const group1ParticipantsInput = createParticipantInput('group1Participants')
-const group2ParticipantsInput = createParticipantInput('group2Participants')
+const group1ParticipantsInput = createParticipantInput("group1Participants")
+const group2ParticipantsInput = createParticipantInput("group2Participants")
 
 // Computed properties for cost calculations
 const hasHourlyRatesConfigured = computed(() => {
@@ -122,15 +122,15 @@ function getEfficiencyColor(): string {
     durationMinutes <= EFFICIENCY_THRESHOLDS.OPTIMAL_DURATION_MINUTES &&
     totalParticipants <= EFFICIENCY_THRESHOLDS.OPTIMAL_PARTICIPANT_COUNT
   ) {
-    return 'bg-positive' // Green - efficient
+    return "bg-positive" // Green - efficient
   }
   if (
     durationMinutes <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_DURATION_MINUTES &&
     totalParticipants <= EFFICIENCY_THRESHOLDS.ACCEPTABLE_PARTICIPANT_COUNT
   ) {
-    return 'bg-warning' // Orange - moderate
+    return "bg-warning" // Orange - moderate
   }
-  return 'bg-negative' // Red - potentially inefficient
+  return "bg-negative" // Red - potentially inefficient
 }
 
 function handleGroup1Input() {
@@ -150,11 +150,11 @@ function handleParticipantValidation(event: Event) {
   } else if (input.validity.rangeUnderflow) {
     input.setCustomValidity(`Minimum ${LIMITS.MIN_PARTICIPANTS} participants required`)
   } else if (input.validity.valueMissing) {
-    input.setCustomValidity('Participant count is required')
+    input.setCustomValidity("Participant count is required")
   } else if (input.validity.badInput) {
-    input.setCustomValidity('Please enter a valid number')
+    input.setCustomValidity("Please enter a valid number")
   } else {
-    input.setCustomValidity('')
+    input.setCustomValidity("")
   }
 }
 
@@ -166,24 +166,24 @@ function handleStartTimeValidation(event: Event) {
   // Check format
   const parsedTime = parseTimeInput(value)
   if (!parsedTime) {
-    input.setCustomValidity('Invalid time format. Use HH:MM or HHMM')
+    input.setCustomValidity("Invalid time format. Use HH:MM or HHMM")
     return
   }
 
   // Check if time is in the future
   const { hours, minutes } = parsedTime
   if (!isTimeBeforeNow(hours, minutes)) {
-    input.setCustomValidity('Start time cannot be in the future')
+    input.setCustomValidity("Start time cannot be in the future")
     return
   }
 
-  input.setCustomValidity('')
+  input.setCustomValidity("")
 }
 
 // Keyboard navigation - Escape key to config page
-useEventListener('keydown', (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    router.push('/config/')
+useEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    router.push("/config/")
   }
 })
 
@@ -201,11 +201,11 @@ async function fetchMeetingsMetered() {
 const alternativeActivities = computed(() => {
   const hours = meetingStore.calculations.peopleHours
   return [
-    { activity: 'Lines of code written', value: Math.round(hours * 50) },
-    { activity: 'Emails answered', value: Math.round(hours * 12) },
-    { activity: 'km jogging', value: Math.round(hours * 10) },
-    { activity: 'Drinks consumed', value: Math.round((hours * 60) / 7) },
-    { activity: 'Movies watched', value: Math.round(hours * 1.5) }
+    { activity: "Lines of code written", value: Math.round(hours * 50) },
+    { activity: "Emails answered", value: Math.round(hours * 12) },
+    { activity: "km jogging", value: Math.round(hours * 10) },
+    { activity: "Drinks consumed", value: Math.round((hours * 60) / 7) },
+    { activity: "Movies watched", value: Math.round(hours * 1.5) },
   ]
 })
 
@@ -214,10 +214,10 @@ const alternativePurchases = computed(() => {
   if (cost === 0) return []
 
   return [
-    { item: 'Coffees', value: Math.round(cost / 2) },
-    { item: 'Pizzas', value: Math.round(cost / 15) },
-    { item: 'Conference tickets', value: Math.round(cost / 500) },
-    { item: 'Laptops', value: Math.round(cost / 1000) }
+    { item: "Coffees", value: Math.round(cost / 2) },
+    { item: "Pizzas", value: Math.round(cost / 15) },
+    { item: "Conference tickets", value: Math.round(cost / 500) },
+    { item: "Laptops", value: Math.round(cost / 1000) },
   ]
 })
 

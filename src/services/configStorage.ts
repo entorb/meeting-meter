@@ -1,6 +1,6 @@
-import type { Config } from '@/types'
-import { STORAGE_KEYS } from '@/utils/constants'
-import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
+import type { Config } from "@/types"
+import { STORAGE_KEYS } from "@/utils/constants"
+import { safeGetItem, safeSetItem } from "@/utils/localStorageHelper"
 
 export function loadConfig(): Config | null {
   try {
@@ -12,10 +12,10 @@ export function loadConfig(): Config | null {
     // Validate the config structure with additional type safety
     if (
       parsed &&
-      typeof parsed === 'object' &&
-      typeof parsed.group1HourlyRate === 'number' &&
-      typeof parsed.group2HourlyRate === 'number' &&
-      typeof parsed.workingHoursPerDay === 'number' &&
+      typeof parsed === "object" &&
+      typeof parsed.group1HourlyRate === "number" &&
+      typeof parsed.group2HourlyRate === "number" &&
+      typeof parsed.workingHoursPerDay === "number" &&
       !Number.isNaN(parsed.group1HourlyRate) &&
       !Number.isNaN(parsed.group2HourlyRate) &&
       !Number.isNaN(parsed.workingHoursPerDay)

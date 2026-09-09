@@ -1,11 +1,11 @@
-import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { defineStore } from "pinia"
+import { computed, ref, watch } from "vue"
 
-import { loadConfig, saveConfig } from '@/services/configStorage'
-import type { Calculations, Config, MeetingData } from '@/types'
-import { DEFAULTS, STORAGE_KEYS, TIME_CONSTANTS, TIMER_SETTINGS } from '@/utils/constants'
-import { formatDuration, isTimeBeforeNow, parseTimeInput } from '@/utils/helpers'
-import { safeGetItem, safeSetItem } from '@/utils/localStorageHelper'
+import { loadConfig, saveConfig } from "@/services/configStorage"
+import type { Calculations, Config, MeetingData } from "@/types"
+import { DEFAULTS, STORAGE_KEYS, TIME_CONSTANTS, TIMER_SETTINGS } from "@/utils/constants"
+import { formatDuration, isTimeBeforeNow, parseTimeInput } from "@/utils/helpers"
+import { safeGetItem, safeSetItem } from "@/utils/localStorageHelper"
 
 // Type for serialized meeting data in localStorage
 interface SerializedMeetingData {
@@ -17,12 +17,12 @@ interface SerializedMeetingData {
   group2Participants: number
 }
 
-export const useMeetingStore = defineStore('meeting', () => {
+export const useMeetingStore = defineStore("meeting", () => {
   // Configuration state
   const config = ref<Config>({
     group1HourlyRate: DEFAULTS.GROUP1_HOURLY_RATE,
     group2HourlyRate: DEFAULTS.GROUP2_HOURLY_RATE,
-    workingHoursPerDay: DEFAULTS.WORKING_HOURS_PER_DAY
+    workingHoursPerDay: DEFAULTS.WORKING_HOURS_PER_DAY,
   })
 
   // Meeting state
@@ -32,7 +32,7 @@ export const useMeetingStore = defineStore('meeting', () => {
     isRunning: false,
     pauseDuration: 0,
     group1Participants: 0,
-    group2Participants: 0
+    group2Participants: 0,
   })
 
   // Timer interval reference (used in timer control actions)
@@ -48,7 +48,7 @@ export const useMeetingStore = defineStore('meeting', () => {
         pauseDuration: data.pauseDuration,
         pauseStartedAt: pauseStartedAt ? new Date(pauseStartedAt).toISOString() : null,
         group1Participants: data.group1Participants,
-        group2Participants: data.group2Participants
+        group2Participants: data.group2Participants,
       }
       safeSetItem(STORAGE_KEYS.MEETING, JSON.stringify(serializedData))
     } catch {
@@ -77,7 +77,7 @@ export const useMeetingStore = defineStore('meeting', () => {
         isRunning: false,
         pauseDuration: 0,
         group1Participants: clampParticipants(parsed.group1Participants),
-        group2Participants: clampParticipants(parsed.group2Participants)
+        group2Participants: clampParticipants(parsed.group2Participants),
       })
       return null
     }
@@ -112,7 +112,7 @@ export const useMeetingStore = defineStore('meeting', () => {
         isRunning: parsed.isRunning,
         pauseDuration: parsed.pauseDuration || 0,
         group1Participants: clampParticipants(parsed.group1Participants),
-        group2Participants: clampParticipants(parsed.group2Participants)
+        group2Participants: clampParticipants(parsed.group2Participants),
       }
     } catch {
       return null
@@ -127,7 +127,7 @@ export const useMeetingStore = defineStore('meeting', () => {
       config.value = {
         group1HourlyRate: loadedConfig.group1HourlyRate || 0,
         group2HourlyRate: loadedConfig.group2HourlyRate || 0,
-        workingHoursPerDay: loadedConfig.workingHoursPerDay || 8
+        workingHoursPerDay: loadedConfig.workingHoursPerDay || 8,
       }
     }
 
@@ -153,8 +153,8 @@ export const useMeetingStore = defineStore('meeting', () => {
   initialize()
 
   // Persistence watchers
-  watch(config, newConfig => saveConfig(newConfig), { deep: true })
-  watch(meetingData, newData => saveMeetingData(newData), { deep: true })
+  watch(config, (newConfig) => saveConfig(newConfig), { deep: true })
+  watch(meetingData, (newData) => saveMeetingData(newData), { deep: true })
 
   // Computed calculations
   const calculations = computed<Calculations>(() => {
@@ -178,7 +178,7 @@ export const useMeetingStore = defineStore('meeting', () => {
       totalCost,
       totalParticipants,
       group1Cost,
-      group2Cost
+      group2Cost,
     }
   })
 
@@ -270,7 +270,7 @@ export const useMeetingStore = defineStore('meeting', () => {
       hours,
       minutes,
       0,
-      0
+      0,
     )
 
     meetingData.value.startTime = newStartTime
@@ -313,6 +313,6 @@ export const useMeetingStore = defineStore('meeting', () => {
     setManualStartTime,
     setPauseDuration,
     updateConfig,
-    formatDuration
+    formatDuration,
   }
 })

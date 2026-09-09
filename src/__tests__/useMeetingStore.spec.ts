@@ -1,36 +1,36 @@
-import { createPinia, setActivePinia } from 'pinia'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
-import * as configStorage from '@/services/configStorage'
-import { useMeetingStore } from '@/stores/meetingStore'
-import { STORAGE_KEYS } from '@/utils/constants'
-import * as helpers from '@/utils/helpers'
-import * as localStorageHelper from '@/utils/localStorageHelper'
+import { createPinia, setActivePinia } from "pinia"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { nextTick } from "vue"
+import * as configStorage from "@/services/configStorage"
+import { useMeetingStore } from "@/stores/meetingStore"
+import { STORAGE_KEYS } from "@/utils/constants"
+import * as helpers from "@/utils/helpers"
+import * as localStorageHelper from "@/utils/localStorageHelper"
 
 // Mock dependencies
-vi.mock('@/services/configStorage', () => ({
+vi.mock("@/services/configStorage", () => ({
   loadConfig: vi.fn(),
-  saveConfig: vi.fn()
+  saveConfig: vi.fn(),
 }))
 
-vi.mock('@/utils/localStorageHelper', () => ({
+vi.mock("@/utils/localStorageHelper", () => ({
   safeGetItem: vi.fn(),
-  safeSetItem: vi.fn()
+  safeSetItem: vi.fn(),
 }))
 
-vi.mock('@/utils/helpers', () => ({
+vi.mock("@/utils/helpers", () => ({
   formatDuration: vi.fn((ms: number) => {
     const seconds = Math.floor(ms / 1000)
     const h = Math.floor(seconds / 3600)
     const m = Math.floor((seconds % 3600) / 60)
     const s = seconds % 60
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
   }),
   parseTimeInput: vi.fn((timeString: string) => {
     const match = timeString.match(/^(\d{1,2}):?(\d{2})$/)
     if (!match) return null
-    const hours = Number.parseInt(match[1] || '0', 10)
-    const minutes = Number.parseInt(match[2] || '0', 10)
+    const hours = Number.parseInt(match[1] || "0", 10)
+    const minutes = Number.parseInt(match[2] || "0", 10)
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null
     return { hours, minutes }
   }),
@@ -39,10 +39,10 @@ vi.mock('@/utils/helpers', () => ({
     const testTime = new Date()
     testTime.setHours(hours, minutes, 0, 0)
     return testTime.getTime() < now.getTime()
-  })
+  }),
 }))
 
-describe('useMeetingStore', () => {
+describe("useMeetingStore", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
@@ -59,8 +59,8 @@ describe('useMeetingStore', () => {
     vi.useRealTimers()
   })
 
-  describe('Initialization', () => {
-    it('initializes with default config when no saved config exists', () => {
+  describe("Initialization", () => {
+    it("initializes with default config when no saved config exists", () => {
       vi.mocked(configStorage.loadConfig).mockReturnValue(null)
 
       const store = useMeetingStore()
@@ -70,11 +70,11 @@ describe('useMeetingStore', () => {
       expect(store.config.workingHoursPerDay).toBe(8)
     })
 
-    it('loads saved config on initialization', () => {
+    it("loads saved config on initialization", () => {
       vi.mocked(configStorage.loadConfig).mockReturnValue({
         group1HourlyRate: 50,
         group2HourlyRate: 30,
-        workingHoursPerDay: 7
+        workingHoursPerDay: 7,
       })
 
       const store = useMeetingStore()
@@ -84,7 +84,7 @@ describe('useMeetingStore', () => {
       expect(store.config.workingHoursPerDay).toBe(7)
     })
 
-    it('initializes with default meeting data when no saved data exists', () => {
+    it("initializes with default meeting data when no saved data exists", () => {
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(null)
 
       const store = useMeetingStore()
@@ -96,20 +96,20 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.group2Participants).toBe(0)
     })
 
-    it('loads saved meeting data on initialization', () => {
+    it("loads saved meeting data on initialization", () => {
       // Set a known "current" time
-      const now = new Date('2025-01-01T10:30:00Z')
+      const now = new Date("2025-01-01T10:30:00Z")
       vi.setSystemTime(now)
 
       // Create a start time that's 30 minutes ago (well within the 24-hour expiry)
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: startTime.toISOString(),
           isRunning: false,
           group1Participants: 5,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -120,15 +120,15 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.group2Participants).toBe(3)
     })
 
-    it('clears expired meeting data older than SESSION_EXPIRY_HOURS', () => {
+    it("clears expired meeting data older than SESSION_EXPIRY_HOURS", () => {
       const oldStartTime = new Date(Date.now() - 25 * 60 * 60 * 1000) // 25 hours ago
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: oldStartTime.toISOString(),
           isRunning: true,
           group1Participants: 5,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -139,15 +139,15 @@ describe('useMeetingStore', () => {
       expect(localStorageHelper.safeSetItem).toHaveBeenCalled()
     })
 
-    it('restarts timer interval if meeting was running', () => {
+    it("restarts timer interval if meeting was running", () => {
       const startTime = new Date(Date.now() - 1000) // 1 second ago
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: startTime.toISOString(),
           isRunning: true,
           group1Participants: 5,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -156,8 +156,8 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeGreaterThan(0)
     })
 
-    it('handles invalid JSON in saved meeting data', () => {
-      vi.mocked(localStorageHelper.safeGetItem).mockReturnValue('invalid json')
+    it("handles invalid JSON in saved meeting data", () => {
+      vi.mocked(localStorageHelper.safeGetItem).mockReturnValue("invalid json")
 
       const store = useMeetingStore()
 
@@ -165,14 +165,14 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBe(0)
     })
 
-    it('handles invalid date in saved meeting data', () => {
+    it("handles invalid date in saved meeting data", () => {
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
-          startTime: 'invalid-date',
+          startTime: "invalid-date",
           isRunning: false,
           group1Participants: 5,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -180,14 +180,14 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.startTime).toBeNull()
     })
 
-    it('clamps negative participants to 0', () => {
+    it("clamps negative participants to 0", () => {
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: null,
           isRunning: false,
           group1Participants: -5,
-          group2Participants: -3
-        })
+          group2Participants: -3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -197,10 +197,10 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('Timer Control', () => {
-    it('starts timer from zero when not previously started', () => {
+  describe("Timer Control", () => {
+    it("starts timer from zero when not previously started", () => {
       const store = useMeetingStore()
-      const now = new Date('2025-01-01T10:00:00Z')
+      const now = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(now)
 
       store.startTimer()
@@ -210,9 +210,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.isRunning).toBe(true)
     })
 
-    it('updates duration while timer is running', () => {
+    it("updates duration while timer is running", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       store.startTimer()
@@ -223,9 +223,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
-    it('resumes timer and subtracts paused time from duration', () => {
+    it("resumes timer and subtracts paused time from duration", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       // Start, run 5s, pause
@@ -245,9 +245,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeLessThan(8000)
     })
 
-    it('pauses timer and preserves duration', () => {
+    it("pauses timer and preserves duration", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       store.startTimer()
@@ -259,9 +259,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
-    it('stops timer and resets all values', () => {
+    it("stops timer and resets all values", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       store.startTimer()
@@ -274,7 +274,7 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBe(0)
     })
 
-    it('does nothing when pausing already paused timer', () => {
+    it("does nothing when pausing already paused timer", () => {
       const store = useMeetingStore()
 
       store.startTimer()
@@ -284,8 +284,8 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.isRunning).toBe(false)
     })
 
-    it('clears interval on stop', () => {
-      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
+    it("clears interval on stop", () => {
+      const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval")
       const store = useMeetingStore()
 
       store.startTimer()
@@ -294,8 +294,8 @@ describe('useMeetingStore', () => {
       expect(clearIntervalSpy).toHaveBeenCalled()
     })
 
-    it('clears interval on pause', () => {
-      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
+    it("clears interval on pause", () => {
+      const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval")
       const store = useMeetingStore()
 
       store.startTimer()
@@ -304,9 +304,9 @@ describe('useMeetingStore', () => {
       expect(clearIntervalSpy).toHaveBeenCalled()
     })
 
-    it('records pauseStartedAt when pausing', () => {
+    it("records pauseStartedAt when pausing", () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       vi.advanceTimersByTime(5000)
@@ -316,9 +316,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeGreaterThanOrEqual(5000)
     })
 
-    it('accumulates pauseDuration across multiple pause/resume cycles', () => {
+    it("accumulates pauseDuration across multiple pause/resume cycles", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       // Start, run 2s, pause for 3s
@@ -342,9 +342,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeLessThan(6000)
     })
 
-    it('stopTimer resets pauseDuration to 0', () => {
+    it("stopTimer resets pauseDuration to 0", () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       vi.advanceTimersByTime(5000)
@@ -358,9 +358,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.startTime).toBeNull()
     })
 
-    it('timer interval subtracts pauseDuration from elapsed time', () => {
+    it("timer interval subtracts pauseDuration from elapsed time", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       // Start, run 2s, pause for 4s, resume
@@ -378,9 +378,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBeLessThan(4000)
     })
 
-    it('setPauseDuration sets pause duration in milliseconds', () => {
+    it("setPauseDuration sets pause duration in milliseconds", () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       store.pauseTimer()
@@ -390,9 +390,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.pauseDuration).toBe(10 * 60_000)
     })
 
-    it('setPauseDuration recalculates duration when paused', () => {
+    it("setPauseDuration recalculates duration when paused", () => {
       const store = useMeetingStore()
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(startTime)
 
       store.startTimer()
@@ -406,9 +406,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBe(1_800_000)
     })
 
-    it('setPauseDuration ignores negative values', () => {
+    it("setPauseDuration ignores negative values", () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       store.setPauseDuration(-5)
@@ -417,75 +417,75 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('Manual Start Time', () => {
-    it('sets manual start time with valid time string', () => {
+  describe("Manual Start Time", () => {
+    it("sets manual start time with valid time string", () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue({ hours: 14, minutes: 30 })
       vi.mocked(helpers.isTimeBeforeNow).mockReturnValue(true)
 
       const store = useMeetingStore()
-      const now = new Date('2025-01-01T15:00:00Z')
+      const now = new Date("2025-01-01T15:00:00Z")
       vi.setSystemTime(now)
 
-      store.setManualStartTime('14:30')
+      store.setManualStartTime("14:30")
 
       expect(store.meetingData.startTime?.getHours()).toBe(14)
       expect(store.meetingData.startTime?.getMinutes()).toBe(30)
     })
 
-    it('recalculates duration when timer is running', () => {
+    it("recalculates duration when timer is running", () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue({ hours: 14, minutes: 30 })
       vi.mocked(helpers.isTimeBeforeNow).mockReturnValue(true)
 
       const store = useMeetingStore()
-      const now = new Date('2025-01-01T15:00:00Z')
+      const now = new Date("2025-01-01T15:00:00Z")
       vi.setSystemTime(now)
 
       store.startTimer()
-      store.setManualStartTime('14:30')
+      store.setManualStartTime("14:30")
 
       expect(store.meetingData.duration).toBeGreaterThan(0)
     })
 
-    it('ignores invalid time string', () => {
+    it("ignores invalid time string", () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue(null)
 
       const store = useMeetingStore()
       const originalStartTime = store.meetingData.startTime
 
-      store.setManualStartTime('invalid')
+      store.setManualStartTime("invalid")
 
       expect(store.meetingData.startTime).toBe(originalStartTime)
     })
 
-    it('ignores time in the future', () => {
+    it("ignores time in the future", () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue({ hours: 18, minutes: 0 })
       vi.mocked(helpers.isTimeBeforeNow).mockReturnValue(false)
 
       const store = useMeetingStore()
       const originalStartTime = store.meetingData.startTime
 
-      store.setManualStartTime('18:00')
+      store.setManualStartTime("18:00")
 
       expect(store.meetingData.startTime).toBe(originalStartTime)
     })
 
-    it('handles time string without colon', () => {
+    it("handles time string without colon", () => {
       vi.mocked(helpers.parseTimeInput).mockReturnValue({ hours: 14, minutes: 30 })
       vi.mocked(helpers.isTimeBeforeNow).mockReturnValue(true)
 
       const store = useMeetingStore()
-      const now = new Date('2025-01-01T15:00:00Z')
+      const now = new Date("2025-01-01T15:00:00Z")
       vi.setSystemTime(now)
 
-      store.setManualStartTime('1430')
+      store.setManualStartTime("1430")
 
       expect(store.meetingData.startTime?.getHours()).toBe(14)
       expect(store.meetingData.startTime?.getMinutes()).toBe(30)
     })
   })
 
-  describe('Config Updates', () => {
-    it('updates config with partial values', () => {
+  describe("Config Updates", () => {
+    it("updates config with partial values", () => {
       const store = useMeetingStore()
 
       store.updateConfig({ group1HourlyRate: 75 })
@@ -495,19 +495,19 @@ describe('useMeetingStore', () => {
       expect(store.config.workingHoursPerDay).toBe(8)
     })
 
-    it('updates multiple config values', () => {
+    it("updates multiple config values", () => {
       const store = useMeetingStore()
 
       store.updateConfig({
         group1HourlyRate: 50,
-        group2HourlyRate: 30
+        group2HourlyRate: 30,
       })
 
       expect(store.config.group1HourlyRate).toBe(50)
       expect(store.config.group2HourlyRate).toBe(30)
     })
 
-    it('saves config to storage when updated', async () => {
+    it("saves config to storage when updated", async () => {
       const store = useMeetingStore()
 
       store.updateConfig({ group1HourlyRate: 75 })
@@ -521,8 +521,8 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('Calculations', () => {
-    it('calculates total participants', () => {
+  describe("Calculations", () => {
+    it("calculates total participants", () => {
       const store = useMeetingStore()
       store.meetingData.group1Participants = 5
       store.meetingData.group2Participants = 3
@@ -530,7 +530,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalParticipants).toBe(8)
     })
 
-    it('calculates people hours correctly', () => {
+    it("calculates people hours correctly", () => {
       const store = useMeetingStore()
       store.meetingData.duration = 3_600_000 // 1 hour in ms
       store.meetingData.group1Participants = 5
@@ -539,7 +539,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.peopleHours).toBe(8)
     })
 
-    it('calculates people days correctly', () => {
+    it("calculates people days correctly", () => {
       const store = useMeetingStore()
       store.config.workingHoursPerDay = 8
       store.meetingData.duration = 3_600_000 // 1 hour
@@ -549,7 +549,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.peopleDays).toBe(1)
     })
 
-    it('calculates total cost with hourly rates', () => {
+    it("calculates total cost with hourly rates", () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 50
       store.config.group2HourlyRate = 30
@@ -561,7 +561,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalCost).toBe(190)
     })
 
-    it('calculates group costs separately', () => {
+    it("calculates group costs separately", () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 100
       store.config.group2HourlyRate = 50
@@ -573,7 +573,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.group2Cost).toBe(100) // 0.5 * 4 * 50
     })
 
-    it('handles zero duration', () => {
+    it("handles zero duration", () => {
       const store = useMeetingStore()
       store.meetingData.duration = 0
       store.meetingData.group1Participants = 5
@@ -582,7 +582,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalCost).toBe(0)
     })
 
-    it('handles zero participants', () => {
+    it("handles zero participants", () => {
       const store = useMeetingStore()
       store.meetingData.duration = 3_600_000
       store.meetingData.group1Participants = 0
@@ -593,7 +593,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalCost).toBe(0)
     })
 
-    it('calculates correctly with only group1 participants', () => {
+    it("calculates correctly with only group1 participants", () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 75
       store.meetingData.duration = 3_600_000 // 1 hour
@@ -603,7 +603,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalCost).toBe(300)
     })
 
-    it('calculates correctly with only group2 participants', () => {
+    it("calculates correctly with only group2 participants", () => {
       const store = useMeetingStore()
       store.config.group2HourlyRate = 45
       store.meetingData.duration = 3_600_000 // 1 hour
@@ -614,8 +614,8 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('Persistence', () => {
-    it('saves meeting data when participants change', async () => {
+  describe("Persistence", () => {
+    it("saves meeting data when participants change", async () => {
       const store = useMeetingStore()
 
       store.meetingData.group1Participants = 10
@@ -629,7 +629,7 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"group1Participants":10')
     })
 
-    it('saves meeting data when timer state changes', async () => {
+    it("saves meeting data when timer state changes", async () => {
       const store = useMeetingStore()
 
       store.startTimer()
@@ -643,9 +643,9 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"isRunning":true')
     })
 
-    it('handles localStorage errors gracefully when saving', () => {
+    it("handles localStorage errors gracefully when saving", () => {
       vi.mocked(localStorageHelper.safeSetItem).mockImplementation(() => {
-        throw new Error('Storage full')
+        throw new Error("Storage full")
       })
 
       const store = useMeetingStore()
@@ -656,9 +656,9 @@ describe('useMeetingStore', () => {
       }).not.toThrow()
     })
 
-    it('serializes startTime to ISO string', async () => {
+    it("serializes startTime to ISO string", async () => {
       const store = useMeetingStore()
-      const testDate = new Date('2025-01-01T10:00:00Z')
+      const testDate = new Date("2025-01-01T10:00:00Z")
       vi.setSystemTime(testDate)
 
       store.startTimer()
@@ -672,7 +672,7 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain(testDate.toISOString())
     })
 
-    it('saves null startTime correctly', async () => {
+    it("saves null startTime correctly", async () => {
       const store = useMeetingStore()
       store.startTimer()
       await nextTick()
@@ -692,9 +692,9 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"startTime":null')
     })
 
-    it('serializes pauseDuration and pauseStartedAt', async () => {
+    it("serializes pauseDuration and pauseStartedAt", async () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       vi.advanceTimersByTime(5000)
@@ -711,9 +711,9 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"pauseStartedAt":')
     })
 
-    it('serializes accumulated pauseDuration after resume', async () => {
+    it("serializes accumulated pauseDuration after resume", async () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       vi.advanceTimersByTime(5000)
@@ -731,19 +731,19 @@ describe('useMeetingStore', () => {
       expect(lastCall[1]).toContain('"pauseDuration":2000')
     })
 
-    it('restores pauseDuration from saved data on load', () => {
-      const now = new Date('2025-01-01T10:30:00Z')
+    it("restores pauseDuration from saved data on load", () => {
+      const now = new Date("2025-01-01T10:30:00Z")
       vi.setSystemTime(now)
 
-      const startTime = new Date('2025-01-01T10:00:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: startTime.toISOString(),
           isRunning: true,
           pauseDuration: 300_000,
           group1Participants: 2,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -752,12 +752,12 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.isRunning).toBe(true)
     })
 
-    it('restores pauseStartedAt from saved data on load', () => {
-      const now = new Date('2025-01-01T10:30:00Z')
+    it("restores pauseStartedAt from saved data on load", () => {
+      const now = new Date("2025-01-01T10:30:00Z")
       vi.setSystemTime(now)
 
-      const startTime = new Date('2025-01-01T10:00:00Z')
-      const pauseStartedAt = new Date('2025-01-01T10:25:00Z')
+      const startTime = new Date("2025-01-01T10:00:00Z")
+      const pauseStartedAt = new Date("2025-01-01T10:25:00Z")
       vi.mocked(localStorageHelper.safeGetItem).mockReturnValue(
         JSON.stringify({
           startTime: startTime.toISOString(),
@@ -765,8 +765,8 @@ describe('useMeetingStore', () => {
           pauseDuration: 100_000,
           pauseStartedAt: pauseStartedAt.toISOString(),
           group1Participants: 2,
-          group2Participants: 3
-        })
+          group2Participants: 3,
+        }),
       )
 
       const store = useMeetingStore()
@@ -780,9 +780,9 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.pauseDuration).toBeGreaterThanOrEqual(100_000)
     })
 
-    it('clears pauseDuration on stop', async () => {
+    it("clears pauseDuration on stop", async () => {
       const store = useMeetingStore()
-      vi.setSystemTime(new Date('2025-01-01T10:00:00Z'))
+      vi.setSystemTime(new Date("2025-01-01T10:00:00Z"))
 
       store.startTimer()
       vi.advanceTimersByTime(5000)
@@ -802,8 +802,8 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('Edge Cases', () => {
-    it('handles rapid timer start/stop/start', () => {
+  describe("Edge Cases", () => {
+    it("handles rapid timer start/stop/start", () => {
       const store = useMeetingStore()
 
       store.startTimer()
@@ -814,14 +814,14 @@ describe('useMeetingStore', () => {
       expect(store.meetingData.duration).toBe(0)
     })
 
-    it('handles very long meeting durations', () => {
+    it("handles very long meeting durations", () => {
       const store = useMeetingStore()
       store.meetingData.duration = 36_000_000 // 10 hours
 
       expect(store.calculations.durationHours).toBe(10)
     })
 
-    it('handles fractional hourly rates', () => {
+    it("handles fractional hourly rates", () => {
       const store = useMeetingStore()
       store.config.group1HourlyRate = 50.5
       store.meetingData.duration = 3_600_000
@@ -830,7 +830,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.totalCost).toBe(101)
     })
 
-    it('handles non-standard working hours per day', () => {
+    it("handles non-standard working hours per day", () => {
       const store = useMeetingStore()
       store.config.workingHoursPerDay = 6
       store.meetingData.duration = 3_600_000 // 1 hour
@@ -839,7 +839,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.peopleDays).toBe(1)
     })
 
-    it('prevents negative duration', () => {
+    it("prevents negative duration", () => {
       const store = useMeetingStore()
       const futureTime = new Date(Date.now() + 10_000)
       store.meetingData.startTime = futureTime
@@ -849,7 +849,7 @@ describe('useMeetingStore', () => {
       expect(store.calculations.durationHours).toBeGreaterThanOrEqual(0)
     })
 
-    it('handles missing participant values', () => {
+    it("handles missing participant values", () => {
       const store = useMeetingStore()
       // @ts-expect-error Testing runtime behavior
       store.meetingData.group1Participants = undefined
@@ -860,21 +860,21 @@ describe('useMeetingStore', () => {
     })
   })
 
-  describe('formatDuration Export', () => {
-    it('exports formatDuration function', () => {
+  describe("formatDuration Export", () => {
+    it("exports formatDuration function", () => {
       const store = useMeetingStore()
 
       expect(store.formatDuration).toBeDefined()
-      expect(typeof store.formatDuration).toBe('function')
+      expect(typeof store.formatDuration).toBe("function")
     })
 
-    it('formatDuration works correctly', () => {
+    it("formatDuration works correctly", () => {
       const store = useMeetingStore()
 
       const result = store.formatDuration(3_665_000) // 1h 1m 5s
 
       expect(helpers.formatDuration).toHaveBeenCalledWith(3_665_000)
-      expect(result).toBe('1:01:05')
+      expect(result).toBe("1:01:05")
     })
   })
 })

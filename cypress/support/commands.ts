@@ -4,9 +4,9 @@
 
 // Configure rates helper command
 Cypress.Commands.add(
-  'configureRates',
+  "configureRates",
   (group1Rate: number, group2Rate: number, workingHours?: number) => {
-    cy.visit('/config')
+    cy.visit("/config")
 
     // Configure Quasar q-input fields - split commands to avoid unsafe chaining
     cy.get('[data-cy="cfg-salary-1"]').clear()
@@ -21,11 +21,11 @@ Cypress.Commands.add(
     }
 
     cy.get('[data-cy="back-btn"]').click()
-  }
+  },
 )
 
 // Set participants helper command
-Cypress.Commands.add('setParticipants', (group1Count: number, group2Count: number) => {
+Cypress.Commands.add("setParticipants", (group1Count: number, group2Count: number) => {
   // Split commands to avoid unsafe chaining
   cy.get('[data-cy="input-group-1"]').clear()
   cy.get('[data-cy="input-group-1"]').type(group1Count.toString())
@@ -35,9 +35,9 @@ Cypress.Commands.add('setParticipants', (group1Count: number, group2Count: numbe
 })
 
 // Start timer and wait for it to tick
-Cypress.Commands.add('startTimerAndWait', () => {
+Cypress.Commands.add("startTimerAndWait", () => {
   cy.get('[data-cy="start-timer-btn"]').click()
-  cy.get('[data-cy="timer-display"]').should('not.contain', '0:00:00')
+  cy.get('[data-cy="timer-display"]').should("not.contain", "0:00:00")
 })
 
 declare global {

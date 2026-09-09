@@ -1,11 +1,11 @@
-import { mount } from '@vue/test-utils'
-import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
-import { createMemoryHistory, createRouter } from 'vue-router'
-import { quasarMocks, quasarProvide, quasarStubs } from '@/__tests__/testUtils'
-import HomePage from '@/pages/HomePage.vue'
+import { mount } from "@vue/test-utils"
+import { createPinia, setActivePinia } from "pinia"
+import { beforeEach, describe, expect, it } from "vitest"
+import { createMemoryHistory, createRouter } from "vue-router"
+import { quasarMocks, quasarProvide, quasarStubs } from "@/__tests__/testUtils"
+import HomePage from "@/pages/HomePage.vue"
 
-describe('HomePage Component', () => {
+describe("HomePage Component", () => {
   beforeEach(() => {
     localStorage.clear()
     setActivePinia(createPinia())
@@ -15,9 +15,9 @@ describe('HomePage Component', () => {
     return createRouter({
       history: createMemoryHistory(),
       routes: [
-        { path: '/', name: 'home', component: { template: '<div>Home</div>' } },
-        { path: '/config', name: 'config', component: { template: '<div>Config</div>' } }
-      ]
+        { path: "/", name: "home", component: { template: "<div>Home</div>" } },
+        { path: "/config", name: "config", component: { template: "<div>Config</div>" } },
+      ],
     })
   }
 
@@ -26,11 +26,11 @@ describe('HomePage Component', () => {
       mocks: quasarMocks,
       plugins: [router],
       provide: quasarProvide,
-      stubs: quasarStubs
-    }
+      stubs: quasarStubs,
+    },
   })
 
-  it('mounts without errors and renders content', async () => {
+  it("mounts without errors and renders content", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -38,14 +38,14 @@ describe('HomePage Component', () => {
     expect(wrapper.html()).toBeTruthy()
   })
 
-  it('displays the correct title', async () => {
+  it("displays the correct title", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
-    expect(wrapper.text()).toContain('Meeting Meter')
+    expect(wrapper.text()).toContain("Meeting Meter")
   })
 
-  it('renders config button', async () => {
+  it("renders config button", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -53,7 +53,7 @@ describe('HomePage Component', () => {
     expect(configBtn.exists()).toBe(true)
   })
 
-  it('renders start timer button when timer not started', async () => {
+  it("renders start timer button when timer not started", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -61,7 +61,7 @@ describe('HomePage Component', () => {
     expect(startBtn.exists()).toBe(true)
   })
 
-  it('renders group 1 participants input', async () => {
+  it("renders group 1 participants input", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -69,7 +69,7 @@ describe('HomePage Component', () => {
     expect(input.exists()).toBe(true)
   })
 
-  it('renders group 2 participants input', async () => {
+  it("renders group 2 participants input", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -77,7 +77,7 @@ describe('HomePage Component', () => {
     expect(input.exists()).toBe(true)
   })
 
-  it('renders people hours card', async () => {
+  it("renders people hours card", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -85,7 +85,7 @@ describe('HomePage Component', () => {
     expect(card.exists()).toBe(true)
   })
 
-  it('renders duration costs card', async () => {
+  it("renders duration costs card", async () => {
     const router = createMockRouter()
     const wrapper = mount(HomePage, createMountOptions(router))
     await wrapper.vm.$nextTick()
@@ -93,29 +93,29 @@ describe('HomePage Component', () => {
     expect(card.exists()).toBe(true)
   })
 
-  it('navigates to config on Escape key press', async () => {
+  it("navigates to config on Escape key press", async () => {
     const router = createMockRouter()
-    await router.push('/')
+    await router.push("/")
     await router.isReady()
     mount(HomePage, createMountOptions(router))
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    const event = new KeyboardEvent('keydown', { key: 'Escape' })
+    const event = new KeyboardEvent("keydown", { key: "Escape" })
     globalThis.dispatchEvent(event)
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 10))
 
-    expect(router.currentRoute.value.path).toBe('/config/')
+    expect(router.currentRoute.value.path).toBe("/config/")
   })
 
-  it('does not navigate on other key presses', async () => {
+  it("does not navigate on other key presses", async () => {
     const router = createMockRouter()
-    await router.push('/')
+    await router.push("/")
     mount(HomePage, createMountOptions(router))
 
-    const event = new KeyboardEvent('keydown', { key: 'Enter' })
+    const event = new KeyboardEvent("keydown", { key: "Enter" })
     globalThis.dispatchEvent(event)
     await router.isReady()
 
-    expect(router.currentRoute.value.path).toBe('/')
+    expect(router.currentRoute.value.path).toBe("/")
   })
 })

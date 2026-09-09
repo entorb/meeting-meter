@@ -1,6 +1,6 @@
 // Stub Quasar components for faster tests
-const DIV_SLOT_TEMPLATE = '<div><slot /></div>'
-const SPAN_SLOT_TEMPLATE = '<span><slot /></span>'
+const DIV_SLOT_TEMPLATE = "<div><slot /></div>"
+const SPAN_SLOT_TEMPLATE = "<span><slot /></span>"
 
 export const quasarStubs = {
   QPage: { template: DIV_SLOT_TEMPLATE },
@@ -14,25 +14,25 @@ export const quasarStubs = {
   QInput: {
     template:
       '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-    props: ['modelValue'],
-    emits: ['update:modelValue'],
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
     methods: {
       focus() {
         // Stub focus method for tests
-      }
-    }
+      },
+    },
   },
-  QIcon: { template: '<i />' },
+  QIcon: { template: "<i />" },
   QDialog: { template: DIV_SLOT_TEMPLATE },
-  QForm: { template: '<form><slot /></form>' },
+  QForm: { template: "<form><slot /></form>" },
   QList: { template: DIV_SLOT_TEMPLATE },
   QItem: { template: DIV_SLOT_TEMPLATE },
   QItemSection: { template: DIV_SLOT_TEMPLATE },
   QItemLabel: { template: DIV_SLOT_TEMPLATE },
-  QSeparator: { template: '<hr />' },
+  QSeparator: { template: "<hr />" },
   QChip: { template: SPAN_SLOT_TEMPLATE },
   QTooltip: { template: DIV_SLOT_TEMPLATE },
-  QAvatar: { template: DIV_SLOT_TEMPLATE }
+  QAvatar: { template: DIV_SLOT_TEMPLATE },
 }
 
 // Mock Quasar globals for components that use $q
@@ -41,12 +41,12 @@ export const quasarMocks = {
     dark: { isActive: false },
     screen: {
       gt: { xs: false, sm: false, md: false },
-      lt: { sm: false, md: false, lg: false }
-    }
-  }
+      lt: { sm: false, md: false, lg: false },
+    },
+  },
 }
 
 // Provide Quasar injection tokens
 export const quasarProvide = {
-  _q_: quasarMocks.$q
+  _q_: quasarMocks.$q,
 }
