@@ -1,18 +1,22 @@
 #!/bin/sh
-
-# ensure we are in the root dir
-cd $(dirname $0)/..
+cd "$(dirname "$0")/.." || exit 1
 
 # exit upon error
 set -e
 
 # cleanup
 rm -f .DS_Store
-rm -f */.DS_Store
+rm -f -- ./*/.DS_Store
 
-pnpm run check
+echo "## Checks"
+echo "### Code checks"
+./scripts/run_checks.sh
+
+echo "### E2E tests"
+./scripts/run_e2e.sh
+
+echo "## Frontend Build and Transfer"
 pnpm run build
+rsync -rhv --delete --no-perms dist/ entorb@entorb.net:html/meeting-meter/
 
-rsync -rhv --delete --no-perms --ignore-times dist/ entorb@entorb.net:html/meeting-meter/
-
-echo DONE
+echo "## DONE"
