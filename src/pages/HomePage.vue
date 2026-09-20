@@ -499,7 +499,8 @@ onMounted(() => {
             <q-card
               flat
               bordered
-              :class="`text-center cursor-pointer ${getEfficiencyColor()}`"
+              class="text-center cursor-pointer"
+              :class="getEfficiencyColor()"
               data-cy="card-duration-costs"
               @click="router.push('/config')"
             >

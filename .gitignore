@@ -6,5 +6,6 @@
 /dist/
 /example/
 /node_modules/
+/tmp
 cspell-words-missing.txt
 sonar-report.xml
