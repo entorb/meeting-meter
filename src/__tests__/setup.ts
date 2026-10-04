@@ -3,6 +3,7 @@
 import { vi } from "vitest"
 
 // Suppress Vue warnings about unresolved Quasar components
+// biome-ignore lint/suspicious/noConsole: wrap console.warn to filter Quasar warnings
 const originalWarn = console.warn
 console.warn = (...args) => {
   if (typeof args[0] === "string" && args[0].includes("Failed to resolve component")) return

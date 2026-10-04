@@ -1,28 +1,18 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!**/.cache",
-      "!**/dist",
-      "!**/node_modules",
-      "!**/public",
-      "!**/coverage",
-      "!**/pnpm-lock.yaml",
       "!**/*.d.ts",
-      "!**/*.tsbuildinfo",
-      "!**/.vite",
-      "!**/scripts",
-      "!**/cypress/downloads",
-      "!**/cypress/screenshots",
-      "!**/cypress/videos",
-      "!**/CLAUDE.md",
-      "!**/GEMINI.md",
-      "!**/sonar-report.xml",
-      "!**/.cspellcache",
-      "!**/.eslintcache"
+      "!cypress/downloads",
+      "!cypress/screenshots",
+      "!cypress/videos",
+      "!package.json",
+      "!pnpm-lock.yaml",
+      "!public",
+      "!scripts"
     ]
   },
   "formatter": {
@@ -115,7 +105,7 @@
         "useArrowFunction": "error",
         "useDateNow": "error",
         "useFlatMap": "error",
-        "useLiteralKeys": "off",
+        "useLiteralKeys": "warn",
         "useOptionalChain": "error",
         "useRegexLiterals": "error",
         "useSimplifiedLogicExpression": "warn"
@@ -183,7 +173,7 @@
       "suspicious": {
         "noAssignInExpressions": "error",
         "noConfusingVoidType": "error",
-        "noConsole": "off",
+        "noConsole": "warn",
         "noDebugger": "error",
         "noDoubleEquals": "error",
         "noDuplicateCase": "error",
