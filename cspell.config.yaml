@@ -12,6 +12,7 @@ dictionaries:
 language: en-US
 ignorePaths:
   - '.*'
+  - '/*.json'
   - /.vscode/
   - /LICENSE
   - cspell-words.txt
