@@ -1,6 +1,6 @@
 #!/bin/sh
-
-cd "$(dirname "$0")/.." || exit 1
+set -e
+cd "$(dirname "$0")/.."
 
 # Cypress needs a running dev server.
 # Start vite directly, bypassing the pnpm wrapper, to remove the warning upon killing the process.
