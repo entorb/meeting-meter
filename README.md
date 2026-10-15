@@ -1,5 +1,9 @@
 # Meeting Meter App (MMA): The "Taxi Meter" for Meetings
 
+2026-10-15: Deprecated, merged into [entorb/timer](https://github.com/entorb/timer) / [entorb.net/timer/](https://entorb.net/timer).
+
+---
+
 Calculate the cost of meetings based on the number of attendees and their hourly rates.
 
 Deployed to <https://entorb.net/meeting-meter/>
